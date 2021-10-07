@@ -1,7 +1,7 @@
 <template>
   <div :class="$style.container">
     <Header />
-    <Body :items="items" v-on:reloadlist="getList()"/>
+    <Body :username="username" :email="email" :items="items" v-on:reloadlist="getList()"/>
   </div>
 </template>
 <script>
@@ -13,11 +13,13 @@ import axios from 'axios'
 export default {
   components: {
     Header,
-    Body,
+    Body
   },
   data: function() {
     return {
-      items: []
+      items: [],
+      username: null,
+      email: null
     }
   },
   methods: {
@@ -29,10 +31,21 @@ export default {
       .catch( err => {
         console.log(err)
       })
+    },
+    init() {
+      axios.get('api/auth/init')
+      .then( res => {
+        console.log(res.data);
+        this.username = res.data.username;
+        this.email = res.data.email;
+      }).catch( err => {
+        console.log(err);
+      })
     }
   },
   created() {
     this.getList();
+    this.init();
   }
 };
 </script>

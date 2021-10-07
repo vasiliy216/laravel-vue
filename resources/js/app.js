@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 
-import { Input, Button, DatePicker, Avatar, Dropdown, Icon, Menu } from 'ant-design-vue'
+import { Input, Button, DatePicker, Avatar, Dropdown, Icon, Menu, Form, Popover } from 'ant-design-vue'
 import 'ant-design-vue/dist/antd.css';
 
 Vue.use(DatePicker);
@@ -11,13 +11,15 @@ Vue.use(Button);
 Vue.use(Dropdown);
 Vue.use(Icon);
 Vue.use(Menu);
+Vue.use(Form);
+Vue.use(Popover);
 
 Vue.use(VueRouter);
 
 
 import App from './components/App'
-import Hello from './components/Hello'
-import Home from './components/Home'
+import Register from './components/section/Auth/Register.vue'
+import Login from './components/section/Auth/Login.vue'
 
 const router = new VueRouter({
     mode: 'history',
@@ -25,13 +27,18 @@ const router = new VueRouter({
         {
             path: '/',
             name: 'home',
-            component: Home
+            component: App
         },
         {
-            path: '/hello',
-            name: 'hello',
-            component: Hello,
+            path: '/register',
+            name: 'register',
+            component: Register,
         },
+        {
+            path: '/login',
+            name: 'login',
+            component: Login,
+        }
     ],
 });
 const app = new Vue({

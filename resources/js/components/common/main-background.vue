@@ -1,6 +1,6 @@
 <template>
   <div class="main-background">
-    <add-task v-on:reloadlist="$emit('reloadlist')"/>
+    <add-task :username="username" :email="email" v-on:reloadlist="$emit('reloadlist')"/>
     <task-item
       v-for="(item, index) in items"
       :key="index"
@@ -15,7 +15,7 @@
 import AddTask from "../basic/add-task.vue";
 import TaskItem from "../basic/task-item.vue";
 export default {
-  props: ["items"],
+  props: ["items", "username", "email"],
   components: {
     AddTask,
     TaskItem,

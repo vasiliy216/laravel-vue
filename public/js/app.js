@@ -5340,6 +5340,120 @@ var requestAnimationTimeout = function requestAnimationTimeout(callback, delay) 
 
 /***/ }),
 
+/***/ "./node_modules/ant-design-vue/es/_util/responsiveObserve.js":
+/*!*******************************************************************!*\
+  !*** ./node_modules/ant-design-vue/es/_util/responsiveObserve.js ***!
+  \*******************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "responsiveArray": () => (/* binding */ responsiveArray),
+/* harmony export */   "responsiveMap": () => (/* binding */ responsiveMap),
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! babel-runtime/helpers/defineProperty */ "./node_modules/babel-runtime/helpers/defineProperty.js");
+/* harmony import */ var babel_runtime_helpers_extends__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! babel-runtime/helpers/extends */ "./node_modules/babel-runtime/helpers/extends.js");
+
+
+// matchMedia polyfill for
+// https://github.com/WickyNilliams/enquire.js/issues/82
+var enquire = void 0;
+
+// TODO: Will be removed in antd 4.0 because we will no longer support ie9
+if (typeof window !== 'undefined') {
+  var matchMediaPolyfill = function matchMediaPolyfill(mediaQuery) {
+    return {
+      media: mediaQuery,
+      matches: false,
+      addListener: function addListener() {},
+      removeListener: function removeListener() {}
+    };
+  };
+  // ref: https://github.com/ant-design/ant-design/issues/18774
+  if (!window.matchMedia) window.matchMedia = matchMediaPolyfill;
+  // eslint-disable-next-line global-require
+  enquire = __webpack_require__(/*! enquire.js */ "./node_modules/enquire.js/src/index.js");
+}
+
+var responsiveArray = ['xxl', 'xl', 'lg', 'md', 'sm', 'xs'];
+
+var responsiveMap = {
+  xs: '(max-width: 575px)',
+  sm: '(min-width: 576px)',
+  md: '(min-width: 768px)',
+  lg: '(min-width: 992px)',
+  xl: '(min-width: 1200px)',
+  xxl: '(min-width: 1600px)'
+};
+
+var subscribers = [];
+var subUid = -1;
+var screens = {};
+
+var responsiveObserve = {
+  dispatch: function dispatch(pointMap) {
+    screens = pointMap;
+    if (subscribers.length < 1) {
+      return false;
+    }
+
+    subscribers.forEach(function (item) {
+      item.func(screens);
+    });
+
+    return true;
+  },
+  subscribe: function subscribe(func) {
+    if (subscribers.length === 0) {
+      this.register();
+    }
+    var token = (++subUid).toString();
+    subscribers.push({
+      token: token,
+      func: func
+    });
+    func(screens);
+    return token;
+  },
+  unsubscribe: function unsubscribe(token) {
+    subscribers = subscribers.filter(function (item) {
+      return item.token !== token;
+    });
+    if (subscribers.length === 0) {
+      this.unregister();
+    }
+  },
+  unregister: function unregister() {
+    Object.keys(responsiveMap).map(function (screen) {
+      return enquire.unregister(responsiveMap[screen]);
+    });
+  },
+  register: function register() {
+    var _this = this;
+
+    Object.keys(responsiveMap).map(function (screen) {
+      return enquire.register(responsiveMap[screen], {
+        match: function match() {
+          var pointMap = (0,babel_runtime_helpers_extends__WEBPACK_IMPORTED_MODULE_1__["default"])({}, screens, (0,babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_0__["default"])({}, screen, true));
+          _this.dispatch(pointMap);
+        },
+        unmatch: function unmatch() {
+          var pointMap = (0,babel_runtime_helpers_extends__WEBPACK_IMPORTED_MODULE_1__["default"])({}, screens, (0,babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_0__["default"])({}, screen, false));
+          _this.dispatch(pointMap);
+        },
+        // Keep a empty destroy to avoid triggering unmatch when unregister
+        destroy: function destroy() {}
+      });
+    });
+  }
+};
+
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (responsiveObserve);
+
+/***/ }),
+
 /***/ "./node_modules/ant-design-vue/es/_util/store/PropTypes.js":
 /*!*****************************************************************!*\
   !*** ./node_modules/ant-design-vue/es/_util/store/PropTypes.js ***!
@@ -9552,6 +9666,1262 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ }),
 
+/***/ "./node_modules/ant-design-vue/es/form/Form.js":
+/*!*****************************************************!*\
+  !*** ./node_modules/ant-design-vue/es/form/Form.js ***!
+  \*****************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "FormCreateOption": () => (/* binding */ FormCreateOption),
+/* harmony export */   "WrappedFormUtils": () => (/* binding */ WrappedFormUtils),
+/* harmony export */   "FormProps": () => (/* binding */ FormProps),
+/* harmony export */   "ValidationRule": () => (/* binding */ ValidationRule),
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! babel-runtime/helpers/defineProperty */ "./node_modules/babel-runtime/helpers/defineProperty.js");
+/* harmony import */ var babel_runtime_helpers_extends__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! babel-runtime/helpers/extends */ "./node_modules/babel-runtime/helpers/extends.js");
+/* harmony import */ var _util_vue_types__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../_util/vue-types */ "./node_modules/ant-design-vue/es/_util/vue-types/index.js");
+/* harmony import */ var classnames__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! classnames */ "./node_modules/classnames/index.js");
+/* harmony import */ var classnames__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(classnames__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var _grid_Col__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../grid/Col */ "./node_modules/ant-design-vue/es/grid/Col.js");
+/* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.esm.js");
+/* harmony import */ var lodash_isRegExp__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! lodash/isRegExp */ "./node_modules/lodash/isRegExp.js");
+/* harmony import */ var lodash_isRegExp__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(lodash_isRegExp__WEBPACK_IMPORTED_MODULE_3__);
+/* harmony import */ var _util_warning__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! ../_util/warning */ "./node_modules/ant-design-vue/es/_util/warning.js");
+/* harmony import */ var _vc_form_src_createDOMForm__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ../vc-form/src/createDOMForm */ "./node_modules/ant-design-vue/es/vc-form/src/createDOMForm.js");
+/* harmony import */ var _vc_form_src_createFormField__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../vc-form/src/createFormField */ "./node_modules/ant-design-vue/es/vc-form/src/createFormField.js");
+/* harmony import */ var _FormItem__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./FormItem */ "./node_modules/ant-design-vue/es/form/FormItem.js");
+/* harmony import */ var _constants__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./constants */ "./node_modules/ant-design-vue/es/form/constants.js");
+/* harmony import */ var _util_props_util__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../_util/props-util */ "./node_modules/ant-design-vue/es/_util/props-util.js");
+/* harmony import */ var _config_provider_configConsumerProps__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! ../config-provider/configConsumerProps */ "./node_modules/ant-design-vue/es/config-provider/configConsumerProps.js");
+/* harmony import */ var _base__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ../base */ "./node_modules/ant-design-vue/es/base/index.js");
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+var FormCreateOption = {
+  onFieldsChange: _util_vue_types__WEBPACK_IMPORTED_MODULE_4__["default"].func,
+  onValuesChange: _util_vue_types__WEBPACK_IMPORTED_MODULE_4__["default"].func,
+  mapPropsToFields: _util_vue_types__WEBPACK_IMPORTED_MODULE_4__["default"].func,
+  validateMessages: _util_vue_types__WEBPACK_IMPORTED_MODULE_4__["default"].any,
+  withRef: _util_vue_types__WEBPACK_IMPORTED_MODULE_4__["default"].bool,
+  name: _util_vue_types__WEBPACK_IMPORTED_MODULE_4__["default"].string
+};
+
+// function create
+var WrappedFormUtils = {
+  /** 获取一组输入控件的值，如不传入参数，则获取全部组件的值 */
+  getFieldsValue: _util_vue_types__WEBPACK_IMPORTED_MODULE_4__["default"].func,
+  /** 获取一个输入控件的值*/
+  getFieldValue: _util_vue_types__WEBPACK_IMPORTED_MODULE_4__["default"].func,
+  /** 设置一组输入控件的值*/
+  setFieldsValue: _util_vue_types__WEBPACK_IMPORTED_MODULE_4__["default"].func,
+  /** 设置一组输入控件的值*/
+  setFields: _util_vue_types__WEBPACK_IMPORTED_MODULE_4__["default"].func,
+  /** 校验并获取一组输入域的值与 Error */
+  validateFields: _util_vue_types__WEBPACK_IMPORTED_MODULE_4__["default"].func,
+  // validateFields(fieldNames: Array<string>, options: Object, callback: ValidateCallback): void;
+  // validateFields(fieldNames: Array<string>, callback: ValidateCallback): void;
+  // validateFields(options: Object, callback: ValidateCallback): void;
+  // validateFields(callback: ValidateCallback): void;
+  // validateFields(): void;
+  /** 与 `validateFields` 相似，但校验完后，如果校验不通过的菜单域不在可见范围内，则自动滚动进可见范围 */
+  validateFieldsAndScroll: _util_vue_types__WEBPACK_IMPORTED_MODULE_4__["default"].func,
+  // validateFieldsAndScroll(fieldNames?: Array<string>, options?: Object, callback?: ValidateCallback): void;
+  // validateFieldsAndScroll(fieldNames?: Array<string>, callback?: ValidateCallback): void;
+  // validateFieldsAndScroll(options?: Object, callback?: ValidateCallback): void;
+  // validateFieldsAndScroll(callback?: ValidateCallback): void;
+  // validateFieldsAndScroll(): void;
+  /** 获取某个输入控件的 Error */
+  getFieldError: _util_vue_types__WEBPACK_IMPORTED_MODULE_4__["default"].func,
+  getFieldsError: _util_vue_types__WEBPACK_IMPORTED_MODULE_4__["default"].func,
+  /** 判断一个输入控件是否在校验状态*/
+  isFieldValidating: _util_vue_types__WEBPACK_IMPORTED_MODULE_4__["default"].func,
+  isFieldTouched: _util_vue_types__WEBPACK_IMPORTED_MODULE_4__["default"].func,
+  isFieldsTouched: _util_vue_types__WEBPACK_IMPORTED_MODULE_4__["default"].func,
+  /** 重置一组输入控件的值与状态，如不传入参数，则重置所有组件 */
+  resetFields: _util_vue_types__WEBPACK_IMPORTED_MODULE_4__["default"].func,
+
+  getFieldDecorator: _util_vue_types__WEBPACK_IMPORTED_MODULE_4__["default"].func
+};
+
+var FormProps = {
+  layout: _util_vue_types__WEBPACK_IMPORTED_MODULE_4__["default"].oneOf(['horizontal', 'inline', 'vertical']),
+  labelCol: _util_vue_types__WEBPACK_IMPORTED_MODULE_4__["default"].shape(_grid_Col__WEBPACK_IMPORTED_MODULE_5__.ColProps).loose,
+  wrapperCol: _util_vue_types__WEBPACK_IMPORTED_MODULE_4__["default"].shape(_grid_Col__WEBPACK_IMPORTED_MODULE_5__.ColProps).loose,
+  colon: _util_vue_types__WEBPACK_IMPORTED_MODULE_4__["default"].bool,
+  labelAlign: _util_vue_types__WEBPACK_IMPORTED_MODULE_4__["default"].oneOf(['left', 'right']),
+  form: _util_vue_types__WEBPACK_IMPORTED_MODULE_4__["default"].object,
+  // onSubmit: React.FormEventHandler<any>;
+  prefixCls: _util_vue_types__WEBPACK_IMPORTED_MODULE_4__["default"].string,
+  hideRequiredMark: _util_vue_types__WEBPACK_IMPORTED_MODULE_4__["default"].bool,
+  autoFormCreate: _util_vue_types__WEBPACK_IMPORTED_MODULE_4__["default"].func,
+  options: _util_vue_types__WEBPACK_IMPORTED_MODULE_4__["default"].object,
+  selfUpdate: _util_vue_types__WEBPACK_IMPORTED_MODULE_4__["default"].bool
+};
+
+var ValidationRule = {
+  /** validation error message */
+  message: _util_vue_types__WEBPACK_IMPORTED_MODULE_4__["default"].oneOfType([_util_vue_types__WEBPACK_IMPORTED_MODULE_4__["default"].string, _util_vue_types__WEBPACK_IMPORTED_MODULE_4__["default"].func]),
+  /** built-in validation type, available options: https://github.com/yiminghe/async-validator#type */
+  type: _util_vue_types__WEBPACK_IMPORTED_MODULE_4__["default"].string,
+  /** indicates whether field is required */
+  required: _util_vue_types__WEBPACK_IMPORTED_MODULE_4__["default"].boolean,
+  /** treat required fields that only contain whitespace as errors */
+  whitespace: _util_vue_types__WEBPACK_IMPORTED_MODULE_4__["default"].boolean,
+  /** validate the exact length of a field */
+  len: _util_vue_types__WEBPACK_IMPORTED_MODULE_4__["default"].number,
+  /** validate the min length of a field */
+  min: _util_vue_types__WEBPACK_IMPORTED_MODULE_4__["default"].number,
+  /** validate the max length of a field */
+  max: _util_vue_types__WEBPACK_IMPORTED_MODULE_4__["default"].number,
+  /** validate the value from a list of possible values */
+  'enum': _util_vue_types__WEBPACK_IMPORTED_MODULE_4__["default"].oneOfType([String, _util_vue_types__WEBPACK_IMPORTED_MODULE_4__["default"].arrayOf(String)]),
+  /** validate from a regular expression */
+  pattern: _util_vue_types__WEBPACK_IMPORTED_MODULE_4__["default"].custom((lodash_isRegExp__WEBPACK_IMPORTED_MODULE_3___default())),
+  /** transform a value before validation */
+  transform: _util_vue_types__WEBPACK_IMPORTED_MODULE_4__["default"].func,
+  /** custom validate function (Note: callback must be called) */
+  validator: _util_vue_types__WEBPACK_IMPORTED_MODULE_4__["default"].func
+};
+
+// export type ValidateCallback = (errors: any, values: any) => void;
+
+// export type GetFieldDecoratorOptions = {
+//   /** 子节点的值的属性，如 Checkbox 的是 'checked' */
+//   valuePropName?: string;
+//   /** 子节点的初始值，类型、可选值均由子节点决定 */
+//   initialValue?: any;
+//   /** 收集子节点的值的时机 */
+//   trigger?: string;
+//   /** 可以把 onChange 的参数转化为控件的值，例如 DatePicker 可设为：(date, dateString) => dateString */
+//   getValueFromEvent?: (...args: any[]) => any;
+//   /** Get the component props according to field value. */
+//   getValueProps?: (value: any) => any;
+//   /** 校验子节点值的时机 */
+//   validateTrigger?: string | string[];
+//   /** 校验规则，参见 [async-validator](https://github.com/yiminghe/async-validator) */
+//   rules?: ValidationRule[];
+//   /** 是否和其他控件互斥，特别用于 Radio 单选控件 */
+//   exclusive?: boolean;
+//   /** Normalize value to form component */
+//   normalize?: (value: any, prevValue: any, allValues: any) => any;
+//   /** Whether stop validate on first rule of error for this field.  */
+//   validateFirst?: boolean;
+//   /** 是否一直保留子节点的信息 */
+//   preserve?: boolean;
+// };
+
+var Form = {
+  name: 'AForm',
+  props: (0,_util_props_util__WEBPACK_IMPORTED_MODULE_6__.initDefaultProps)(FormProps, {
+    layout: 'horizontal',
+    hideRequiredMark: false,
+    colon: true
+  }),
+  Item: _FormItem__WEBPACK_IMPORTED_MODULE_7__["default"],
+  createFormField: _vc_form_src_createFormField__WEBPACK_IMPORTED_MODULE_8__["default"],
+  create: function create() {
+    var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+
+    return (0,_vc_form_src_createDOMForm__WEBPACK_IMPORTED_MODULE_9__["default"])((0,babel_runtime_helpers_extends__WEBPACK_IMPORTED_MODULE_1__["default"])({
+      fieldNameProp: 'id'
+    }, options, {
+      fieldMetaProp: _constants__WEBPACK_IMPORTED_MODULE_10__.FIELD_META_PROP,
+      fieldDataProp: _constants__WEBPACK_IMPORTED_MODULE_10__.FIELD_DATA_PROP
+    }));
+  },
+  createForm: function createForm(context) {
+    var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+
+    var V = _base__WEBPACK_IMPORTED_MODULE_11__["default"].Vue || vue__WEBPACK_IMPORTED_MODULE_12__["default"];
+    return new V(Form.create((0,babel_runtime_helpers_extends__WEBPACK_IMPORTED_MODULE_1__["default"])({}, options, { templateContext: context }))());
+  },
+  created: function created() {
+    this.formItemContexts = new Map();
+  },
+  provide: function provide() {
+    var _this = this;
+
+    return {
+      FormContext: this,
+      // https://github.com/vueComponent/ant-design-vue/issues/446
+      collectFormItemContext: this.form && this.form.templateContext ? function (c) {
+        var type = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'add';
+
+        var formItemContexts = _this.formItemContexts;
+        var number = formItemContexts.get(c) || 0;
+        if (type === 'delete') {
+          if (number <= 1) {
+            formItemContexts['delete'](c);
+          } else {
+            formItemContexts.set(c, number - 1);
+          }
+        } else {
+          if (c !== _this.form.templateContext) {
+            formItemContexts.set(c, number + 1);
+          }
+        }
+      } : function () {}
+    };
+  },
+
+  inject: {
+    configProvider: { 'default': function _default() {
+        return _config_provider_configConsumerProps__WEBPACK_IMPORTED_MODULE_13__.ConfigConsumerProps;
+      } }
+  },
+  watch: {
+    form: function form() {
+      this.$forceUpdate();
+    }
+  },
+  computed: {
+    vertical: function vertical() {
+      return this.layout === 'vertical';
+    }
+  },
+  beforeUpdate: function beforeUpdate() {
+    this.formItemContexts.forEach(function (number, c) {
+      if (c.$forceUpdate) {
+        c.$forceUpdate();
+      }
+    });
+  },
+  updated: function updated() {
+    if (this.form && this.form.cleanUpUselessFields) {
+      this.form.cleanUpUselessFields();
+    }
+  },
+
+  methods: {
+    onSubmit: function onSubmit(e) {
+      if (!(0,_util_props_util__WEBPACK_IMPORTED_MODULE_6__.getListeners)(this).submit) {
+        e.preventDefault();
+      } else {
+        this.$emit('submit', e);
+      }
+    }
+  },
+
+  render: function render() {
+    var _classNames,
+        _this2 = this;
+
+    var h = arguments[0];
+    var customizePrefixCls = this.prefixCls,
+        hideRequiredMark = this.hideRequiredMark,
+        layout = this.layout,
+        onSubmit = this.onSubmit,
+        $slots = this.$slots,
+        autoFormCreate = this.autoFormCreate,
+        _options = this.options,
+        options = _options === undefined ? {} : _options;
+
+    var getPrefixCls = this.configProvider.getPrefixCls;
+    var prefixCls = getPrefixCls('form', customizePrefixCls);
+
+    var formClassName = classnames__WEBPACK_IMPORTED_MODULE_2___default()(prefixCls, (_classNames = {}, (0,babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_0__["default"])(_classNames, prefixCls + '-horizontal', layout === 'horizontal'), (0,babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_0__["default"])(_classNames, prefixCls + '-vertical', layout === 'vertical'), (0,babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_0__["default"])(_classNames, prefixCls + '-inline', layout === 'inline'), (0,babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_0__["default"])(_classNames, prefixCls + '-hide-required-mark', hideRequiredMark), _classNames));
+    if (autoFormCreate) {
+      (0,_util_warning__WEBPACK_IMPORTED_MODULE_14__["default"])(false, 'Form', '`autoFormCreate` is deprecated. please use `form` instead.');
+      var DomForm = this.DomForm || (0,_vc_form_src_createDOMForm__WEBPACK_IMPORTED_MODULE_9__["default"])((0,babel_runtime_helpers_extends__WEBPACK_IMPORTED_MODULE_1__["default"])({
+        fieldNameProp: 'id'
+      }, options, {
+        fieldMetaProp: _constants__WEBPACK_IMPORTED_MODULE_10__.FIELD_META_PROP,
+        fieldDataProp: _constants__WEBPACK_IMPORTED_MODULE_10__.FIELD_DATA_PROP,
+        templateContext: this.$vnode.context
+      }))({
+        provide: function provide() {
+          return {
+            decoratorFormProps: this.$props
+          };
+        },
+        data: function data() {
+          return {
+            children: $slots['default'],
+            formClassName: formClassName,
+            submit: onSubmit
+          };
+        },
+        created: function created() {
+          autoFormCreate(this.form);
+        },
+        render: function render() {
+          var h = arguments[0];
+          var children = this.children,
+              formClassName = this.formClassName,
+              submit = this.submit;
+
+          return h(
+            'form',
+            {
+              on: {
+                'submit': submit
+              },
+              'class': formClassName },
+            [children]
+          );
+        }
+      });
+      if (this.domForm) {
+        this.domForm.children = $slots['default'];
+        this.domForm.submit = onSubmit;
+        this.domForm.formClassName = formClassName;
+      }
+      this.DomForm = DomForm;
+
+      return h(DomForm, {
+        attrs: {
+          wrappedComponentRef: function wrappedComponentRef(inst) {
+            _this2.domForm = inst;
+          }
+        }
+      });
+    }
+    return h(
+      'form',
+      {
+        on: {
+          'submit': onSubmit
+        },
+        'class': formClassName },
+      [$slots['default']]
+    );
+  }
+};
+
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (Form);
+
+/***/ }),
+
+/***/ "./node_modules/ant-design-vue/es/form/FormItem.js":
+/*!*********************************************************!*\
+  !*** ./node_modules/ant-design-vue/es/form/FormItem.js ***!
+  \*********************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "FormItemProps": () => (/* binding */ FormItemProps),
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var babel_runtime_helpers_typeof__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! babel-runtime/helpers/typeof */ "./node_modules/babel-runtime/helpers/typeof.js");
+/* harmony import */ var babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! babel-runtime/helpers/defineProperty */ "./node_modules/babel-runtime/helpers/defineProperty.js");
+/* harmony import */ var babel_runtime_helpers_objectWithoutProperties__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! babel-runtime/helpers/objectWithoutProperties */ "./node_modules/babel-runtime/helpers/objectWithoutProperties.js");
+/* harmony import */ var babel_helper_vue_jsx_merge_props__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! babel-helper-vue-jsx-merge-props */ "./node_modules/babel-helper-vue-jsx-merge-props/index.js");
+/* harmony import */ var babel_helper_vue_jsx_merge_props__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(babel_helper_vue_jsx_merge_props__WEBPACK_IMPORTED_MODULE_3__);
+/* harmony import */ var babel_runtime_helpers_toConsumableArray__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! babel-runtime/helpers/toConsumableArray */ "./node_modules/babel-runtime/helpers/toConsumableArray.js");
+/* harmony import */ var _util_vue_types__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../_util/vue-types */ "./node_modules/ant-design-vue/es/_util/vue-types/index.js");
+/* harmony import */ var classnames__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! classnames */ "./node_modules/classnames/index.js");
+/* harmony import */ var classnames__WEBPACK_IMPORTED_MODULE_5___default = /*#__PURE__*/__webpack_require__.n(classnames__WEBPACK_IMPORTED_MODULE_5__);
+/* harmony import */ var lodash_find__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! lodash/find */ "./node_modules/lodash/find.js");
+/* harmony import */ var lodash_find__WEBPACK_IMPORTED_MODULE_6___default = /*#__PURE__*/__webpack_require__.n(lodash_find__WEBPACK_IMPORTED_MODULE_6__);
+/* harmony import */ var _grid_Row__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! ../grid/Row */ "./node_modules/ant-design-vue/es/grid/Row.js");
+/* harmony import */ var _grid_Col__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../grid/Col */ "./node_modules/ant-design-vue/es/grid/Col.js");
+/* harmony import */ var _util_warning__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ../_util/warning */ "./node_modules/ant-design-vue/es/_util/warning.js");
+/* harmony import */ var _constants__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! ./constants */ "./node_modules/ant-design-vue/es/form/constants.js");
+/* harmony import */ var _util_props_util__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ../_util/props-util */ "./node_modules/ant-design-vue/es/_util/props-util.js");
+/* harmony import */ var _util_getTransitionProps__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! ../_util/getTransitionProps */ "./node_modules/ant-design-vue/es/_util/getTransitionProps.js");
+/* harmony import */ var _util_BaseMixin__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ../_util/BaseMixin */ "./node_modules/ant-design-vue/es/_util/BaseMixin.js");
+/* harmony import */ var _util_vnode__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! ../_util/vnode */ "./node_modules/ant-design-vue/es/_util/vnode.js");
+/* harmony import */ var _icon__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! ../icon */ "./node_modules/ant-design-vue/es/icon/index.js");
+/* harmony import */ var _config_provider_configConsumerProps__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ../config-provider/configConsumerProps */ "./node_modules/ant-design-vue/es/config-provider/configConsumerProps.js");
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+function noop() {}
+
+function intersperseSpace(list) {
+  return list.reduce(function (current, item) {
+    return [].concat((0,babel_runtime_helpers_toConsumableArray__WEBPACK_IMPORTED_MODULE_4__["default"])(current), [' ', item]);
+  }, []).slice(1);
+}
+var FormItemProps = {
+  id: _util_vue_types__WEBPACK_IMPORTED_MODULE_7__["default"].string,
+  htmlFor: _util_vue_types__WEBPACK_IMPORTED_MODULE_7__["default"].string,
+  prefixCls: _util_vue_types__WEBPACK_IMPORTED_MODULE_7__["default"].string,
+  label: _util_vue_types__WEBPACK_IMPORTED_MODULE_7__["default"].any,
+  labelCol: _util_vue_types__WEBPACK_IMPORTED_MODULE_7__["default"].shape(_grid_Col__WEBPACK_IMPORTED_MODULE_8__.ColProps).loose,
+  wrapperCol: _util_vue_types__WEBPACK_IMPORTED_MODULE_7__["default"].shape(_grid_Col__WEBPACK_IMPORTED_MODULE_8__.ColProps).loose,
+  help: _util_vue_types__WEBPACK_IMPORTED_MODULE_7__["default"].any,
+  extra: _util_vue_types__WEBPACK_IMPORTED_MODULE_7__["default"].any,
+  validateStatus: _util_vue_types__WEBPACK_IMPORTED_MODULE_7__["default"].oneOf(['', 'success', 'warning', 'error', 'validating']),
+  hasFeedback: _util_vue_types__WEBPACK_IMPORTED_MODULE_7__["default"].bool,
+  required: _util_vue_types__WEBPACK_IMPORTED_MODULE_7__["default"].bool,
+  colon: _util_vue_types__WEBPACK_IMPORTED_MODULE_7__["default"].bool,
+  fieldDecoratorId: _util_vue_types__WEBPACK_IMPORTED_MODULE_7__["default"].string,
+  fieldDecoratorOptions: _util_vue_types__WEBPACK_IMPORTED_MODULE_7__["default"].object,
+  selfUpdate: _util_vue_types__WEBPACK_IMPORTED_MODULE_7__["default"].bool,
+  labelAlign: _util_vue_types__WEBPACK_IMPORTED_MODULE_7__["default"].oneOf(['left', 'right'])
+};
+function comeFromSlot() {
+  var vnodes = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [];
+  var itemVnode = arguments[1];
+
+  var isSlot = false;
+  for (var i = 0, len = vnodes.length; i < len; i++) {
+    var vnode = vnodes[i];
+    if (vnode && (vnode === itemVnode || vnode.$vnode === itemVnode)) {
+      isSlot = true;
+    } else {
+      var componentOptions = vnode.componentOptions || vnode.$vnode && vnode.$vnode.componentOptions;
+      var children = componentOptions ? componentOptions.children : vnode.$children;
+      isSlot = comeFromSlot(children, itemVnode);
+    }
+    if (isSlot) {
+      break;
+    }
+  }
+  return isSlot;
+}
+
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
+  name: 'AFormItem',
+  __ANT_FORM_ITEM: true,
+  mixins: [_util_BaseMixin__WEBPACK_IMPORTED_MODULE_9__["default"]],
+  props: (0,_util_props_util__WEBPACK_IMPORTED_MODULE_10__.initDefaultProps)(FormItemProps, {
+    hasFeedback: false
+  }),
+  provide: function provide() {
+    return {
+      isFormItemChildren: true
+    };
+  },
+
+  inject: {
+    isFormItemChildren: { 'default': false },
+    FormContext: { 'default': function _default() {
+        return {};
+      } },
+    decoratorFormProps: { 'default': function _default() {
+        return {};
+      } },
+    collectFormItemContext: { 'default': function _default() {
+        return noop;
+      } },
+    configProvider: { 'default': function _default() {
+        return _config_provider_configConsumerProps__WEBPACK_IMPORTED_MODULE_11__.ConfigConsumerProps;
+      } }
+  },
+  data: function data() {
+    return { helpShow: false };
+  },
+
+  computed: {
+    itemSelfUpdate: function itemSelfUpdate() {
+      return !!(this.selfUpdate === undefined ? this.FormContext.selfUpdate : this.selfUpdate);
+    }
+  },
+  created: function created() {
+    this.collectContext();
+  },
+  beforeUpdate: function beforeUpdate() {
+    if (true) {
+      this.collectContext();
+    }
+  },
+  beforeDestroy: function beforeDestroy() {
+    this.collectFormItemContext(this.$vnode && this.$vnode.context, 'delete');
+  },
+  mounted: function mounted() {
+    var _$props = this.$props,
+        help = _$props.help,
+        validateStatus = _$props.validateStatus;
+
+    (0,_util_warning__WEBPACK_IMPORTED_MODULE_12__["default"])(this.getControls(this.slotDefault, true).length <= 1 || help !== undefined || validateStatus !== undefined, 'Form.Item', 'Cannot generate `validateStatus` and `help` automatically, ' + 'while there are more than one `getFieldDecorator` in it.');
+    (0,_util_warning__WEBPACK_IMPORTED_MODULE_12__["default"])(!this.fieldDecoratorId, 'Form.Item', '`fieldDecoratorId` is deprecated. please use `v-decorator={id, options}` instead.');
+  },
+
+  methods: {
+    collectContext: function collectContext() {
+      if (this.FormContext.form && this.FormContext.form.templateContext) {
+        var templateContext = this.FormContext.form.templateContext;
+
+        var vnodes = Object.values(templateContext.$slots || {}).reduce(function (a, b) {
+          return [].concat((0,babel_runtime_helpers_toConsumableArray__WEBPACK_IMPORTED_MODULE_4__["default"])(a), (0,babel_runtime_helpers_toConsumableArray__WEBPACK_IMPORTED_MODULE_4__["default"])(b));
+        }, []);
+        var isSlot = comeFromSlot(vnodes, this.$vnode);
+        (0,_util_warning__WEBPACK_IMPORTED_MODULE_12__["default"])(!isSlot, 'You can not set FormItem from slot, please use slot-scope instead slot');
+        var isSlotScope = false;
+        // 进一步判断是否是通过slot-scope传递
+        if (!isSlot && this.$vnode.context !== templateContext) {
+          isSlotScope = comeFromSlot(this.$vnode.context.$children, templateContext.$vnode);
+        }
+        if (!isSlotScope && !isSlot) {
+          this.collectFormItemContext(this.$vnode.context);
+        }
+      }
+    },
+    getHelpMessage: function getHelpMessage() {
+      var help = (0,_util_props_util__WEBPACK_IMPORTED_MODULE_10__.getComponentFromProp)(this, 'help');
+      var onlyControl = this.getOnlyControl();
+      if (help === undefined && onlyControl) {
+        var errors = this.getField().errors;
+        if (errors) {
+          return intersperseSpace(errors.map(function (e, index) {
+            var node = null;
+            if ((0,_util_props_util__WEBPACK_IMPORTED_MODULE_10__.isValidElement)(e)) {
+              node = e;
+            } else if ((0,_util_props_util__WEBPACK_IMPORTED_MODULE_10__.isValidElement)(e.message)) {
+              node = e.message;
+            }
+            return node ? (0,_util_vnode__WEBPACK_IMPORTED_MODULE_13__.cloneElement)(node, { key: index }) : e.message;
+          }));
+        } else {
+          return '';
+        }
+      }
+
+      return help;
+    },
+    getControls: function getControls() {
+      var childrenArray = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [];
+      var recursively = arguments[1];
+
+      var controls = [];
+      for (var i = 0; i < childrenArray.length; i++) {
+        if (!recursively && controls.length > 0) {
+          break;
+        }
+
+        var child = childrenArray[i];
+        if (!child.tag && child.text.trim() === '') {
+          continue;
+        }
+
+        if ((0,_util_props_util__WEBPACK_IMPORTED_MODULE_10__.getSlotOptions)(child).__ANT_FORM_ITEM) {
+          continue;
+        }
+        var children = (0,_util_props_util__WEBPACK_IMPORTED_MODULE_10__.getAllChildren)(child);
+        var attrs = child.data && child.data.attrs || {};
+        if (_constants__WEBPACK_IMPORTED_MODULE_14__.FIELD_META_PROP in attrs) {
+          // And means FIELD_DATA_PROP in child.props, too.
+          controls.push(child);
+        } else if (children) {
+          controls = controls.concat(this.getControls(children, recursively));
+        }
+      }
+      return controls;
+    },
+    getOnlyControl: function getOnlyControl() {
+      var child = this.getControls(this.slotDefault, false)[0];
+      return child !== undefined ? child : null;
+    },
+    getChildAttr: function getChildAttr(prop) {
+      var child = this.getOnlyControl();
+      var data = {};
+      if (!child) {
+        return undefined;
+      }
+      if (child.data) {
+        data = child.data;
+      } else if (child.$vnode && child.$vnode.data) {
+        data = child.$vnode.data;
+      }
+      return data[prop] || data.attrs[prop];
+    },
+    getId: function getId() {
+      return this.getChildAttr('id');
+    },
+    getMeta: function getMeta() {
+      return this.getChildAttr(_constants__WEBPACK_IMPORTED_MODULE_14__.FIELD_META_PROP);
+    },
+    getField: function getField() {
+      return this.getChildAttr(_constants__WEBPACK_IMPORTED_MODULE_14__.FIELD_DATA_PROP);
+    },
+    getValidateStatus: function getValidateStatus() {
+      var onlyControl = this.getOnlyControl();
+      if (!onlyControl) {
+        return '';
+      }
+      var field = this.getField();
+      if (field.validating) {
+        return 'validating';
+      }
+      if (field.errors) {
+        return 'error';
+      }
+      var fieldValue = 'value' in field ? field.value : this.getMeta().initialValue;
+      if (fieldValue !== undefined && fieldValue !== null && fieldValue !== '') {
+        return 'success';
+      }
+      return '';
+    },
+
+
+    // Resolve duplicated ids bug between different forms
+    // https://github.com/ant-design/ant-design/issues/7351
+    onLabelClick: function onLabelClick() {
+      var id = this.id || this.getId();
+      if (!id) {
+        return;
+      }
+      var formItemNode = this.$el;
+      var control = formItemNode.querySelector('[id="' + id + '"]');
+      if (control && control.focus) {
+        control.focus();
+      }
+    },
+    onHelpAnimEnd: function onHelpAnimEnd(_key, helpShow) {
+      this.helpShow = helpShow;
+      if (!helpShow) {
+        this.$forceUpdate();
+      }
+    },
+    isRequired: function isRequired() {
+      var required = this.required;
+
+      if (required !== undefined) {
+        return required;
+      }
+      if (this.getOnlyControl()) {
+        var meta = this.getMeta() || {};
+        var validate = meta.validate || [];
+
+        return validate.filter(function (item) {
+          return !!item.rules;
+        }).some(function (item) {
+          return item.rules.some(function (rule) {
+            return rule.required;
+          });
+        });
+      }
+      return false;
+    },
+    renderHelp: function renderHelp(prefixCls) {
+      var _this = this;
+
+      var h = this.$createElement;
+
+      var help = this.getHelpMessage();
+      var children = help ? h(
+        'div',
+        { 'class': prefixCls + '-explain', key: 'help' },
+        [help]
+      ) : null;
+      if (children) {
+        this.helpShow = !!children;
+      }
+      var transitionProps = (0,_util_getTransitionProps__WEBPACK_IMPORTED_MODULE_15__["default"])('show-help', {
+        afterEnter: function afterEnter() {
+          return _this.onHelpAnimEnd('help', true);
+        },
+        afterLeave: function afterLeave() {
+          return _this.onHelpAnimEnd('help', false);
+        }
+      });
+      return h(
+        'transition',
+        babel_helper_vue_jsx_merge_props__WEBPACK_IMPORTED_MODULE_3___default()([transitionProps, { key: 'help' }]),
+        [children]
+      );
+    },
+    renderExtra: function renderExtra(prefixCls) {
+      var h = this.$createElement;
+
+      var extra = (0,_util_props_util__WEBPACK_IMPORTED_MODULE_10__.getComponentFromProp)(this, 'extra');
+      return extra ? h(
+        'div',
+        { 'class': prefixCls + '-extra' },
+        [extra]
+      ) : null;
+    },
+    renderValidateWrapper: function renderValidateWrapper(prefixCls, c1, c2, c3) {
+      var h = this.$createElement;
+
+      var props = this.$props;
+      var onlyControl = this.getOnlyControl;
+      var validateStatus = props.validateStatus === undefined && onlyControl ? this.getValidateStatus() : props.validateStatus;
+
+      var classes = prefixCls + '-item-control';
+      if (validateStatus) {
+        classes = classnames__WEBPACK_IMPORTED_MODULE_5___default()(prefixCls + '-item-control', {
+          'has-feedback': validateStatus && props.hasFeedback,
+          'has-success': validateStatus === 'success',
+          'has-warning': validateStatus === 'warning',
+          'has-error': validateStatus === 'error',
+          'is-validating': validateStatus === 'validating'
+        });
+      }
+      var iconType = '';
+      switch (validateStatus) {
+        case 'success':
+          iconType = 'check-circle';
+          break;
+        case 'warning':
+          iconType = 'exclamation-circle';
+          break;
+        case 'error':
+          iconType = 'close-circle';
+          break;
+        case 'validating':
+          iconType = 'loading';
+          break;
+        default:
+          iconType = '';
+          break;
+      }
+      var icon = props.hasFeedback && iconType ? h(
+        'span',
+        { 'class': prefixCls + '-item-children-icon' },
+        [h(_icon__WEBPACK_IMPORTED_MODULE_16__["default"], {
+          attrs: { type: iconType, theme: iconType === 'loading' ? 'outlined' : 'filled' }
+        })]
+      ) : null;
+      return h(
+        'div',
+        { 'class': classes },
+        [h(
+          'span',
+          { 'class': prefixCls + '-item-children' },
+          [c1, icon]
+        ), c2, c3]
+      );
+    },
+    renderWrapper: function renderWrapper(prefixCls, children) {
+      var h = this.$createElement;
+
+      var _ref = this.isFormItemChildren ? {} : this.FormContext,
+          contextWrapperCol = _ref.wrapperCol;
+
+      var wrapperCol = this.wrapperCol;
+
+      var mergedWrapperCol = wrapperCol || contextWrapperCol || {};
+
+      var style = mergedWrapperCol.style,
+          id = mergedWrapperCol.id,
+          on = mergedWrapperCol.on,
+          restProps = (0,babel_runtime_helpers_objectWithoutProperties__WEBPACK_IMPORTED_MODULE_2__["default"])(mergedWrapperCol, ['style', 'id', 'on']);
+
+      var className = classnames__WEBPACK_IMPORTED_MODULE_5___default()(prefixCls + '-item-control-wrapper', mergedWrapperCol['class']);
+      var colProps = {
+        props: restProps,
+        'class': className,
+        key: 'wrapper',
+        style: style,
+        id: id,
+        on: on
+      };
+      return h(
+        _grid_Col__WEBPACK_IMPORTED_MODULE_8__["default"],
+        colProps,
+        [children]
+      );
+    },
+    renderLabel: function renderLabel(prefixCls) {
+      var _classNames;
+
+      var h = this.$createElement;
+      var _FormContext = this.FormContext,
+          vertical = _FormContext.vertical,
+          contextLabelAlign = _FormContext.labelAlign,
+          contextLabelCol = _FormContext.labelCol,
+          contextColon = _FormContext.colon;
+      var labelAlign = this.labelAlign,
+          labelCol = this.labelCol,
+          colon = this.colon,
+          id = this.id,
+          htmlFor = this.htmlFor;
+
+      var label = (0,_util_props_util__WEBPACK_IMPORTED_MODULE_10__.getComponentFromProp)(this, 'label');
+      var required = this.isRequired();
+      var mergedLabelCol = labelCol || contextLabelCol || {};
+
+      var mergedLabelAlign = labelAlign || contextLabelAlign;
+      var labelClsBasic = prefixCls + '-item-label';
+      var labelColClassName = classnames__WEBPACK_IMPORTED_MODULE_5___default()(labelClsBasic, mergedLabelAlign === 'left' && labelClsBasic + '-left', mergedLabelCol['class']);
+
+      var labelColClass = mergedLabelCol['class'],
+          labelColStyle = mergedLabelCol.style,
+          labelColId = mergedLabelCol.id,
+          on = mergedLabelCol.on,
+          restProps = (0,babel_runtime_helpers_objectWithoutProperties__WEBPACK_IMPORTED_MODULE_2__["default"])(mergedLabelCol, ['class', 'style', 'id', 'on']);
+
+      var labelChildren = label;
+      // Keep label is original where there should have no colon
+      var computedColon = colon === true || contextColon !== false && colon !== false;
+      var haveColon = computedColon && !vertical;
+      // Remove duplicated user input colon
+      if (haveColon && typeof label === 'string' && label.trim() !== '') {
+        labelChildren = label.replace(/[：:]\s*$/, '');
+      }
+
+      var labelClassName = classnames__WEBPACK_IMPORTED_MODULE_5___default()((_classNames = {}, (0,babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_1__["default"])(_classNames, prefixCls + '-item-required', required), (0,babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_1__["default"])(_classNames, prefixCls + '-item-no-colon', !computedColon), _classNames));
+      var colProps = {
+        props: restProps,
+        'class': labelColClassName,
+        key: 'label',
+        style: labelColStyle,
+        id: labelColId,
+        on: on
+      };
+
+      return label ? h(
+        _grid_Col__WEBPACK_IMPORTED_MODULE_8__["default"],
+        colProps,
+        [h(
+          'label',
+          {
+            attrs: {
+              'for': htmlFor || id || this.getId(),
+
+              title: typeof label === 'string' ? label : ''
+            },
+            'class': labelClassName, on: {
+              'click': this.onLabelClick
+            }
+          },
+          [labelChildren]
+        )]
+      ) : null;
+    },
+    renderChildren: function renderChildren(prefixCls) {
+      return [this.renderLabel(prefixCls), this.renderWrapper(prefixCls, this.renderValidateWrapper(prefixCls, this.slotDefault, this.renderHelp(prefixCls), this.renderExtra(prefixCls)))];
+    },
+    renderFormItem: function renderFormItem() {
+      var _itemClassName;
+
+      var h = this.$createElement;
+      var customizePrefixCls = this.$props.prefixCls;
+
+      var getPrefixCls = this.configProvider.getPrefixCls;
+      var prefixCls = getPrefixCls('form', customizePrefixCls);
+      var children = this.renderChildren(prefixCls);
+      var itemClassName = (_itemClassName = {}, (0,babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_1__["default"])(_itemClassName, prefixCls + '-item', true), (0,babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_1__["default"])(_itemClassName, prefixCls + '-item-with-help', this.helpShow), _itemClassName);
+
+      return h(
+        _grid_Row__WEBPACK_IMPORTED_MODULE_17__["default"],
+        { 'class': classnames__WEBPACK_IMPORTED_MODULE_5___default()(itemClassName), key: 'row' },
+        [children]
+      );
+    },
+    decoratorOption: function decoratorOption(vnode) {
+      if (vnode.data && vnode.data.directives) {
+        var directive = lodash_find__WEBPACK_IMPORTED_MODULE_6___default()(vnode.data.directives, ['name', 'decorator']);
+        (0,_util_warning__WEBPACK_IMPORTED_MODULE_12__["default"])(!directive || directive && Array.isArray(directive.value), 'Form', 'Invalid directive: type check failed for directive "decorator". Expected Array, got ' + (0,babel_runtime_helpers_typeof__WEBPACK_IMPORTED_MODULE_0__["default"])(directive ? directive.value : directive) + '. At ' + vnode.tag + '.');
+        return directive ? directive.value : null;
+      } else {
+        return null;
+      }
+    },
+    decoratorChildren: function decoratorChildren(vnodes) {
+      var FormContext = this.FormContext;
+
+      var getFieldDecorator = FormContext.form.getFieldDecorator;
+      for (var i = 0, len = vnodes.length; i < len; i++) {
+        var vnode = vnodes[i];
+        if ((0,_util_props_util__WEBPACK_IMPORTED_MODULE_10__.getSlotOptions)(vnode).__ANT_FORM_ITEM) {
+          break;
+        }
+        if (vnode.children) {
+          vnode.children = this.decoratorChildren((0,_util_vnode__WEBPACK_IMPORTED_MODULE_13__.cloneVNodes)(vnode.children));
+        } else if (vnode.componentOptions && vnode.componentOptions.children) {
+          vnode.componentOptions.children = this.decoratorChildren((0,_util_vnode__WEBPACK_IMPORTED_MODULE_13__.cloneVNodes)(vnode.componentOptions.children));
+        }
+        var option = this.decoratorOption(vnode);
+        if (option && option[0]) {
+          vnodes[i] = getFieldDecorator(option[0], option[1], this)(vnode);
+        }
+      }
+      return vnodes;
+    }
+  },
+
+  render: function render() {
+    var $slots = this.$slots,
+        decoratorFormProps = this.decoratorFormProps,
+        fieldDecoratorId = this.fieldDecoratorId,
+        _fieldDecoratorOption = this.fieldDecoratorOptions,
+        fieldDecoratorOptions = _fieldDecoratorOption === undefined ? {} : _fieldDecoratorOption,
+        FormContext = this.FormContext;
+
+    var child = (0,_util_props_util__WEBPACK_IMPORTED_MODULE_10__.filterEmpty)($slots['default'] || []);
+    if (decoratorFormProps.form && fieldDecoratorId && child.length) {
+      var getFieldDecorator = decoratorFormProps.form.getFieldDecorator;
+      child[0] = getFieldDecorator(fieldDecoratorId, fieldDecoratorOptions, this)(child[0]);
+      (0,_util_warning__WEBPACK_IMPORTED_MODULE_12__["default"])(!(child.length > 1), 'Form', '`autoFormCreate` just `decorator` then first children. but you can use JSX to support multiple children');
+      this.slotDefault = child;
+    } else if (FormContext.form) {
+      child = (0,_util_vnode__WEBPACK_IMPORTED_MODULE_13__.cloneVNodes)(child);
+      this.slotDefault = this.decoratorChildren(child);
+    } else {
+      this.slotDefault = child;
+    }
+    return this.renderFormItem();
+  }
+});
+
+/***/ }),
+
+/***/ "./node_modules/ant-design-vue/es/form/constants.js":
+/*!**********************************************************!*\
+  !*** ./node_modules/ant-design-vue/es/form/constants.js ***!
+  \**********************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "FIELD_META_PROP": () => (/* binding */ FIELD_META_PROP),
+/* harmony export */   "FIELD_DATA_PROP": () => (/* binding */ FIELD_DATA_PROP)
+/* harmony export */ });
+var FIELD_META_PROP = 'data-__meta';
+var FIELD_DATA_PROP = 'data-__field';
+
+/***/ }),
+
+/***/ "./node_modules/ant-design-vue/es/form/index.js":
+/*!******************************************************!*\
+  !*** ./node_modules/ant-design-vue/es/form/index.js ***!
+  \******************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "FormProps": () => (/* reexport safe */ _Form__WEBPACK_IMPORTED_MODULE_3__.FormProps),
+/* harmony export */   "FormCreateOption": () => (/* reexport safe */ _Form__WEBPACK_IMPORTED_MODULE_3__.FormCreateOption),
+/* harmony export */   "ValidationRule": () => (/* reexport safe */ _Form__WEBPACK_IMPORTED_MODULE_3__.ValidationRule),
+/* harmony export */   "FormItemProps": () => (/* reexport safe */ _FormItem__WEBPACK_IMPORTED_MODULE_4__.FormItemProps),
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.esm.js");
+/* harmony import */ var _Form__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./Form */ "./node_modules/ant-design-vue/es/form/Form.js");
+/* harmony import */ var vue_ref__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! vue-ref */ "./node_modules/vue-ref/index.js");
+/* harmony import */ var _util_FormDecoratorDirective__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../_util/FormDecoratorDirective */ "./node_modules/ant-design-vue/es/_util/FormDecoratorDirective.js");
+/* harmony import */ var _base__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../base */ "./node_modules/ant-design-vue/es/base/index.js");
+/* harmony import */ var _FormItem__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./FormItem */ "./node_modules/ant-design-vue/es/form/FormItem.js");
+
+
+
+
+
+
+vue__WEBPACK_IMPORTED_MODULE_1__["default"].use(vue_ref__WEBPACK_IMPORTED_MODULE_0__["default"], { name: 'ant-ref' });
+vue__WEBPACK_IMPORTED_MODULE_1__["default"].use(_util_FormDecoratorDirective__WEBPACK_IMPORTED_MODULE_2__["default"]);
+vue__WEBPACK_IMPORTED_MODULE_1__["default"].prototype.$form = _Form__WEBPACK_IMPORTED_MODULE_3__["default"];
+
+
+
+
+/* istanbul ignore next */
+_Form__WEBPACK_IMPORTED_MODULE_3__["default"].install = function (Vue) {
+  Vue.use(_base__WEBPACK_IMPORTED_MODULE_5__["default"]);
+  Vue.component(_Form__WEBPACK_IMPORTED_MODULE_3__["default"].name, _Form__WEBPACK_IMPORTED_MODULE_3__["default"]);
+  Vue.component(_Form__WEBPACK_IMPORTED_MODULE_3__["default"].Item.name, _Form__WEBPACK_IMPORTED_MODULE_3__["default"].Item);
+  Vue.prototype.$form = _Form__WEBPACK_IMPORTED_MODULE_3__["default"];
+};
+
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (_Form__WEBPACK_IMPORTED_MODULE_3__["default"]);
+
+/***/ }),
+
+/***/ "./node_modules/ant-design-vue/es/grid/Col.js":
+/*!****************************************************!*\
+  !*** ./node_modules/ant-design-vue/es/grid/Col.js ***!
+  \****************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "ColSize": () => (/* binding */ ColSize),
+/* harmony export */   "ColProps": () => (/* binding */ ColProps),
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! babel-runtime/helpers/defineProperty */ "./node_modules/babel-runtime/helpers/defineProperty.js");
+/* harmony import */ var babel_runtime_helpers_extends__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! babel-runtime/helpers/extends */ "./node_modules/babel-runtime/helpers/extends.js");
+/* harmony import */ var babel_runtime_helpers_typeof__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! babel-runtime/helpers/typeof */ "./node_modules/babel-runtime/helpers/typeof.js");
+/* harmony import */ var _util_vue_types__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../_util/vue-types */ "./node_modules/ant-design-vue/es/_util/vue-types/index.js");
+/* harmony import */ var _config_provider_configConsumerProps__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../config-provider/configConsumerProps */ "./node_modules/ant-design-vue/es/config-provider/configConsumerProps.js");
+/* harmony import */ var _util_props_util__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../_util/props-util */ "./node_modules/ant-design-vue/es/_util/props-util.js");
+
+
+
+
+
+
+
+var stringOrNumber = _util_vue_types__WEBPACK_IMPORTED_MODULE_3__["default"].oneOfType([_util_vue_types__WEBPACK_IMPORTED_MODULE_3__["default"].string, _util_vue_types__WEBPACK_IMPORTED_MODULE_3__["default"].number]);
+
+var ColSize = _util_vue_types__WEBPACK_IMPORTED_MODULE_3__["default"].shape({
+  span: stringOrNumber,
+  order: stringOrNumber,
+  offset: stringOrNumber,
+  push: stringOrNumber,
+  pull: stringOrNumber
+}).loose;
+
+var objectOrNumber = _util_vue_types__WEBPACK_IMPORTED_MODULE_3__["default"].oneOfType([_util_vue_types__WEBPACK_IMPORTED_MODULE_3__["default"].string, _util_vue_types__WEBPACK_IMPORTED_MODULE_3__["default"].number, ColSize]);
+
+var ColProps = {
+  span: stringOrNumber,
+  order: stringOrNumber,
+  offset: stringOrNumber,
+  push: stringOrNumber,
+  pull: stringOrNumber,
+  xs: objectOrNumber,
+  sm: objectOrNumber,
+  md: objectOrNumber,
+  lg: objectOrNumber,
+  xl: objectOrNumber,
+  xxl: objectOrNumber,
+  prefixCls: _util_vue_types__WEBPACK_IMPORTED_MODULE_3__["default"].string,
+  flex: stringOrNumber
+};
+
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
+  name: 'ACol',
+  props: ColProps,
+  inject: {
+    configProvider: { 'default': function _default() {
+        return _config_provider_configConsumerProps__WEBPACK_IMPORTED_MODULE_4__.ConfigConsumerProps;
+      } },
+    rowContext: {
+      'default': function _default() {
+        return null;
+      }
+    }
+  },
+  methods: {
+    parseFlex: function parseFlex(flex) {
+      if (typeof flex === 'number') {
+        return flex + ' ' + flex + ' auto';
+      }
+      if (/^\d+(\.\d+)?(px|em|rem|%)$/.test(flex)) {
+        return '0 0 ' + flex;
+      }
+      return flex;
+    }
+  },
+  render: function render() {
+    var _this = this,
+        _extends3;
+
+    var h = arguments[0];
+    var span = this.span,
+        order = this.order,
+        offset = this.offset,
+        push = this.push,
+        pull = this.pull,
+        flex = this.flex,
+        customizePrefixCls = this.prefixCls,
+        $slots = this.$slots,
+        rowContext = this.rowContext;
+
+    var getPrefixCls = this.configProvider.getPrefixCls;
+    var prefixCls = getPrefixCls('col', customizePrefixCls);
+
+    var sizeClassObj = {};
+    ['xs', 'sm', 'md', 'lg', 'xl', 'xxl'].forEach(function (size) {
+      var _extends2;
+
+      var sizeProps = {};
+      var propSize = _this[size];
+      if (typeof propSize === 'number') {
+        sizeProps.span = propSize;
+      } else if ((typeof propSize === 'undefined' ? 'undefined' : (0,babel_runtime_helpers_typeof__WEBPACK_IMPORTED_MODULE_2__["default"])(propSize)) === 'object') {
+        sizeProps = propSize || {};
+      }
+
+      sizeClassObj = (0,babel_runtime_helpers_extends__WEBPACK_IMPORTED_MODULE_1__["default"])({}, sizeClassObj, (_extends2 = {}, (0,babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_0__["default"])(_extends2, prefixCls + '-' + size + '-' + sizeProps.span, sizeProps.span !== undefined), (0,babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_0__["default"])(_extends2, prefixCls + '-' + size + '-order-' + sizeProps.order, sizeProps.order || sizeProps.order === 0), (0,babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_0__["default"])(_extends2, prefixCls + '-' + size + '-offset-' + sizeProps.offset, sizeProps.offset || sizeProps.offset === 0), (0,babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_0__["default"])(_extends2, prefixCls + '-' + size + '-push-' + sizeProps.push, sizeProps.push || sizeProps.push === 0), (0,babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_0__["default"])(_extends2, prefixCls + '-' + size + '-pull-' + sizeProps.pull, sizeProps.pull || sizeProps.pull === 0), _extends2));
+    });
+    var classes = (0,babel_runtime_helpers_extends__WEBPACK_IMPORTED_MODULE_1__["default"])((_extends3 = {}, (0,babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_0__["default"])(_extends3, '' + prefixCls, true), (0,babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_0__["default"])(_extends3, prefixCls + '-' + span, span !== undefined), (0,babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_0__["default"])(_extends3, prefixCls + '-order-' + order, order), (0,babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_0__["default"])(_extends3, prefixCls + '-offset-' + offset, offset), (0,babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_0__["default"])(_extends3, prefixCls + '-push-' + push, push), (0,babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_0__["default"])(_extends3, prefixCls + '-pull-' + pull, pull), _extends3), sizeClassObj);
+    var divProps = {
+      on: (0,_util_props_util__WEBPACK_IMPORTED_MODULE_5__.getListeners)(this),
+      'class': classes,
+      style: {}
+    };
+    if (rowContext) {
+      var gutter = rowContext.getGutter();
+      if (gutter) {
+        divProps.style = (0,babel_runtime_helpers_extends__WEBPACK_IMPORTED_MODULE_1__["default"])({}, gutter[0] > 0 ? {
+          paddingLeft: gutter[0] / 2 + 'px',
+          paddingRight: gutter[0] / 2 + 'px'
+        } : {}, gutter[1] > 0 ? {
+          paddingTop: gutter[1] / 2 + 'px',
+          paddingBottom: gutter[1] / 2 + 'px'
+        } : {});
+      }
+    }
+
+    if (flex) {
+      divProps.style.flex = this.parseFlex(flex);
+    }
+
+    return h(
+      'div',
+      divProps,
+      [$slots['default']]
+    );
+  }
+});
+
+/***/ }),
+
+/***/ "./node_modules/ant-design-vue/es/grid/Row.js":
+/*!****************************************************!*\
+  !*** ./node_modules/ant-design-vue/es/grid/Row.js ***!
+  \****************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! babel-runtime/helpers/defineProperty */ "./node_modules/babel-runtime/helpers/defineProperty.js");
+/* harmony import */ var babel_runtime_helpers_typeof__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! babel-runtime/helpers/typeof */ "./node_modules/babel-runtime/helpers/typeof.js");
+/* harmony import */ var babel_runtime_helpers_extends__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! babel-runtime/helpers/extends */ "./node_modules/babel-runtime/helpers/extends.js");
+/* harmony import */ var _util_vue_types__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../_util/vue-types */ "./node_modules/ant-design-vue/es/_util/vue-types/index.js");
+/* harmony import */ var _util_BaseMixin__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../_util/BaseMixin */ "./node_modules/ant-design-vue/es/_util/BaseMixin.js");
+/* harmony import */ var _config_provider_configConsumerProps__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../config-provider/configConsumerProps */ "./node_modules/ant-design-vue/es/config-provider/configConsumerProps.js");
+/* harmony import */ var _util_responsiveObserve__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../_util/responsiveObserve */ "./node_modules/ant-design-vue/es/_util/responsiveObserve.js");
+
+
+
+
+
+
+
+
+var RowProps = {
+  gutter: _util_vue_types__WEBPACK_IMPORTED_MODULE_3__["default"].oneOfType([_util_vue_types__WEBPACK_IMPORTED_MODULE_3__["default"].object, _util_vue_types__WEBPACK_IMPORTED_MODULE_3__["default"].number, _util_vue_types__WEBPACK_IMPORTED_MODULE_3__["default"].array]),
+  type: _util_vue_types__WEBPACK_IMPORTED_MODULE_3__["default"].oneOf(['flex']),
+  align: _util_vue_types__WEBPACK_IMPORTED_MODULE_3__["default"].oneOf(['top', 'middle', 'bottom', 'stretch']),
+  justify: _util_vue_types__WEBPACK_IMPORTED_MODULE_3__["default"].oneOf(['start', 'end', 'center', 'space-around', 'space-between']),
+  prefixCls: _util_vue_types__WEBPACK_IMPORTED_MODULE_3__["default"].string
+};
+
+var responsiveArray = ['xxl', 'xl', 'lg', 'md', 'sm', 'xs'];
+
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
+  name: 'ARow',
+  mixins: [_util_BaseMixin__WEBPACK_IMPORTED_MODULE_4__["default"]],
+  props: (0,babel_runtime_helpers_extends__WEBPACK_IMPORTED_MODULE_2__["default"])({}, RowProps, {
+    gutter: _util_vue_types__WEBPACK_IMPORTED_MODULE_3__["default"].oneOfType([_util_vue_types__WEBPACK_IMPORTED_MODULE_3__["default"].object, _util_vue_types__WEBPACK_IMPORTED_MODULE_3__["default"].number, _util_vue_types__WEBPACK_IMPORTED_MODULE_3__["default"].array]).def(0)
+  }),
+  provide: function provide() {
+    return {
+      rowContext: this
+    };
+  },
+
+  inject: {
+    configProvider: { 'default': function _default() {
+        return _config_provider_configConsumerProps__WEBPACK_IMPORTED_MODULE_5__.ConfigConsumerProps;
+      } }
+  },
+  data: function data() {
+    return {
+      screens: {}
+    };
+  },
+  mounted: function mounted() {
+    var _this = this;
+
+    this.$nextTick(function () {
+      _this.token = _util_responsiveObserve__WEBPACK_IMPORTED_MODULE_6__["default"].subscribe(function (screens) {
+        var gutter = _this.gutter;
+
+        if ((typeof gutter === 'undefined' ? 'undefined' : (0,babel_runtime_helpers_typeof__WEBPACK_IMPORTED_MODULE_1__["default"])(gutter)) === 'object' || Array.isArray(gutter) && ((0,babel_runtime_helpers_typeof__WEBPACK_IMPORTED_MODULE_1__["default"])(gutter[0]) === 'object' || (0,babel_runtime_helpers_typeof__WEBPACK_IMPORTED_MODULE_1__["default"])(gutter[1]) === 'object')) {
+          _this.screens = screens;
+        }
+      });
+    });
+  },
+  beforeDestroy: function beforeDestroy() {
+    _util_responsiveObserve__WEBPACK_IMPORTED_MODULE_6__["default"].unsubscribe(this.token);
+  },
+
+  methods: {
+    getGutter: function getGutter() {
+      var results = [0, 0];
+      var gutter = this.gutter,
+          screens = this.screens;
+
+      var normalizedGutter = Array.isArray(gutter) ? gutter : [gutter, 0];
+      normalizedGutter.forEach(function (g, index) {
+        if ((typeof g === 'undefined' ? 'undefined' : (0,babel_runtime_helpers_typeof__WEBPACK_IMPORTED_MODULE_1__["default"])(g)) === 'object') {
+          for (var i = 0; i < responsiveArray.length; i++) {
+            var breakpoint = responsiveArray[i];
+            if (screens[breakpoint] && g[breakpoint] !== undefined) {
+              results[index] = g[breakpoint];
+              break;
+            }
+          }
+        } else {
+          results[index] = g || 0;
+        }
+      });
+      return results;
+    }
+  },
+
+  render: function render() {
+    var _classes;
+
+    var h = arguments[0];
+    var type = this.type,
+        justify = this.justify,
+        align = this.align,
+        customizePrefixCls = this.prefixCls,
+        $slots = this.$slots;
+
+    var getPrefixCls = this.configProvider.getPrefixCls;
+    var prefixCls = getPrefixCls('row', customizePrefixCls);
+
+    var gutter = this.getGutter();
+    var classes = (_classes = {}, (0,babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_0__["default"])(_classes, prefixCls, !type), (0,babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_0__["default"])(_classes, prefixCls + '-' + type, type), (0,babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_0__["default"])(_classes, prefixCls + '-' + type + '-' + justify, type && justify), (0,babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_0__["default"])(_classes, prefixCls + '-' + type + '-' + align, type && align), _classes);
+    var rowStyle = (0,babel_runtime_helpers_extends__WEBPACK_IMPORTED_MODULE_2__["default"])({}, gutter[0] > 0 ? {
+      marginLeft: gutter[0] / -2 + 'px',
+      marginRight: gutter[0] / -2 + 'px'
+    } : {}, gutter[1] > 0 ? {
+      marginTop: gutter[1] / -2 + 'px',
+      marginBottom: gutter[1] / -2 + 'px'
+    } : {});
+    return h(
+      'div',
+      { 'class': classes, style: rowStyle },
+      [$slots['default']]
+    );
+  }
+});
+
+/***/ }),
+
 /***/ "./node_modules/ant-design-vue/es/icon/IconFont.js":
 /*!*********************************************************!*\
   !*** ./node_modules/ant-design-vue/es/icon/IconFont.js ***!
@@ -12133,6 +13503,105 @@ Menu.install = function (Vue) {
   Vue.component(Menu.ItemGroup.name, Menu.ItemGroup);
 };
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (Menu);
+
+/***/ }),
+
+/***/ "./node_modules/ant-design-vue/es/popover/index.js":
+/*!*********************************************************!*\
+  !*** ./node_modules/ant-design-vue/es/popover/index.js ***!
+  \*********************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var babel_runtime_helpers_extends__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! babel-runtime/helpers/extends */ "./node_modules/babel-runtime/helpers/extends.js");
+/* harmony import */ var _tooltip__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../tooltip */ "./node_modules/ant-design-vue/es/tooltip/index.js");
+/* harmony import */ var _tooltip_abstractTooltipProps__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../tooltip/abstractTooltipProps */ "./node_modules/ant-design-vue/es/tooltip/abstractTooltipProps.js");
+/* harmony import */ var _util_vue_types__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../_util/vue-types */ "./node_modules/ant-design-vue/es/_util/vue-types/index.js");
+/* harmony import */ var _util_props_util__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../_util/props-util */ "./node_modules/ant-design-vue/es/_util/props-util.js");
+/* harmony import */ var _config_provider_configConsumerProps__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../config-provider/configConsumerProps */ "./node_modules/ant-design-vue/es/config-provider/configConsumerProps.js");
+/* harmony import */ var _base__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../base */ "./node_modules/ant-design-vue/es/base/index.js");
+
+
+
+
+
+
+
+
+var props = (0,_tooltip_abstractTooltipProps__WEBPACK_IMPORTED_MODULE_1__["default"])();
+var Popover = {
+  name: 'APopover',
+  props: (0,babel_runtime_helpers_extends__WEBPACK_IMPORTED_MODULE_0__["default"])({}, props, {
+    prefixCls: _util_vue_types__WEBPACK_IMPORTED_MODULE_2__["default"].string,
+    transitionName: _util_vue_types__WEBPACK_IMPORTED_MODULE_2__["default"].string.def('zoom-big'),
+    content: _util_vue_types__WEBPACK_IMPORTED_MODULE_2__["default"].any,
+    title: _util_vue_types__WEBPACK_IMPORTED_MODULE_2__["default"].any
+  }),
+  model: {
+    prop: 'visible',
+    event: 'visibleChange'
+  },
+  inject: {
+    configProvider: { 'default': function _default() {
+        return _config_provider_configConsumerProps__WEBPACK_IMPORTED_MODULE_3__.ConfigConsumerProps;
+      } }
+  },
+  methods: {
+    getPopupDomNode: function getPopupDomNode() {
+      return this.$refs.tooltip.getPopupDomNode();
+    }
+  },
+
+  render: function render() {
+    var h = arguments[0];
+    var title = this.title,
+        customizePrefixCls = this.prefixCls,
+        $slots = this.$slots;
+
+    var getPrefixCls = this.configProvider.getPrefixCls;
+    var prefixCls = getPrefixCls('popover', customizePrefixCls);
+
+    var props = (0,_util_props_util__WEBPACK_IMPORTED_MODULE_4__.getOptionProps)(this);
+    delete props.title;
+    delete props.content;
+    var tooltipProps = {
+      props: (0,babel_runtime_helpers_extends__WEBPACK_IMPORTED_MODULE_0__["default"])({}, props, {
+        prefixCls: prefixCls
+      }),
+      ref: 'tooltip',
+      on: (0,_util_props_util__WEBPACK_IMPORTED_MODULE_4__.getListeners)(this)
+    };
+    return h(
+      _tooltip__WEBPACK_IMPORTED_MODULE_5__["default"],
+      tooltipProps,
+      [h(
+        'template',
+        { slot: 'title' },
+        [h('div', [(title || $slots.title) && h(
+          'div',
+          { 'class': prefixCls + '-title' },
+          [(0,_util_props_util__WEBPACK_IMPORTED_MODULE_4__.getComponentFromProp)(this, 'title')]
+        ), h(
+          'div',
+          { 'class': prefixCls + '-inner-content' },
+          [(0,_util_props_util__WEBPACK_IMPORTED_MODULE_4__.getComponentFromProp)(this, 'content')]
+        )])]
+      ), this.$slots['default']]
+    );
+  }
+};
+
+/* istanbul ignore next */
+Popover.install = function (Vue) {
+  Vue.use(_base__WEBPACK_IMPORTED_MODULE_6__["default"]);
+  Vue.component(Popover.name, Popover);
+};
+
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (Popover);
 
 /***/ }),
 
@@ -18167,6 +19636,1474 @@ var placements = {
 
 /***/ }),
 
+/***/ "./node_modules/ant-design-vue/es/vc-form/src/createBaseForm.js":
+/*!**********************************************************************!*\
+  !*** ./node_modules/ant-design-vue/es/vc-form/src/createBaseForm.js ***!
+  \**********************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var babel_runtime_helpers_typeof__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! babel-runtime/helpers/typeof */ "./node_modules/babel-runtime/helpers/typeof.js");
+/* harmony import */ var babel_runtime_helpers_objectWithoutProperties__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! babel-runtime/helpers/objectWithoutProperties */ "./node_modules/babel-runtime/helpers/objectWithoutProperties.js");
+/* harmony import */ var babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! babel-runtime/helpers/defineProperty */ "./node_modules/babel-runtime/helpers/defineProperty.js");
+/* harmony import */ var babel_runtime_helpers_extends__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! babel-runtime/helpers/extends */ "./node_modules/babel-runtime/helpers/extends.js");
+/* harmony import */ var babel_runtime_helpers_toConsumableArray__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! babel-runtime/helpers/toConsumableArray */ "./node_modules/babel-runtime/helpers/toConsumableArray.js");
+/* harmony import */ var async_validator__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! async-validator */ "./node_modules/async-validator/dist-web/index.js");
+/* harmony import */ var warning__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! warning */ "./node_modules/warning/warning.js");
+/* harmony import */ var warning__WEBPACK_IMPORTED_MODULE_5___default = /*#__PURE__*/__webpack_require__.n(warning__WEBPACK_IMPORTED_MODULE_5__);
+/* harmony import */ var lodash_get__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! lodash/get */ "./node_modules/lodash/get.js");
+/* harmony import */ var lodash_get__WEBPACK_IMPORTED_MODULE_6___default = /*#__PURE__*/__webpack_require__.n(lodash_get__WEBPACK_IMPORTED_MODULE_6__);
+/* harmony import */ var lodash_set__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! lodash/set */ "./node_modules/lodash/set.js");
+/* harmony import */ var lodash_set__WEBPACK_IMPORTED_MODULE_7___default = /*#__PURE__*/__webpack_require__.n(lodash_set__WEBPACK_IMPORTED_MODULE_7__);
+/* harmony import */ var lodash_eq__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! lodash/eq */ "./node_modules/lodash/eq.js");
+/* harmony import */ var lodash_eq__WEBPACK_IMPORTED_MODULE_8___default = /*#__PURE__*/__webpack_require__.n(lodash_eq__WEBPACK_IMPORTED_MODULE_8__);
+/* harmony import */ var lodash_omit__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! lodash/omit */ "./node_modules/lodash/omit.js");
+/* harmony import */ var lodash_omit__WEBPACK_IMPORTED_MODULE_9___default = /*#__PURE__*/__webpack_require__.n(lodash_omit__WEBPACK_IMPORTED_MODULE_9__);
+/* harmony import */ var _createFieldsStore__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! ./createFieldsStore */ "./node_modules/ant-design-vue/es/vc-form/src/createFieldsStore.js");
+/* harmony import */ var _util_vnode__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! ../../_util/vnode */ "./node_modules/ant-design-vue/es/_util/vnode.js");
+/* harmony import */ var _util_BaseMixin__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ../../_util/BaseMixin */ "./node_modules/ant-design-vue/es/_util/BaseMixin.js");
+/* harmony import */ var _util_props_util__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! ../../_util/props-util */ "./node_modules/ant-design-vue/es/_util/props-util.js");
+/* harmony import */ var _util_vue_types__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ../../_util/vue-types */ "./node_modules/ant-design-vue/es/_util/vue-types/index.js");
+/* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./utils */ "./node_modules/ant-design-vue/es/vc-form/src/utils.js");
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+var DEFAULT_TRIGGER = 'change';
+
+function createBaseForm() {
+  var option = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+  var mixins = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : [];
+  var validateMessages = option.validateMessages,
+      onFieldsChange = option.onFieldsChange,
+      onValuesChange = option.onValuesChange,
+      _option$mapProps = option.mapProps,
+      mapProps = _option$mapProps === undefined ? _utils__WEBPACK_IMPORTED_MODULE_10__.identity : _option$mapProps,
+      mapPropsToFields = option.mapPropsToFields,
+      fieldNameProp = option.fieldNameProp,
+      fieldMetaProp = option.fieldMetaProp,
+      fieldDataProp = option.fieldDataProp,
+      _option$formPropName = option.formPropName,
+      formPropName = _option$formPropName === undefined ? 'form' : _option$formPropName,
+      formName = option.name,
+      _option$props = option.props,
+      props = _option$props === undefined ? {} : _option$props,
+      templateContext = option.templateContext;
+
+  return function decorate(WrappedComponent) {
+    var formProps = {};
+    if (Array.isArray(props)) {
+      props.forEach(function (prop) {
+        formProps[prop] = _util_vue_types__WEBPACK_IMPORTED_MODULE_11__["default"].any;
+      });
+    } else {
+      formProps = props;
+    }
+    var Form = {
+      mixins: [_util_BaseMixin__WEBPACK_IMPORTED_MODULE_12__["default"]].concat((0,babel_runtime_helpers_toConsumableArray__WEBPACK_IMPORTED_MODULE_4__["default"])(mixins)),
+      props: (0,babel_runtime_helpers_extends__WEBPACK_IMPORTED_MODULE_3__["default"])({}, formProps, {
+        wrappedComponentRef: _util_vue_types__WEBPACK_IMPORTED_MODULE_11__["default"].func.def(function () {})
+      }),
+      data: function data() {
+        var _this = this;
+
+        var fields = mapPropsToFields && mapPropsToFields(this.$props);
+        this.fieldsStore = (0,_createFieldsStore__WEBPACK_IMPORTED_MODULE_13__["default"])(fields || {});
+        this.templateContext = templateContext;
+        this.instances = {};
+        this.cachedBind = {};
+        this.clearedFieldMetaCache = {};
+        this.formItems = {};
+        this.renderFields = {};
+        this.domFields = {};
+
+        // HACK: https://github.com/ant-design/ant-design/issues/6406
+        ['getFieldsValue', 'getFieldValue', 'setFieldsInitialValue', 'getFieldsError', 'getFieldError', 'isFieldValidating', 'isFieldsValidating', 'isFieldsTouched', 'isFieldTouched'].forEach(function (key) {
+          _this[key] = function () {
+            var _fieldsStore;
+
+            return (_fieldsStore = _this.fieldsStore)[key].apply(_fieldsStore, arguments);
+          };
+        });
+
+        return {
+          submitting: false
+        };
+      },
+
+      watch: templateContext ? {} : {
+        $props: {
+          handler: function handler(nextProps) {
+            if (mapPropsToFields) {
+              this.fieldsStore.updateFields(mapPropsToFields(nextProps));
+            }
+          },
+
+          deep: true
+        }
+      },
+      mounted: function mounted() {
+        this.cleanUpUselessFields();
+      },
+      updated: function updated() {
+        // form updated add for template v-decorator
+        this.cleanUpUselessFields();
+      },
+
+      methods: {
+        updateFields: function updateFields() {
+          var fields = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+
+          this.fieldsStore.updateFields(mapPropsToFields(fields));
+          if (templateContext) {
+            templateContext.$forceUpdate();
+          }
+        },
+        onCollectCommon: function onCollectCommon(name, action, args) {
+          var fieldMeta = this.fieldsStore.getFieldMeta(name);
+          if (fieldMeta[action]) {
+            fieldMeta[action].apply(fieldMeta, (0,babel_runtime_helpers_toConsumableArray__WEBPACK_IMPORTED_MODULE_4__["default"])(args));
+          } else if (fieldMeta.originalProps && fieldMeta.originalProps[action]) {
+            var _fieldMeta$originalPr;
+
+            (_fieldMeta$originalPr = fieldMeta.originalProps)[action].apply(_fieldMeta$originalPr, (0,babel_runtime_helpers_toConsumableArray__WEBPACK_IMPORTED_MODULE_4__["default"])(args));
+          }
+          var value = fieldMeta.getValueFromEvent ? fieldMeta.getValueFromEvent.apply(fieldMeta, (0,babel_runtime_helpers_toConsumableArray__WEBPACK_IMPORTED_MODULE_4__["default"])(args)) : _utils__WEBPACK_IMPORTED_MODULE_10__.getValueFromEvent.apply(undefined, (0,babel_runtime_helpers_toConsumableArray__WEBPACK_IMPORTED_MODULE_4__["default"])(args));
+          if (onValuesChange && value !== this.fieldsStore.getFieldValue(name)) {
+            var valuesAll = this.fieldsStore.getAllValues();
+            var valuesAllSet = {};
+            valuesAll[name] = value;
+            Object.keys(valuesAll).forEach(function (key) {
+              return lodash_set__WEBPACK_IMPORTED_MODULE_7___default()(valuesAllSet, key, valuesAll[key]);
+            });
+            onValuesChange((0,babel_runtime_helpers_extends__WEBPACK_IMPORTED_MODULE_3__["default"])((0,babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_2__["default"])({}, formPropName, this.getForm()), this.$props), lodash_set__WEBPACK_IMPORTED_MODULE_7___default()({}, name, value), valuesAllSet);
+          }
+          var field = this.fieldsStore.getField(name);
+          return { name: name, field: (0,babel_runtime_helpers_extends__WEBPACK_IMPORTED_MODULE_3__["default"])({}, field, { value: value, touched: true }), fieldMeta: fieldMeta };
+        },
+        onCollect: function onCollect(name_, action) {
+          for (var _len = arguments.length, args = Array(_len > 2 ? _len - 2 : 0), _key = 2; _key < _len; _key++) {
+            args[_key - 2] = arguments[_key];
+          }
+
+          var _onCollectCommon = this.onCollectCommon(name_, action, args),
+              name = _onCollectCommon.name,
+              field = _onCollectCommon.field,
+              fieldMeta = _onCollectCommon.fieldMeta;
+
+          var validate = fieldMeta.validate;
+
+          this.fieldsStore.setFieldsAsDirty();
+          var newField = (0,babel_runtime_helpers_extends__WEBPACK_IMPORTED_MODULE_3__["default"])({}, field, {
+            dirty: (0,_utils__WEBPACK_IMPORTED_MODULE_10__.hasRules)(validate)
+          });
+          this.setFields((0,babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_2__["default"])({}, name, newField));
+        },
+        onCollectValidate: function onCollectValidate(name_, action) {
+          for (var _len2 = arguments.length, args = Array(_len2 > 2 ? _len2 - 2 : 0), _key2 = 2; _key2 < _len2; _key2++) {
+            args[_key2 - 2] = arguments[_key2];
+          }
+
+          var _onCollectCommon2 = this.onCollectCommon(name_, action, args),
+              field = _onCollectCommon2.field,
+              fieldMeta = _onCollectCommon2.fieldMeta;
+
+          var newField = (0,babel_runtime_helpers_extends__WEBPACK_IMPORTED_MODULE_3__["default"])({}, field, {
+            dirty: true
+          });
+          this.fieldsStore.setFieldsAsDirty();
+          this.validateFieldsInternal([newField], {
+            action: action,
+            options: {
+              firstFields: !!fieldMeta.validateFirst
+            }
+          });
+        },
+        getCacheBind: function getCacheBind(name, action, fn) {
+          if (!this.cachedBind[name]) {
+            this.cachedBind[name] = {};
+          }
+          var cache = this.cachedBind[name];
+          if (!cache[action] || cache[action].oriFn !== fn) {
+            cache[action] = {
+              fn: fn.bind(this, name, action),
+              oriFn: fn
+            };
+          }
+          return cache[action].fn;
+        },
+        getFieldDecorator: function getFieldDecorator(name, fieldOption, formItem) {
+          var _this2 = this;
+
+          var _getFieldProps = this.getFieldProps(name, fieldOption),
+              props = _getFieldProps.props,
+              restProps = (0,babel_runtime_helpers_objectWithoutProperties__WEBPACK_IMPORTED_MODULE_1__["default"])(_getFieldProps, ['props']);
+
+          this.formItems[name] = formItem;
+          return function (fieldElem) {
+            // We should put field in record if it is rendered
+            _this2.renderFields[name] = true;
+
+            var fieldMeta = _this2.fieldsStore.getFieldMeta(name);
+            var originalProps = (0,_util_props_util__WEBPACK_IMPORTED_MODULE_14__.getOptionProps)(fieldElem);
+            var originalEvents = (0,_util_props_util__WEBPACK_IMPORTED_MODULE_14__.getEvents)(fieldElem);
+            if (true) {
+              var valuePropName = fieldMeta.valuePropName;
+              warning__WEBPACK_IMPORTED_MODULE_5___default()(!(0,_util_props_util__WEBPACK_IMPORTED_MODULE_14__.slotHasProp)(fieldElem, valuePropName), '`getFieldDecorator` will override `' + valuePropName + '`, ' + ('so please don\'t set `' + valuePropName + ' and v-model` directly ') + 'and use `setFieldsValue` to set it.');
+              warning__WEBPACK_IMPORTED_MODULE_5___default()(!(!(0,_util_props_util__WEBPACK_IMPORTED_MODULE_14__.slotHasProp)(fieldElem, valuePropName) && valuePropName in originalProps && !(fieldOption && 'initialValue' in fieldOption)), (0,_util_props_util__WEBPACK_IMPORTED_MODULE_14__.getComponentName)(fieldElem.componentOptions) + ' `default value` can not collect, ' + ' please use `option.initialValue` to set default value.');
+              var defaultValuePropName = 'default' + valuePropName[0].toUpperCase() + valuePropName.slice(1);
+              warning__WEBPACK_IMPORTED_MODULE_5___default()(!(0,_util_props_util__WEBPACK_IMPORTED_MODULE_14__.slotHasProp)(fieldElem, defaultValuePropName), '`' + defaultValuePropName + '` is invalid ' + ('for `getFieldDecorator` will set `' + valuePropName + '`,') + ' please use `option.initialValue` instead.');
+            }
+            fieldMeta.originalProps = originalProps;
+            // fieldMeta.ref = fieldElem.data && fieldElem.data.ref
+            var newProps = (0,babel_runtime_helpers_extends__WEBPACK_IMPORTED_MODULE_3__["default"])({
+              props: (0,babel_runtime_helpers_extends__WEBPACK_IMPORTED_MODULE_3__["default"])({}, props, _this2.fieldsStore.getFieldValuePropValue(fieldMeta))
+            }, restProps);
+            newProps.domProps.value = newProps.props.value;
+            var newEvents = {};
+            Object.keys(newProps.on).forEach(function (key) {
+              if (originalEvents[key]) {
+                var triggerEvents = newProps.on[key];
+                newEvents[key] = function () {
+                  originalEvents[key].apply(originalEvents, arguments);
+                  triggerEvents.apply(undefined, arguments);
+                };
+              } else {
+                newEvents[key] = newProps.on[key];
+              }
+            });
+            return (0,_util_vnode__WEBPACK_IMPORTED_MODULE_15__.cloneElement)(fieldElem, (0,babel_runtime_helpers_extends__WEBPACK_IMPORTED_MODULE_3__["default"])({}, newProps, { on: newEvents }));
+          };
+        },
+        getFieldProps: function getFieldProps(name) {
+          var _this3 = this;
+
+          var usersFieldOption = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+
+          if (!name) {
+            throw new Error('Must call `getFieldProps` with valid name string!');
+          }
+          if (true) {
+            warning__WEBPACK_IMPORTED_MODULE_5___default()(this.fieldsStore.isValidNestedFieldName(name), 'One field name cannot be part of another, e.g. `a` and `a.b`. Check field: ' + name);
+            warning__WEBPACK_IMPORTED_MODULE_5___default()(!('exclusive' in usersFieldOption), '`option.exclusive` of `getFieldProps`|`getFieldDecorator` had been remove.');
+          }
+
+          delete this.clearedFieldMetaCache[name];
+
+          var fieldOption = (0,babel_runtime_helpers_extends__WEBPACK_IMPORTED_MODULE_3__["default"])({
+            name: name,
+            trigger: DEFAULT_TRIGGER,
+            valuePropName: 'value',
+            validate: []
+          }, usersFieldOption);
+
+          var rules = fieldOption.rules,
+              trigger = fieldOption.trigger,
+              _fieldOption$validate = fieldOption.validateTrigger,
+              validateTrigger = _fieldOption$validate === undefined ? trigger : _fieldOption$validate,
+              validate = fieldOption.validate;
+
+
+          var fieldMeta = this.fieldsStore.getFieldMeta(name);
+          if ('initialValue' in fieldOption) {
+            fieldMeta.initialValue = fieldOption.initialValue;
+          }
+
+          var inputProps = (0,babel_runtime_helpers_extends__WEBPACK_IMPORTED_MODULE_3__["default"])({}, this.fieldsStore.getFieldValuePropValue(fieldOption));
+          var inputListeners = {};
+          var inputAttrs = {};
+          if (fieldNameProp) {
+            inputProps[fieldNameProp] = formName ? formName + '_' + name : name;
+          }
+
+          var validateRules = (0,_utils__WEBPACK_IMPORTED_MODULE_10__.normalizeValidateRules)(validate, rules, validateTrigger);
+          var validateTriggers = (0,_utils__WEBPACK_IMPORTED_MODULE_10__.getValidateTriggers)(validateRules);
+          validateTriggers.forEach(function (action) {
+            if (inputListeners[action]) return;
+            inputListeners[action] = _this3.getCacheBind(name, action, _this3.onCollectValidate);
+          });
+
+          // make sure that the value will be collect
+          if (trigger && validateTriggers.indexOf(trigger) === -1) {
+            inputListeners[trigger] = this.getCacheBind(name, trigger, this.onCollect);
+          }
+
+          var meta = (0,babel_runtime_helpers_extends__WEBPACK_IMPORTED_MODULE_3__["default"])({}, fieldMeta, fieldOption, {
+            validate: validateRules
+          });
+          this.fieldsStore.setFieldMeta(name, meta);
+          if (fieldMetaProp) {
+            inputAttrs[fieldMetaProp] = meta;
+          }
+
+          if (fieldDataProp) {
+            inputAttrs[fieldDataProp] = this.fieldsStore.getField(name);
+          }
+          // This field is rendered, record it
+          this.renderFields[name] = true;
+          return {
+            props: lodash_omit__WEBPACK_IMPORTED_MODULE_9___default()(inputProps, ['id']),
+            // id: inputProps.id,
+            domProps: {
+              value: inputProps.value
+            },
+            attrs: (0,babel_runtime_helpers_extends__WEBPACK_IMPORTED_MODULE_3__["default"])({}, inputAttrs, {
+              id: inputProps.id
+            }),
+            directives: [{
+              name: 'ant-ref',
+              value: this.getCacheBind(name, name + '__ref', this.saveRef)
+            }],
+            on: inputListeners
+          };
+        },
+        getFieldInstance: function getFieldInstance(name) {
+          return this.instances[name];
+        },
+        getRules: function getRules(fieldMeta, action) {
+          var actionRules = fieldMeta.validate.filter(function (item) {
+            return !action || item.trigger.indexOf(action) >= 0;
+          }).map(function (item) {
+            return item.rules;
+          });
+          return (0,_utils__WEBPACK_IMPORTED_MODULE_10__.flattenArray)(actionRules);
+        },
+        setFields: function setFields(maybeNestedFields, callback) {
+          var _this4 = this;
+
+          var fields = this.fieldsStore.flattenRegisteredFields(maybeNestedFields);
+          this.fieldsStore.setFields(fields);
+          var changedFields = Object.keys(fields).reduce(function (acc, name) {
+            return lodash_set__WEBPACK_IMPORTED_MODULE_7___default()(acc, name, _this4.fieldsStore.getField(name));
+          }, {});
+          if (onFieldsChange) {
+            var _changedFields = Object.keys(fields).reduce(function (acc, name) {
+              return lodash_set__WEBPACK_IMPORTED_MODULE_7___default()(acc, name, _this4.fieldsStore.getField(name));
+            }, {});
+            onFieldsChange(this, _changedFields, this.fieldsStore.getNestedAllFields());
+          }
+          var formContext = templateContext || this;
+          var allUpdate = false;
+          Object.keys(changedFields).forEach(function (key) {
+            var formItem = _this4.formItems[key];
+            formItem = typeof formItem === 'function' ? formItem() : formItem;
+            if (formItem && formItem.itemSelfUpdate) {
+              formItem.$forceUpdate();
+            } else {
+              allUpdate = true;
+            }
+          });
+          if (allUpdate) {
+            formContext.$forceUpdate();
+          }
+          this.$nextTick(function () {
+            callback && callback();
+          });
+        },
+        setFieldsValue: function setFieldsValue(changedValues, callback) {
+          var fieldsMeta = this.fieldsStore.fieldsMeta;
+
+          var values = this.fieldsStore.flattenRegisteredFields(changedValues);
+          var newFields = Object.keys(values).reduce(function (acc, name) {
+            var isRegistered = fieldsMeta[name];
+            if (true) {
+              warning__WEBPACK_IMPORTED_MODULE_5___default()(isRegistered, 'Cannot use `setFieldsValue` until ' + 'you use `getFieldDecorator` or `getFieldProps` to register it.');
+            }
+            if (isRegistered) {
+              var value = values[name];
+              acc[name] = {
+                value: value
+              };
+            }
+            return acc;
+          }, {});
+          this.setFields(newFields, callback);
+          if (onValuesChange) {
+            var allValues = this.fieldsStore.getAllValues();
+            onValuesChange((0,babel_runtime_helpers_extends__WEBPACK_IMPORTED_MODULE_3__["default"])((0,babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_2__["default"])({}, formPropName, this.getForm()), this.$props), changedValues, allValues);
+          }
+        },
+        saveRef: function saveRef(name, _, component) {
+          if (!component) {
+            var fieldMeta = this.fieldsStore.getFieldMeta(name);
+            if (!fieldMeta.preserve) {
+              // after destroy, delete data
+              this.clearedFieldMetaCache[name] = {
+                field: this.fieldsStore.getField(name),
+                meta: fieldMeta
+              };
+              this.clearField(name);
+            }
+            delete this.domFields[name];
+            return;
+          }
+          this.domFields[name] = true;
+          this.recoverClearedField(name);
+          // const fieldMeta = this.fieldsStore.getFieldMeta(name)
+          // if (fieldMeta) {
+          //   const ref = fieldMeta.ref
+          //   if (ref) {
+          //     if (typeof ref === 'string') {
+          //       throw new Error(`can not set ref string for ${name}`)
+          //     }
+          //     ref(component)
+          //   }
+          // }
+          this.instances[name] = component;
+        },
+        cleanUpUselessFields: function cleanUpUselessFields() {
+          var _this5 = this;
+
+          var fieldList = this.fieldsStore.getAllFieldsName();
+          var removedList = fieldList.filter(function (field) {
+            var fieldMeta = _this5.fieldsStore.getFieldMeta(field);
+            return !_this5.renderFields[field] && !_this5.domFields[field] && !fieldMeta.preserve;
+          });
+          if (removedList.length) {
+            removedList.forEach(this.clearField);
+          }
+          this.renderFields = {};
+        },
+        clearField: function clearField(name) {
+          this.fieldsStore.clearField(name);
+          delete this.instances[name];
+          delete this.cachedBind[name];
+        },
+        resetFields: function resetFields(ns) {
+          var _this6 = this;
+
+          var newFields = this.fieldsStore.resetFields(ns);
+          if (Object.keys(newFields).length > 0) {
+            this.setFields(newFields);
+          }
+          if (ns) {
+            var names = Array.isArray(ns) ? ns : [ns];
+            names.forEach(function (name) {
+              return delete _this6.clearedFieldMetaCache[name];
+            });
+          } else {
+            this.clearedFieldMetaCache = {};
+          }
+        },
+        recoverClearedField: function recoverClearedField(name) {
+          if (this.clearedFieldMetaCache[name]) {
+            this.fieldsStore.setFields((0,babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_2__["default"])({}, name, this.clearedFieldMetaCache[name].field));
+            this.fieldsStore.setFieldMeta(name, this.clearedFieldMetaCache[name].meta);
+            delete this.clearedFieldMetaCache[name];
+          }
+        },
+        validateFieldsInternal: function validateFieldsInternal(fields, _ref, callback) {
+          var _this7 = this;
+
+          var fieldNames = _ref.fieldNames,
+              action = _ref.action,
+              _ref$options = _ref.options,
+              options = _ref$options === undefined ? {} : _ref$options;
+
+          var allRules = {};
+          var allValues = {};
+          var allFields = {};
+          var alreadyErrors = {};
+          fields.forEach(function (field) {
+            var name = field.name;
+            if (options.force !== true && field.dirty === false) {
+              if (field.errors) {
+                lodash_set__WEBPACK_IMPORTED_MODULE_7___default()(alreadyErrors, name, { errors: field.errors });
+              }
+              return;
+            }
+            var fieldMeta = _this7.fieldsStore.getFieldMeta(name);
+            var newField = (0,babel_runtime_helpers_extends__WEBPACK_IMPORTED_MODULE_3__["default"])({}, field);
+            newField.errors = undefined;
+            newField.validating = true;
+            newField.dirty = true;
+            allRules[name] = _this7.getRules(fieldMeta, action);
+            allValues[name] = newField.value;
+            allFields[name] = newField;
+          });
+          this.setFields(allFields);
+          // in case normalize
+          Object.keys(allValues).forEach(function (f) {
+            allValues[f] = _this7.fieldsStore.getFieldValue(f);
+          });
+          if (callback && (0,_utils__WEBPACK_IMPORTED_MODULE_10__.isEmptyObject)(allFields)) {
+            callback((0,_utils__WEBPACK_IMPORTED_MODULE_10__.isEmptyObject)(alreadyErrors) ? null : alreadyErrors, this.fieldsStore.getFieldsValue(fieldNames));
+            return;
+          }
+          var validator = new async_validator__WEBPACK_IMPORTED_MODULE_16__["default"](allRules);
+          if (validateMessages) {
+            validator.messages(validateMessages);
+          }
+          validator.validate(allValues, options, function (errors) {
+            var errorsGroup = (0,babel_runtime_helpers_extends__WEBPACK_IMPORTED_MODULE_3__["default"])({}, alreadyErrors);
+            if (errors && errors.length) {
+              errors.forEach(function (e) {
+                var errorFieldName = e.field;
+                var fieldName = errorFieldName;
+
+                // Handle using array validation rule.
+                // ref: https://github.com/ant-design/ant-design/issues/14275
+                Object.keys(allRules).some(function (ruleFieldName) {
+                  var rules = allRules[ruleFieldName] || [];
+
+                  // Exist if match rule
+                  if (ruleFieldName === errorFieldName) {
+                    fieldName = ruleFieldName;
+                    return true;
+                  }
+
+                  // Skip if not match array type
+                  if (rules.every(function (_ref2) {
+                    var type = _ref2.type;
+                    return type !== 'array';
+                  }) && errorFieldName.indexOf(ruleFieldName) !== 0) {
+                    return false;
+                  }
+
+                  // Exist if match the field name
+                  var restPath = errorFieldName.slice(ruleFieldName.length + 1);
+                  if (/^\d+$/.test(restPath)) {
+                    fieldName = ruleFieldName;
+                    return true;
+                  }
+
+                  return false;
+                });
+
+                var field = lodash_get__WEBPACK_IMPORTED_MODULE_6___default()(errorsGroup, fieldName);
+                if ((typeof field === 'undefined' ? 'undefined' : (0,babel_runtime_helpers_typeof__WEBPACK_IMPORTED_MODULE_0__["default"])(field)) !== 'object' || Array.isArray(field)) {
+                  lodash_set__WEBPACK_IMPORTED_MODULE_7___default()(errorsGroup, fieldName, { errors: [] });
+                }
+                var fieldErrors = lodash_get__WEBPACK_IMPORTED_MODULE_6___default()(errorsGroup, fieldName.concat('.errors'));
+                fieldErrors.push(e);
+              });
+            }
+            var expired = [];
+            var nowAllFields = {};
+            Object.keys(allRules).forEach(function (name) {
+              var fieldErrors = lodash_get__WEBPACK_IMPORTED_MODULE_6___default()(errorsGroup, name);
+              var nowField = _this7.fieldsStore.getField(name);
+              // avoid concurrency problems
+              if (!lodash_eq__WEBPACK_IMPORTED_MODULE_8___default()(nowField.value, allValues[name])) {
+                expired.push({
+                  name: name
+                });
+              } else {
+                nowField.errors = fieldErrors && fieldErrors.errors;
+                nowField.value = allValues[name];
+                nowField.validating = false;
+                nowField.dirty = false;
+                nowAllFields[name] = nowField;
+              }
+            });
+            _this7.setFields(nowAllFields);
+            if (callback) {
+              if (expired.length) {
+                expired.forEach(function (_ref3) {
+                  var name = _ref3.name;
+
+                  var fieldErrors = [{
+                    message: name + ' need to revalidate',
+                    field: name
+                  }];
+                  lodash_set__WEBPACK_IMPORTED_MODULE_7___default()(errorsGroup, name, {
+                    expired: true,
+                    errors: fieldErrors
+                  });
+                });
+              }
+
+              callback((0,_utils__WEBPACK_IMPORTED_MODULE_10__.isEmptyObject)(errorsGroup) ? null : errorsGroup, _this7.fieldsStore.getFieldsValue(fieldNames));
+            }
+          });
+        },
+        validateFields: function validateFields(ns, opt, cb) {
+          var _this8 = this;
+
+          var pending = new Promise(function (resolve, reject) {
+            var _getParams = (0,_utils__WEBPACK_IMPORTED_MODULE_10__.getParams)(ns, opt, cb),
+                names = _getParams.names,
+                options = _getParams.options;
+
+            var _getParams2 = (0,_utils__WEBPACK_IMPORTED_MODULE_10__.getParams)(ns, opt, cb),
+                callback = _getParams2.callback;
+
+            if (!callback || typeof callback === 'function') {
+              var oldCb = callback;
+              callback = function callback(errors, values) {
+                if (oldCb) {
+                  oldCb(errors, values);
+                } else if (errors) {
+                  reject({ errors: errors, values: values });
+                } else {
+                  resolve(values);
+                }
+              };
+            }
+            var fieldNames = names ? _this8.fieldsStore.getValidFieldsFullName(names) : _this8.fieldsStore.getValidFieldsName();
+            var fields = fieldNames.filter(function (name) {
+              var fieldMeta = _this8.fieldsStore.getFieldMeta(name);
+              return (0,_utils__WEBPACK_IMPORTED_MODULE_10__.hasRules)(fieldMeta.validate);
+            }).map(function (name) {
+              var field = _this8.fieldsStore.getField(name);
+              field.value = _this8.fieldsStore.getFieldValue(name);
+              return field;
+            });
+            if (!fields.length) {
+              callback(null, _this8.fieldsStore.getFieldsValue(fieldNames));
+              return;
+            }
+            if (!('firstFields' in options)) {
+              options.firstFields = fieldNames.filter(function (name) {
+                var fieldMeta = _this8.fieldsStore.getFieldMeta(name);
+                return !!fieldMeta.validateFirst;
+              });
+            }
+            _this8.validateFieldsInternal(fields, {
+              fieldNames: fieldNames,
+              options: options
+            }, callback);
+          });
+          pending['catch'](function (e) {
+            if (console.error && "development" !== 'production') {
+              console.error(e);
+            }
+            return e;
+          });
+          return pending;
+        },
+        isSubmitting: function isSubmitting() {
+          if (true) {
+            warning__WEBPACK_IMPORTED_MODULE_5___default()(false, '`isSubmitting` is deprecated. ' + "Actually, it's more convenient to handle submitting status by yourself.");
+          }
+          return this.submitting;
+        },
+        submit: function submit(callback) {
+          var _this9 = this;
+
+          if (true) {
+            warning__WEBPACK_IMPORTED_MODULE_5___default()(false, '`submit` is deprecated. ' + "Actually, it's more convenient to handle submitting status by yourself.");
+          }
+          var fn = function fn() {
+            _this9.setState({
+              submitting: false
+            });
+          };
+          this.setState({
+            submitting: true
+          });
+          callback(fn);
+        }
+      },
+
+      render: function render() {
+        var h = arguments[0];
+        var $slots = this.$slots,
+            $scopedSlots = this.$scopedSlots;
+
+        var formProps = (0,babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_2__["default"])({}, formPropName, this.getForm());
+
+        var _getOptionProps = (0,_util_props_util__WEBPACK_IMPORTED_MODULE_14__.getOptionProps)(this),
+            wrappedComponentRef = _getOptionProps.wrappedComponentRef,
+            restProps = (0,babel_runtime_helpers_objectWithoutProperties__WEBPACK_IMPORTED_MODULE_1__["default"])(_getOptionProps, ['wrappedComponentRef']);
+
+        var wrappedComponentProps = {
+          props: mapProps.call(this, (0,babel_runtime_helpers_extends__WEBPACK_IMPORTED_MODULE_3__["default"])({}, formProps, restProps)),
+          on: (0,_util_props_util__WEBPACK_IMPORTED_MODULE_14__.getListeners)(this),
+          ref: 'WrappedComponent',
+          directives: [{
+            name: 'ant-ref',
+            value: wrappedComponentRef
+          }]
+        };
+        if (Object.keys($scopedSlots).length) {
+          wrappedComponentProps.scopedSlots = $scopedSlots;
+        }
+        var slotsKey = Object.keys($slots);
+        return WrappedComponent ? h(
+          WrappedComponent,
+          wrappedComponentProps,
+          [slotsKey.length ? slotsKey.map(function (name) {
+            return h(
+              'template',
+              { slot: name },
+              [$slots[name]]
+            );
+          }) : null]
+        ) : null;
+      }
+    };
+    if (!WrappedComponent) return Form;
+    if (Array.isArray(WrappedComponent.props)) {
+      var newProps = {};
+      WrappedComponent.props.forEach(function (prop) {
+        newProps[prop] = _util_vue_types__WEBPACK_IMPORTED_MODULE_11__["default"].any;
+      });
+      newProps[formPropName] = Object;
+      WrappedComponent.props = newProps;
+    } else {
+      WrappedComponent.props = WrappedComponent.props || {};
+      if (!(formPropName in WrappedComponent.props)) {
+        WrappedComponent.props[formPropName] = Object;
+      }
+    }
+    return (0,_utils__WEBPACK_IMPORTED_MODULE_10__.argumentContainer)(Form, WrappedComponent);
+  };
+}
+
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (createBaseForm);
+
+/***/ }),
+
+/***/ "./node_modules/ant-design-vue/es/vc-form/src/createDOMForm.js":
+/*!*********************************************************************!*\
+  !*** ./node_modules/ant-design-vue/es/vc-form/src/createDOMForm.js ***!
+  \*********************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var babel_runtime_helpers_extends__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! babel-runtime/helpers/extends */ "./node_modules/babel-runtime/helpers/extends.js");
+/* harmony import */ var dom_scroll_into_view__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! dom-scroll-into-view */ "./node_modules/dom-scroll-into-view/dist-web/index.js");
+/* harmony import */ var lodash_has__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! lodash/has */ "./node_modules/lodash/has.js");
+/* harmony import */ var lodash_has__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(lodash_has__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _createBaseForm__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./createBaseForm */ "./node_modules/ant-design-vue/es/vc-form/src/createBaseForm.js");
+/* harmony import */ var _createForm__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./createForm */ "./node_modules/ant-design-vue/es/vc-form/src/createForm.js");
+/* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./utils */ "./node_modules/ant-design-vue/es/vc-form/src/utils.js");
+
+
+
+
+
+
+
+function computedStyle(el, prop) {
+  var getComputedStyle = window.getComputedStyle;
+  var style =
+  // If we have getComputedStyle
+  getComputedStyle ? // Query it
+  // TODO: From CSS-Query notes, we might need (node, null) for FF
+  getComputedStyle(el) : // Otherwise, we are in IE and use currentStyle
+  el.currentStyle;
+  if (style) {
+    return style[
+    // Switch to camelCase for CSSOM
+    // DEV: Grabbed from jQuery
+    // https://github.com/jquery/jquery/blob/1.9-stable/src/css.js#L191-L194
+    // https://github.com/jquery/jquery/blob/1.9-stable/src/core.js#L593-L597
+    prop.replace(/-(\w)/gi, function (word, letter) {
+      return letter.toUpperCase();
+    })];
+  }
+  return undefined;
+}
+
+function getScrollableContainer(n) {
+  var node = n;
+  var nodeName = void 0;
+  /* eslint no-cond-assign:0 */
+  while ((nodeName = node.nodeName.toLowerCase()) !== 'body') {
+    var overflowY = computedStyle(node, 'overflowY');
+    // https://stackoverflow.com/a/36900407/3040605
+    if (node !== n && (overflowY === 'auto' || overflowY === 'scroll') && node.scrollHeight > node.clientHeight) {
+      return node;
+    }
+    node = node.parentNode;
+  }
+  return nodeName === 'body' ? node.ownerDocument : node;
+}
+
+var mixin = {
+  methods: {
+    getForm: function getForm() {
+      return (0,babel_runtime_helpers_extends__WEBPACK_IMPORTED_MODULE_0__["default"])({}, _createForm__WEBPACK_IMPORTED_MODULE_2__.mixin.methods.getForm.call(this), {
+        validateFieldsAndScroll: this.validateFieldsAndScroll
+      });
+    },
+    validateFieldsAndScroll: function validateFieldsAndScroll(ns, opt, cb) {
+      var _this = this;
+
+      var _getParams = (0,_utils__WEBPACK_IMPORTED_MODULE_3__.getParams)(ns, opt, cb),
+          names = _getParams.names,
+          callback = _getParams.callback,
+          options = _getParams.options;
+
+      var newCb = function newCb(error, values) {
+        if (error) {
+          var validNames = _this.fieldsStore.getValidFieldsName();
+          var firstNode = void 0;
+          var firstTop = void 0;
+          validNames.forEach(function (name) {
+            if (lodash_has__WEBPACK_IMPORTED_MODULE_1___default()(error, name)) {
+              var instance = _this.getFieldInstance(name);
+              if (instance) {
+                var node = instance.$el || instance.elm;
+                var top = node.getBoundingClientRect().top;
+                if (node.type !== 'hidden' && (firstTop === undefined || firstTop > top)) {
+                  firstTop = top;
+                  firstNode = node;
+                }
+              }
+            }
+          });
+
+          if (firstNode) {
+            var c = options.container || getScrollableContainer(firstNode);
+            (0,dom_scroll_into_view__WEBPACK_IMPORTED_MODULE_4__["default"])(firstNode, c, (0,babel_runtime_helpers_extends__WEBPACK_IMPORTED_MODULE_0__["default"])({
+              onlyScrollIfNeeded: true
+            }, options.scroll));
+          }
+        }
+
+        if (typeof callback === 'function') {
+          callback(error, values);
+        }
+      };
+
+      return this.validateFields(names, options, newCb);
+    }
+  }
+};
+
+function createDOMForm(option) {
+  return (0,_createBaseForm__WEBPACK_IMPORTED_MODULE_5__["default"])((0,babel_runtime_helpers_extends__WEBPACK_IMPORTED_MODULE_0__["default"])({}, option), [mixin]);
+}
+
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (createDOMForm);
+
+/***/ }),
+
+/***/ "./node_modules/ant-design-vue/es/vc-form/src/createFieldsStore.js":
+/*!*************************************************************************!*\
+  !*** ./node_modules/ant-design-vue/es/vc-form/src/createFieldsStore.js ***!
+  \*************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ createFieldsStore)
+/* harmony export */ });
+/* harmony import */ var babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! babel-runtime/helpers/defineProperty */ "./node_modules/babel-runtime/helpers/defineProperty.js");
+/* harmony import */ var babel_runtime_helpers_extends__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! babel-runtime/helpers/extends */ "./node_modules/babel-runtime/helpers/extends.js");
+/* harmony import */ var babel_runtime_helpers_classCallCheck__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! babel-runtime/helpers/classCallCheck */ "./node_modules/babel-runtime/helpers/classCallCheck.js");
+/* harmony import */ var babel_runtime_helpers_createClass__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! babel-runtime/helpers/createClass */ "./node_modules/babel-runtime/helpers/createClass.js");
+/* harmony import */ var lodash_set__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! lodash/set */ "./node_modules/lodash/set.js");
+/* harmony import */ var lodash_set__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(lodash_set__WEBPACK_IMPORTED_MODULE_4__);
+/* harmony import */ var _createFormField__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./createFormField */ "./node_modules/ant-design-vue/es/vc-form/src/createFormField.js");
+/* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./utils */ "./node_modules/ant-design-vue/es/vc-form/src/utils.js");
+
+
+
+
+
+
+
+
+function partOf(a, b) {
+  return b.indexOf(a) === 0 && ['.', '['].indexOf(b[a.length]) !== -1;
+}
+
+function internalFlattenFields(fields) {
+  return (0,_utils__WEBPACK_IMPORTED_MODULE_5__.flattenFields)(fields, function (_, node) {
+    return (0,_createFormField__WEBPACK_IMPORTED_MODULE_6__.isFormField)(node);
+  }, 'You must wrap field data with `createFormField`.');
+}
+
+var FieldsStore = function () {
+  function FieldsStore(fields) {
+    (0,babel_runtime_helpers_classCallCheck__WEBPACK_IMPORTED_MODULE_2__["default"])(this, FieldsStore);
+
+    _initialiseProps.call(this);
+
+    this.fields = internalFlattenFields(fields);
+    this.fieldsMeta = {};
+  }
+
+  (0,babel_runtime_helpers_createClass__WEBPACK_IMPORTED_MODULE_3__["default"])(FieldsStore, [{
+    key: 'updateFields',
+    value: function updateFields(fields) {
+      this.fields = internalFlattenFields(fields);
+    }
+  }, {
+    key: 'flattenRegisteredFields',
+    value: function flattenRegisteredFields(fields) {
+      var validFieldsName = this.getAllFieldsName();
+      return (0,_utils__WEBPACK_IMPORTED_MODULE_5__.flattenFields)(fields, function (path) {
+        return validFieldsName.indexOf(path) >= 0;
+      }, 'You cannot set a form field before rendering a field associated with the value. You can use `getFieldDecorator(id, options)` instead `v-decorator="[id, options]"` to register it before render.');
+    }
+  }, {
+    key: 'setFields',
+    value: function setFields(fields) {
+      var _this = this;
+
+      var fieldsMeta = this.fieldsMeta;
+      var nowFields = (0,babel_runtime_helpers_extends__WEBPACK_IMPORTED_MODULE_1__["default"])({}, this.fields, fields);
+      var nowValues = {};
+      Object.keys(fieldsMeta).forEach(function (f) {
+        nowValues[f] = _this.getValueFromFields(f, nowFields);
+      });
+      Object.keys(nowValues).forEach(function (f) {
+        var value = nowValues[f];
+        var fieldMeta = _this.getFieldMeta(f);
+        if (fieldMeta && fieldMeta.normalize) {
+          var nowValue = fieldMeta.normalize(value, _this.getValueFromFields(f, _this.fields), nowValues);
+          if (nowValue !== value) {
+            nowFields[f] = (0,babel_runtime_helpers_extends__WEBPACK_IMPORTED_MODULE_1__["default"])({}, nowFields[f], {
+              value: nowValue
+            });
+          }
+        }
+      });
+      this.fields = nowFields;
+    }
+  }, {
+    key: 'resetFields',
+    value: function resetFields(ns) {
+      var fields = this.fields;
+
+      var names = ns ? this.getValidFieldsFullName(ns) : this.getAllFieldsName();
+      return names.reduce(function (acc, name) {
+        var field = fields[name];
+        if (field && 'value' in field) {
+          acc[name] = {};
+        }
+        return acc;
+      }, {});
+    }
+  }, {
+    key: 'setFieldMeta',
+    value: function setFieldMeta(name, meta) {
+      this.fieldsMeta[name] = meta;
+    }
+  }, {
+    key: 'setFieldsAsDirty',
+    value: function setFieldsAsDirty() {
+      var _this2 = this;
+
+      Object.keys(this.fields).forEach(function (name) {
+        var field = _this2.fields[name];
+        var fieldMeta = _this2.fieldsMeta[name];
+        if (field && fieldMeta && (0,_utils__WEBPACK_IMPORTED_MODULE_5__.hasRules)(fieldMeta.validate)) {
+          _this2.fields[name] = (0,babel_runtime_helpers_extends__WEBPACK_IMPORTED_MODULE_1__["default"])({}, field, {
+            dirty: true
+          });
+        }
+      });
+    }
+  }, {
+    key: 'getFieldMeta',
+    value: function getFieldMeta(name) {
+      this.fieldsMeta[name] = this.fieldsMeta[name] || {};
+      return this.fieldsMeta[name];
+    }
+  }, {
+    key: 'getValueFromFields',
+    value: function getValueFromFields(name, fields) {
+      var field = fields[name];
+      if (field && 'value' in field) {
+        return field.value;
+      }
+      var fieldMeta = this.getFieldMeta(name);
+      return fieldMeta && fieldMeta.initialValue;
+    }
+  }, {
+    key: 'getValidFieldsName',
+    value: function getValidFieldsName() {
+      var _this3 = this;
+
+      var fieldsMeta = this.fieldsMeta;
+
+      return fieldsMeta ? Object.keys(fieldsMeta).filter(function (name) {
+        return !_this3.getFieldMeta(name).hidden;
+      }) : [];
+    }
+  }, {
+    key: 'getAllFieldsName',
+    value: function getAllFieldsName() {
+      var fieldsMeta = this.fieldsMeta;
+
+      return fieldsMeta ? Object.keys(fieldsMeta) : [];
+    }
+  }, {
+    key: 'getValidFieldsFullName',
+    value: function getValidFieldsFullName(maybePartialName) {
+      var maybePartialNames = Array.isArray(maybePartialName) ? maybePartialName : [maybePartialName];
+      return this.getValidFieldsName().filter(function (fullName) {
+        return maybePartialNames.some(function (partialName) {
+          return fullName === partialName || (0,_utils__WEBPACK_IMPORTED_MODULE_5__.startsWith)(fullName, partialName) && ['.', '['].indexOf(fullName[partialName.length]) >= 0;
+        });
+      });
+    }
+  }, {
+    key: 'getFieldValuePropValue',
+    value: function getFieldValuePropValue(fieldMeta) {
+      var name = fieldMeta.name,
+          getValueProps = fieldMeta.getValueProps,
+          valuePropName = fieldMeta.valuePropName;
+
+      var field = this.getField(name);
+      var fieldValue = 'value' in field ? field.value : fieldMeta.initialValue;
+      if (getValueProps) {
+        return getValueProps(fieldValue);
+      }
+      return (0,babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_0__["default"])({}, valuePropName, fieldValue);
+    }
+  }, {
+    key: 'getField',
+    value: function getField(name) {
+      return (0,babel_runtime_helpers_extends__WEBPACK_IMPORTED_MODULE_1__["default"])({}, this.fields[name], {
+        name: name
+      });
+    }
+  }, {
+    key: 'getNotCollectedFields',
+    value: function getNotCollectedFields() {
+      var _this4 = this;
+
+      var fieldsName = this.getValidFieldsName();
+      return fieldsName.filter(function (name) {
+        return !_this4.fields[name];
+      }).map(function (name) {
+        return {
+          name: name,
+          dirty: false,
+          value: _this4.getFieldMeta(name).initialValue
+        };
+      }).reduce(function (acc, field) {
+        return lodash_set__WEBPACK_IMPORTED_MODULE_4___default()(acc, field.name, (0,_createFormField__WEBPACK_IMPORTED_MODULE_6__["default"])(field));
+      }, {});
+    }
+  }, {
+    key: 'getNestedAllFields',
+    value: function getNestedAllFields() {
+      var _this5 = this;
+
+      return Object.keys(this.fields).reduce(function (acc, name) {
+        return lodash_set__WEBPACK_IMPORTED_MODULE_4___default()(acc, name, (0,_createFormField__WEBPACK_IMPORTED_MODULE_6__["default"])(_this5.fields[name]));
+      }, this.getNotCollectedFields());
+    }
+  }, {
+    key: 'getFieldMember',
+    value: function getFieldMember(name, member) {
+      return this.getField(name)[member];
+    }
+  }, {
+    key: 'getNestedFields',
+    value: function getNestedFields(names, getter) {
+      var fields = names || this.getValidFieldsName();
+      return fields.reduce(function (acc, f) {
+        return lodash_set__WEBPACK_IMPORTED_MODULE_4___default()(acc, f, getter(f));
+      }, {});
+    }
+  }, {
+    key: 'getNestedField',
+    value: function getNestedField(name, getter) {
+      var fullNames = this.getValidFieldsFullName(name);
+      if (fullNames.length === 0 || // Not registered
+      fullNames.length === 1 && fullNames[0] === name // Name already is full name.
+      ) {
+          return getter(name);
+        }
+      var isArrayValue = fullNames[0][name.length] === '[';
+      var suffixNameStartIndex = isArrayValue ? name.length : name.length + 1;
+      return fullNames.reduce(function (acc, fullName) {
+        return lodash_set__WEBPACK_IMPORTED_MODULE_4___default()(acc, fullName.slice(suffixNameStartIndex), getter(fullName));
+      }, isArrayValue ? [] : {});
+    }
+  }, {
+    key: 'isValidNestedFieldName',
+
+
+    // @private
+    // BG: `a` and `a.b` cannot be use in the same form
+    value: function isValidNestedFieldName(name) {
+      var names = this.getAllFieldsName();
+      return names.every(function (n) {
+        return !partOf(n, name) && !partOf(name, n);
+      });
+    }
+  }, {
+    key: 'clearField',
+    value: function clearField(name) {
+      delete this.fields[name];
+      delete this.fieldsMeta[name];
+    }
+  }]);
+
+  return FieldsStore;
+}();
+
+var _initialiseProps = function _initialiseProps() {
+  var _this6 = this;
+
+  this.setFieldsInitialValue = function (initialValues) {
+    var flattenedInitialValues = _this6.flattenRegisteredFields(initialValues);
+    var fieldsMeta = _this6.fieldsMeta;
+    Object.keys(flattenedInitialValues).forEach(function (name) {
+      if (fieldsMeta[name]) {
+        _this6.setFieldMeta(name, (0,babel_runtime_helpers_extends__WEBPACK_IMPORTED_MODULE_1__["default"])({}, _this6.getFieldMeta(name), {
+          initialValue: flattenedInitialValues[name]
+        }));
+      }
+    });
+  };
+
+  this.getAllValues = function () {
+    var fieldsMeta = _this6.fieldsMeta,
+        fields = _this6.fields;
+
+    return Object.keys(fieldsMeta).reduce(function (acc, name) {
+      return lodash_set__WEBPACK_IMPORTED_MODULE_4___default()(acc, name, _this6.getValueFromFields(name, fields));
+    }, {});
+  };
+
+  this.getFieldsValue = function (names) {
+    return _this6.getNestedFields(names, _this6.getFieldValue);
+  };
+
+  this.getFieldValue = function (name) {
+    var fields = _this6.fields;
+
+    return _this6.getNestedField(name, function (fullName) {
+      return _this6.getValueFromFields(fullName, fields);
+    });
+  };
+
+  this.getFieldsError = function (names) {
+    return _this6.getNestedFields(names, _this6.getFieldError);
+  };
+
+  this.getFieldError = function (name) {
+    return _this6.getNestedField(name, function (fullName) {
+      return (0,_utils__WEBPACK_IMPORTED_MODULE_5__.getErrorStrs)(_this6.getFieldMember(fullName, 'errors'));
+    });
+  };
+
+  this.isFieldValidating = function (name) {
+    return _this6.getFieldMember(name, 'validating');
+  };
+
+  this.isFieldsValidating = function (ns) {
+    var names = ns || _this6.getValidFieldsName();
+    return names.some(function (n) {
+      return _this6.isFieldValidating(n);
+    });
+  };
+
+  this.isFieldTouched = function (name) {
+    return _this6.getFieldMember(name, 'touched');
+  };
+
+  this.isFieldsTouched = function (ns) {
+    var names = ns || _this6.getValidFieldsName();
+    return names.some(function (n) {
+      return _this6.isFieldTouched(n);
+    });
+  };
+};
+
+function createFieldsStore(fields) {
+  return new FieldsStore(fields);
+}
+
+/***/ }),
+
+/***/ "./node_modules/ant-design-vue/es/vc-form/src/createForm.js":
+/*!******************************************************************!*\
+  !*** ./node_modules/ant-design-vue/es/vc-form/src/createForm.js ***!
+  \******************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "mixin": () => (/* binding */ mixin),
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _createBaseForm__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./createBaseForm */ "./node_modules/ant-design-vue/es/vc-form/src/createBaseForm.js");
+
+
+var mixin = {
+  methods: {
+    getForm: function getForm() {
+      return {
+        getFieldsValue: this.fieldsStore.getFieldsValue,
+        getFieldValue: this.fieldsStore.getFieldValue,
+        getFieldInstance: this.getFieldInstance,
+        setFieldsValue: this.setFieldsValue,
+        setFields: this.setFields,
+        setFieldsInitialValue: this.fieldsStore.setFieldsInitialValue,
+        getFieldDecorator: this.getFieldDecorator,
+        getFieldProps: this.getFieldProps,
+        getFieldsError: this.fieldsStore.getFieldsError,
+        getFieldError: this.fieldsStore.getFieldError,
+        isFieldValidating: this.fieldsStore.isFieldValidating,
+        isFieldsValidating: this.fieldsStore.isFieldsValidating,
+        isFieldsTouched: this.fieldsStore.isFieldsTouched,
+        isFieldTouched: this.fieldsStore.isFieldTouched,
+        isSubmitting: this.isSubmitting,
+        submit: this.submit,
+        validateFields: this.validateFields,
+        resetFields: this.resetFields
+      };
+    }
+  }
+};
+
+function createForm(options) {
+  return (0,_createBaseForm__WEBPACK_IMPORTED_MODULE_0__["default"])(options, [mixin]);
+}
+
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (createForm);
+
+/***/ }),
+
+/***/ "./node_modules/ant-design-vue/es/vc-form/src/createFormField.js":
+/*!***********************************************************************!*\
+  !*** ./node_modules/ant-design-vue/es/vc-form/src/createFormField.js ***!
+  \***********************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "isFormField": () => (/* binding */ isFormField),
+/* harmony export */   "default": () => (/* binding */ createFormField)
+/* harmony export */ });
+/* harmony import */ var babel_runtime_helpers_extends__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! babel-runtime/helpers/extends */ "./node_modules/babel-runtime/helpers/extends.js");
+/* harmony import */ var babel_runtime_helpers_classCallCheck__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! babel-runtime/helpers/classCallCheck */ "./node_modules/babel-runtime/helpers/classCallCheck.js");
+
+
+
+var Field = function Field(fields) {
+  (0,babel_runtime_helpers_classCallCheck__WEBPACK_IMPORTED_MODULE_1__["default"])(this, Field);
+
+  (0,babel_runtime_helpers_extends__WEBPACK_IMPORTED_MODULE_0__["default"])(this, fields);
+};
+
+function isFormField(obj) {
+  return obj instanceof Field;
+}
+
+function createFormField(field) {
+  if (isFormField(field)) {
+    return field;
+  }
+  return new Field(field);
+}
+
+/***/ }),
+
+/***/ "./node_modules/ant-design-vue/es/vc-form/src/utils.js":
+/*!*************************************************************!*\
+  !*** ./node_modules/ant-design-vue/es/vc-form/src/utils.js ***!
+  \*************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "argumentContainer": () => (/* binding */ argumentContainer),
+/* harmony export */   "identity": () => (/* binding */ identity),
+/* harmony export */   "flattenArray": () => (/* binding */ flattenArray),
+/* harmony export */   "treeTraverse": () => (/* binding */ treeTraverse),
+/* harmony export */   "flattenFields": () => (/* binding */ flattenFields),
+/* harmony export */   "normalizeValidateRules": () => (/* binding */ normalizeValidateRules),
+/* harmony export */   "getValidateTriggers": () => (/* binding */ getValidateTriggers),
+/* harmony export */   "getValueFromEvent": () => (/* binding */ getValueFromEvent),
+/* harmony export */   "getErrorStrs": () => (/* binding */ getErrorStrs),
+/* harmony export */   "getParams": () => (/* binding */ getParams),
+/* harmony export */   "isEmptyObject": () => (/* binding */ isEmptyObject),
+/* harmony export */   "hasRules": () => (/* binding */ hasRules),
+/* harmony export */   "startsWith": () => (/* binding */ startsWith)
+/* harmony export */ });
+/* harmony import */ var babel_runtime_helpers_typeof__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! babel-runtime/helpers/typeof */ "./node_modules/babel-runtime/helpers/typeof.js");
+/* harmony import */ var babel_runtime_helpers_extends__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! babel-runtime/helpers/extends */ "./node_modules/babel-runtime/helpers/extends.js");
+/* harmony import */ var warning__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! warning */ "./node_modules/warning/warning.js");
+/* harmony import */ var warning__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(warning__WEBPACK_IMPORTED_MODULE_2__);
+
+
+
+
+function getDisplayName(WrappedComponent) {
+  return WrappedComponent.name || 'WrappedComponent';
+}
+
+function argumentContainer(Container, WrappedComponent) {
+  /* eslint no-param-reassign:0 */
+  Container.name = 'Form_' + getDisplayName(WrappedComponent);
+  Container.WrappedComponent = WrappedComponent;
+  Container.props = (0,babel_runtime_helpers_extends__WEBPACK_IMPORTED_MODULE_1__["default"])({}, Container.props, WrappedComponent.props);
+  return Container;
+}
+
+function identity(obj) {
+  return obj;
+}
+
+function flattenArray(arr) {
+  return Array.prototype.concat.apply([], arr);
+}
+
+function treeTraverse() {
+  var path = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : '';
+  var tree = arguments[1];
+  var isLeafNode = arguments[2];
+  var errorMessage = arguments[3];
+  var callback = arguments[4];
+
+  if (isLeafNode(path, tree)) {
+    callback(path, tree);
+  } else if (tree === undefined || tree === null) {
+    // Do nothing
+  } else if (Array.isArray(tree)) {
+    tree.forEach(function (subTree, index) {
+      return treeTraverse(path + '[' + index + ']', subTree, isLeafNode, errorMessage, callback);
+    });
+  } else {
+    // It's object and not a leaf node
+    if ((typeof tree === 'undefined' ? 'undefined' : (0,babel_runtime_helpers_typeof__WEBPACK_IMPORTED_MODULE_0__["default"])(tree)) !== 'object') {
+      warning__WEBPACK_IMPORTED_MODULE_2___default()(false, errorMessage);
+      return;
+    }
+    Object.keys(tree).forEach(function (subTreeKey) {
+      var subTree = tree[subTreeKey];
+      treeTraverse('' + path + (path ? '.' : '') + subTreeKey, subTree, isLeafNode, errorMessage, callback);
+    });
+  }
+}
+
+function flattenFields(maybeNestedFields, isLeafNode, errorMessage) {
+  var fields = {};
+  treeTraverse(undefined, maybeNestedFields, isLeafNode, errorMessage, function (path, node) {
+    fields[path] = node;
+  });
+  return fields;
+}
+
+function normalizeValidateRules(validate, rules, validateTrigger) {
+  var validateRules = validate.map(function (item) {
+    var newItem = (0,babel_runtime_helpers_extends__WEBPACK_IMPORTED_MODULE_1__["default"])({}, item, {
+      trigger: item.trigger || []
+    });
+    if (typeof newItem.trigger === 'string') {
+      newItem.trigger = [newItem.trigger];
+    }
+    return newItem;
+  });
+  if (rules) {
+    validateRules.push({
+      trigger: validateTrigger ? [].concat(validateTrigger) : [],
+      rules: rules
+    });
+  }
+  return validateRules;
+}
+
+function getValidateTriggers(validateRules) {
+  return validateRules.filter(function (item) {
+    return !!item.rules && item.rules.length;
+  }).map(function (item) {
+    return item.trigger;
+  }).reduce(function (pre, curr) {
+    return pre.concat(curr);
+  }, []);
+}
+
+function getValueFromEvent(e) {
+  // To support custom element
+  if (!e || !e.target) {
+    return e;
+  }
+  var target = e.target;
+
+  return target.type === 'checkbox' ? target.checked : target.value;
+}
+
+function getErrorStrs(errors) {
+  if (errors) {
+    return errors.map(function (e) {
+      if (e && e.message) {
+        return e.message;
+      }
+      return e;
+    });
+  }
+  return errors;
+}
+
+function getParams(ns, opt, cb) {
+  var names = ns;
+  var options = opt;
+  var callback = cb;
+  if (cb === undefined) {
+    if (typeof names === 'function') {
+      callback = names;
+      options = {};
+      names = undefined;
+    } else if (Array.isArray(names)) {
+      if (typeof options === 'function') {
+        callback = options;
+        options = {};
+      } else {
+        options = options || {};
+      }
+    } else {
+      callback = options;
+      options = names || {};
+      names = undefined;
+    }
+  }
+  return {
+    names: names,
+    options: options,
+    callback: callback
+  };
+}
+
+function isEmptyObject(obj) {
+  return Object.keys(obj).length === 0;
+}
+
+function hasRules(validate) {
+  if (validate) {
+    return validate.some(function (item) {
+      return item.rules && item.rules.length;
+    });
+  }
+  return false;
+}
+
+function startsWith(str, prefix) {
+  return str.lastIndexOf(prefix, 0) === 0;
+}
+
+/***/ }),
+
 /***/ "./node_modules/ant-design-vue/es/vc-menu/DOMWrap.js":
 /*!***********************************************************!*\
   !*** ./node_modules/ant-design-vue/es/vc-menu/DOMWrap.js ***!
@@ -23660,6 +26597,3516 @@ function noteOnce(valid, message) {
 
 /***/ }),
 
+/***/ "./node_modules/async-validator/dist-web/index.js":
+/*!********************************************************!*\
+  !*** ./node_modules/async-validator/dist-web/index.js ***!
+  \********************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* provided dependency */ var process = __webpack_require__(/*! process/browser */ "./node_modules/process/browser.js");
+function _extends() {
+  _extends = Object.assign || function (target) {
+    for (var i = 1; i < arguments.length; i++) {
+      var source = arguments[i];
+
+      for (var key in source) {
+        if (Object.prototype.hasOwnProperty.call(source, key)) {
+          target[key] = source[key];
+        }
+      }
+    }
+
+    return target;
+  };
+
+  return _extends.apply(this, arguments);
+}
+
+function _inheritsLoose(subClass, superClass) {
+  subClass.prototype = Object.create(superClass.prototype);
+  subClass.prototype.constructor = subClass;
+
+  _setPrototypeOf(subClass, superClass);
+}
+
+function _getPrototypeOf(o) {
+  _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) {
+    return o.__proto__ || Object.getPrototypeOf(o);
+  };
+  return _getPrototypeOf(o);
+}
+
+function _setPrototypeOf(o, p) {
+  _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) {
+    o.__proto__ = p;
+    return o;
+  };
+
+  return _setPrototypeOf(o, p);
+}
+
+function _isNativeReflectConstruct() {
+  if (typeof Reflect === "undefined" || !Reflect.construct) return false;
+  if (Reflect.construct.sham) return false;
+  if (typeof Proxy === "function") return true;
+
+  try {
+    Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {}));
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
+function _construct(Parent, args, Class) {
+  if (_isNativeReflectConstruct()) {
+    _construct = Reflect.construct;
+  } else {
+    _construct = function _construct(Parent, args, Class) {
+      var a = [null];
+      a.push.apply(a, args);
+      var Constructor = Function.bind.apply(Parent, a);
+      var instance = new Constructor();
+      if (Class) _setPrototypeOf(instance, Class.prototype);
+      return instance;
+    };
+  }
+
+  return _construct.apply(null, arguments);
+}
+
+function _isNativeFunction(fn) {
+  return Function.toString.call(fn).indexOf("[native code]") !== -1;
+}
+
+function _wrapNativeSuper(Class) {
+  var _cache = typeof Map === "function" ? new Map() : undefined;
+
+  _wrapNativeSuper = function _wrapNativeSuper(Class) {
+    if (Class === null || !_isNativeFunction(Class)) return Class;
+
+    if (typeof Class !== "function") {
+      throw new TypeError("Super expression must either be null or a function");
+    }
+
+    if (typeof _cache !== "undefined") {
+      if (_cache.has(Class)) return _cache.get(Class);
+
+      _cache.set(Class, Wrapper);
+    }
+
+    function Wrapper() {
+      return _construct(Class, arguments, _getPrototypeOf(this).constructor);
+    }
+
+    Wrapper.prototype = Object.create(Class.prototype, {
+      constructor: {
+        value: Wrapper,
+        enumerable: false,
+        writable: true,
+        configurable: true
+      }
+    });
+    return _setPrototypeOf(Wrapper, Class);
+  };
+
+  return _wrapNativeSuper(Class);
+}
+
+/* eslint no-console:0 */
+var formatRegExp = /%[sdj%]/g;
+var warning = function warning() {}; // don't print warning message when in production env or node runtime
+
+if (typeof process !== 'undefined' && process.env && "development" !== 'production' && typeof window !== 'undefined' && typeof document !== 'undefined') {
+  warning = function warning(type, errors) {
+    if (typeof console !== 'undefined' && console.warn) {
+      if (errors.every(function (e) {
+        return typeof e === 'string';
+      })) {
+        console.warn(type, errors);
+      }
+    }
+  };
+}
+
+function convertFieldsError(errors) {
+  if (!errors || !errors.length) return null;
+  var fields = {};
+  errors.forEach(function (error) {
+    var field = error.field;
+    fields[field] = fields[field] || [];
+    fields[field].push(error);
+  });
+  return fields;
+}
+function format() {
+  for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+    args[_key] = arguments[_key];
+  }
+
+  var i = 1;
+  var f = args[0];
+  var len = args.length;
+
+  if (typeof f === 'function') {
+    return f.apply(null, args.slice(1));
+  }
+
+  if (typeof f === 'string') {
+    var str = String(f).replace(formatRegExp, function (x) {
+      if (x === '%%') {
+        return '%';
+      }
+
+      if (i >= len) {
+        return x;
+      }
+
+      switch (x) {
+        case '%s':
+          return String(args[i++]);
+
+        case '%d':
+          return Number(args[i++]);
+
+        case '%j':
+          try {
+            return JSON.stringify(args[i++]);
+          } catch (_) {
+            return '[Circular]';
+          }
+
+          break;
+
+        default:
+          return x;
+      }
+    });
+    return str;
+  }
+
+  return f;
+}
+
+function isNativeStringType(type) {
+  return type === 'string' || type === 'url' || type === 'hex' || type === 'email' || type === 'date' || type === 'pattern';
+}
+
+function isEmptyValue(value, type) {
+  if (value === undefined || value === null) {
+    return true;
+  }
+
+  if (type === 'array' && Array.isArray(value) && !value.length) {
+    return true;
+  }
+
+  if (isNativeStringType(type) && typeof value === 'string' && !value) {
+    return true;
+  }
+
+  return false;
+}
+
+function asyncParallelArray(arr, func, callback) {
+  var results = [];
+  var total = 0;
+  var arrLength = arr.length;
+
+  function count(errors) {
+    results.push.apply(results, errors);
+    total++;
+
+    if (total === arrLength) {
+      callback(results);
+    }
+  }
+
+  arr.forEach(function (a) {
+    func(a, count);
+  });
+}
+
+function asyncSerialArray(arr, func, callback) {
+  var index = 0;
+  var arrLength = arr.length;
+
+  function next(errors) {
+    if (errors && errors.length) {
+      callback(errors);
+      return;
+    }
+
+    var original = index;
+    index = index + 1;
+
+    if (original < arrLength) {
+      func(arr[original], next);
+    } else {
+      callback([]);
+    }
+  }
+
+  next([]);
+}
+
+function flattenObjArr(objArr) {
+  var ret = [];
+  Object.keys(objArr).forEach(function (k) {
+    ret.push.apply(ret, objArr[k]);
+  });
+  return ret;
+}
+
+var AsyncValidationError = /*#__PURE__*/function (_Error) {
+  _inheritsLoose(AsyncValidationError, _Error);
+
+  function AsyncValidationError(errors, fields) {
+    var _this;
+
+    _this = _Error.call(this, 'Async Validation Error') || this;
+    _this.errors = errors;
+    _this.fields = fields;
+    return _this;
+  }
+
+  return AsyncValidationError;
+}( /*#__PURE__*/_wrapNativeSuper(Error));
+function asyncMap(objArr, option, func, callback) {
+  if (option.first) {
+    var _pending = new Promise(function (resolve, reject) {
+      var next = function next(errors) {
+        callback(errors);
+        return errors.length ? reject(new AsyncValidationError(errors, convertFieldsError(errors))) : resolve();
+      };
+
+      var flattenArr = flattenObjArr(objArr);
+      asyncSerialArray(flattenArr, func, next);
+    });
+
+    _pending["catch"](function (e) {
+      return e;
+    });
+
+    return _pending;
+  }
+
+  var firstFields = option.firstFields || [];
+
+  if (firstFields === true) {
+    firstFields = Object.keys(objArr);
+  }
+
+  var objArrKeys = Object.keys(objArr);
+  var objArrLength = objArrKeys.length;
+  var total = 0;
+  var results = [];
+  var pending = new Promise(function (resolve, reject) {
+    var next = function next(errors) {
+      results.push.apply(results, errors);
+      total++;
+
+      if (total === objArrLength) {
+        callback(results);
+        return results.length ? reject(new AsyncValidationError(results, convertFieldsError(results))) : resolve();
+      }
+    };
+
+    if (!objArrKeys.length) {
+      callback(results);
+      resolve();
+    }
+
+    objArrKeys.forEach(function (key) {
+      var arr = objArr[key];
+
+      if (firstFields.indexOf(key) !== -1) {
+        asyncSerialArray(arr, func, next);
+      } else {
+        asyncParallelArray(arr, func, next);
+      }
+    });
+  });
+  pending["catch"](function (e) {
+    return e;
+  });
+  return pending;
+}
+function complementError(rule) {
+  return function (oe) {
+    if (oe && oe.message) {
+      oe.field = oe.field || rule.fullField;
+      return oe;
+    }
+
+    return {
+      message: typeof oe === 'function' ? oe() : oe,
+      field: oe.field || rule.fullField
+    };
+  };
+}
+function deepMerge(target, source) {
+  if (source) {
+    for (var s in source) {
+      if (source.hasOwnProperty(s)) {
+        var value = source[s];
+
+        if (typeof value === 'object' && typeof target[s] === 'object') {
+          target[s] = _extends({}, target[s], value);
+        } else {
+          target[s] = value;
+        }
+      }
+    }
+  }
+
+  return target;
+}
+
+/**
+ *  Rule for validating required fields.
+ *
+ *  @param rule The validation rule.
+ *  @param value The value of the field on the source object.
+ *  @param source The source object being validated.
+ *  @param errors An array of errors that this rule may add
+ *  validation errors to.
+ *  @param options The validation options.
+ *  @param options.messages The validation messages.
+ */
+
+function required(rule, value, source, errors, options, type) {
+  if (rule.required && (!source.hasOwnProperty(rule.field) || isEmptyValue(value, type || rule.type))) {
+    errors.push(format(options.messages.required, rule.fullField));
+  }
+}
+
+/**
+ *  Rule for validating whitespace.
+ *
+ *  @param rule The validation rule.
+ *  @param value The value of the field on the source object.
+ *  @param source The source object being validated.
+ *  @param errors An array of errors that this rule may add
+ *  validation errors to.
+ *  @param options The validation options.
+ *  @param options.messages The validation messages.
+ */
+
+function whitespace(rule, value, source, errors, options) {
+  if (/^\s+$/.test(value) || value === '') {
+    errors.push(format(options.messages.whitespace, rule.fullField));
+  }
+}
+
+/* eslint max-len:0 */
+
+var pattern = {
+  // http://emailregex.com/
+  email: /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
+  url: new RegExp("^(?!mailto:)(?:(?:http|https|ftp)://|//)(?:\\S+(?::\\S*)?@)?(?:(?:(?:[1-9]\\d?|1\\d\\d|2[01]\\d|22[0-3])(?:\\.(?:1?\\d{1,2}|2[0-4]\\d|25[0-5])){2}(?:\\.(?:[0-9]\\d?|1\\d\\d|2[0-4]\\d|25[0-4]))|(?:(?:[a-z\\u00a1-\\uffff0-9]+-*)*[a-z\\u00a1-\\uffff0-9]+)(?:\\.(?:[a-z\\u00a1-\\uffff0-9]+-*)*[a-z\\u00a1-\\uffff0-9]+)*(?:\\.(?:[a-z\\u00a1-\\uffff]{2,})))|localhost)(?::\\d{2,5})?(?:(/|\\?|#)[^\\s]*)?$", 'i'),
+  hex: /^#?([a-f0-9]{6}|[a-f0-9]{3})$/i
+};
+var types = {
+  integer: function integer(value) {
+    return types.number(value) && parseInt(value, 10) === value;
+  },
+  "float": function float(value) {
+    return types.number(value) && !types.integer(value);
+  },
+  array: function array(value) {
+    return Array.isArray(value);
+  },
+  regexp: function regexp(value) {
+    if (value instanceof RegExp) {
+      return true;
+    }
+
+    try {
+      return !!new RegExp(value);
+    } catch (e) {
+      return false;
+    }
+  },
+  date: function date(value) {
+    return typeof value.getTime === 'function' && typeof value.getMonth === 'function' && typeof value.getYear === 'function' && !isNaN(value.getTime());
+  },
+  number: function number(value) {
+    if (isNaN(value)) {
+      return false;
+    }
+
+    return typeof value === 'number';
+  },
+  object: function object(value) {
+    return typeof value === 'object' && !types.array(value);
+  },
+  method: function method(value) {
+    return typeof value === 'function';
+  },
+  email: function email(value) {
+    return typeof value === 'string' && !!value.match(pattern.email) && value.length < 255;
+  },
+  url: function url(value) {
+    return typeof value === 'string' && !!value.match(pattern.url);
+  },
+  hex: function hex(value) {
+    return typeof value === 'string' && !!value.match(pattern.hex);
+  }
+};
+/**
+ *  Rule for validating the type of a value.
+ *
+ *  @param rule The validation rule.
+ *  @param value The value of the field on the source object.
+ *  @param source The source object being validated.
+ *  @param errors An array of errors that this rule may add
+ *  validation errors to.
+ *  @param options The validation options.
+ *  @param options.messages The validation messages.
+ */
+
+function type(rule, value, source, errors, options) {
+  if (rule.required && value === undefined) {
+    required(rule, value, source, errors, options);
+    return;
+  }
+
+  var custom = ['integer', 'float', 'array', 'regexp', 'object', 'method', 'email', 'number', 'date', 'url', 'hex'];
+  var ruleType = rule.type;
+
+  if (custom.indexOf(ruleType) > -1) {
+    if (!types[ruleType](value)) {
+      errors.push(format(options.messages.types[ruleType], rule.fullField, rule.type));
+    } // straight typeof check
+
+  } else if (ruleType && typeof value !== rule.type) {
+    errors.push(format(options.messages.types[ruleType], rule.fullField, rule.type));
+  }
+}
+
+/**
+ *  Rule for validating minimum and maximum allowed values.
+ *
+ *  @param rule The validation rule.
+ *  @param value The value of the field on the source object.
+ *  @param source The source object being validated.
+ *  @param errors An array of errors that this rule may add
+ *  validation errors to.
+ *  @param options The validation options.
+ *  @param options.messages The validation messages.
+ */
+
+function range(rule, value, source, errors, options) {
+  var len = typeof rule.len === 'number';
+  var min = typeof rule.min === 'number';
+  var max = typeof rule.max === 'number'; // 正则匹配码点范围从U+010000一直到U+10FFFF的文字（补充平面Supplementary Plane）
+
+  var spRegexp = /[\uD800-\uDBFF][\uDC00-\uDFFF]/g;
+  var val = value;
+  var key = null;
+  var num = typeof value === 'number';
+  var str = typeof value === 'string';
+  var arr = Array.isArray(value);
+
+  if (num) {
+    key = 'number';
+  } else if (str) {
+    key = 'string';
+  } else if (arr) {
+    key = 'array';
+  } // if the value is not of a supported type for range validation
+  // the validation rule rule should use the
+  // type property to also test for a particular type
+
+
+  if (!key) {
+    return false;
+  }
+
+  if (arr) {
+    val = value.length;
+  }
+
+  if (str) {
+    // 处理码点大于U+010000的文字length属性不准确的bug，如"𠮷𠮷𠮷".lenght !== 3
+    val = value.replace(spRegexp, '_').length;
+  }
+
+  if (len) {
+    if (val !== rule.len) {
+      errors.push(format(options.messages[key].len, rule.fullField, rule.len));
+    }
+  } else if (min && !max && val < rule.min) {
+    errors.push(format(options.messages[key].min, rule.fullField, rule.min));
+  } else if (max && !min && val > rule.max) {
+    errors.push(format(options.messages[key].max, rule.fullField, rule.max));
+  } else if (min && max && (val < rule.min || val > rule.max)) {
+    errors.push(format(options.messages[key].range, rule.fullField, rule.min, rule.max));
+  }
+}
+
+var ENUM = 'enum';
+/**
+ *  Rule for validating a value exists in an enumerable list.
+ *
+ *  @param rule The validation rule.
+ *  @param value The value of the field on the source object.
+ *  @param source The source object being validated.
+ *  @param errors An array of errors that this rule may add
+ *  validation errors to.
+ *  @param options The validation options.
+ *  @param options.messages The validation messages.
+ */
+
+function enumerable(rule, value, source, errors, options) {
+  rule[ENUM] = Array.isArray(rule[ENUM]) ? rule[ENUM] : [];
+
+  if (rule[ENUM].indexOf(value) === -1) {
+    errors.push(format(options.messages[ENUM], rule.fullField, rule[ENUM].join(', ')));
+  }
+}
+
+/**
+ *  Rule for validating a regular expression pattern.
+ *
+ *  @param rule The validation rule.
+ *  @param value The value of the field on the source object.
+ *  @param source The source object being validated.
+ *  @param errors An array of errors that this rule may add
+ *  validation errors to.
+ *  @param options The validation options.
+ *  @param options.messages The validation messages.
+ */
+
+function pattern$1(rule, value, source, errors, options) {
+  if (rule.pattern) {
+    if (rule.pattern instanceof RegExp) {
+      // if a RegExp instance is passed, reset `lastIndex` in case its `global`
+      // flag is accidentally set to `true`, which in a validation scenario
+      // is not necessary and the result might be misleading
+      rule.pattern.lastIndex = 0;
+
+      if (!rule.pattern.test(value)) {
+        errors.push(format(options.messages.pattern.mismatch, rule.fullField, value, rule.pattern));
+      }
+    } else if (typeof rule.pattern === 'string') {
+      var _pattern = new RegExp(rule.pattern);
+
+      if (!_pattern.test(value)) {
+        errors.push(format(options.messages.pattern.mismatch, rule.fullField, value, rule.pattern));
+      }
+    }
+  }
+}
+
+var rules = {
+  required: required,
+  whitespace: whitespace,
+  type: type,
+  range: range,
+  "enum": enumerable,
+  pattern: pattern$1
+};
+
+/**
+ *  Performs validation for string types.
+ *
+ *  @param rule The validation rule.
+ *  @param value The value of the field on the source object.
+ *  @param callback The callback function.
+ *  @param source The source object being validated.
+ *  @param options The validation options.
+ *  @param options.messages The validation messages.
+ */
+
+function string(rule, value, callback, source, options) {
+  var errors = [];
+  var validate = rule.required || !rule.required && source.hasOwnProperty(rule.field);
+
+  if (validate) {
+    if (isEmptyValue(value, 'string') && !rule.required) {
+      return callback();
+    }
+
+    rules.required(rule, value, source, errors, options, 'string');
+
+    if (!isEmptyValue(value, 'string')) {
+      rules.type(rule, value, source, errors, options);
+      rules.range(rule, value, source, errors, options);
+      rules.pattern(rule, value, source, errors, options);
+
+      if (rule.whitespace === true) {
+        rules.whitespace(rule, value, source, errors, options);
+      }
+    }
+  }
+
+  callback(errors);
+}
+
+/**
+ *  Validates a function.
+ *
+ *  @param rule The validation rule.
+ *  @param value The value of the field on the source object.
+ *  @param callback The callback function.
+ *  @param source The source object being validated.
+ *  @param options The validation options.
+ *  @param options.messages The validation messages.
+ */
+
+function method(rule, value, callback, source, options) {
+  var errors = [];
+  var validate = rule.required || !rule.required && source.hasOwnProperty(rule.field);
+
+  if (validate) {
+    if (isEmptyValue(value) && !rule.required) {
+      return callback();
+    }
+
+    rules.required(rule, value, source, errors, options);
+
+    if (value !== undefined) {
+      rules.type(rule, value, source, errors, options);
+    }
+  }
+
+  callback(errors);
+}
+
+/**
+ *  Validates a number.
+ *
+ *  @param rule The validation rule.
+ *  @param value The value of the field on the source object.
+ *  @param callback The callback function.
+ *  @param source The source object being validated.
+ *  @param options The validation options.
+ *  @param options.messages The validation messages.
+ */
+
+function number(rule, value, callback, source, options) {
+  var errors = [];
+  var validate = rule.required || !rule.required && source.hasOwnProperty(rule.field);
+
+  if (validate) {
+    if (value === '') {
+      value = undefined;
+    }
+
+    if (isEmptyValue(value) && !rule.required) {
+      return callback();
+    }
+
+    rules.required(rule, value, source, errors, options);
+
+    if (value !== undefined) {
+      rules.type(rule, value, source, errors, options);
+      rules.range(rule, value, source, errors, options);
+    }
+  }
+
+  callback(errors);
+}
+
+/**
+ *  Validates a boolean.
+ *
+ *  @param rule The validation rule.
+ *  @param value The value of the field on the source object.
+ *  @param callback The callback function.
+ *  @param source The source object being validated.
+ *  @param options The validation options.
+ *  @param options.messages The validation messages.
+ */
+
+function _boolean(rule, value, callback, source, options) {
+  var errors = [];
+  var validate = rule.required || !rule.required && source.hasOwnProperty(rule.field);
+
+  if (validate) {
+    if (isEmptyValue(value) && !rule.required) {
+      return callback();
+    }
+
+    rules.required(rule, value, source, errors, options);
+
+    if (value !== undefined) {
+      rules.type(rule, value, source, errors, options);
+    }
+  }
+
+  callback(errors);
+}
+
+/**
+ *  Validates the regular expression type.
+ *
+ *  @param rule The validation rule.
+ *  @param value The value of the field on the source object.
+ *  @param callback The callback function.
+ *  @param source The source object being validated.
+ *  @param options The validation options.
+ *  @param options.messages The validation messages.
+ */
+
+function regexp(rule, value, callback, source, options) {
+  var errors = [];
+  var validate = rule.required || !rule.required && source.hasOwnProperty(rule.field);
+
+  if (validate) {
+    if (isEmptyValue(value) && !rule.required) {
+      return callback();
+    }
+
+    rules.required(rule, value, source, errors, options);
+
+    if (!isEmptyValue(value)) {
+      rules.type(rule, value, source, errors, options);
+    }
+  }
+
+  callback(errors);
+}
+
+/**
+ *  Validates a number is an integer.
+ *
+ *  @param rule The validation rule.
+ *  @param value The value of the field on the source object.
+ *  @param callback The callback function.
+ *  @param source The source object being validated.
+ *  @param options The validation options.
+ *  @param options.messages The validation messages.
+ */
+
+function integer(rule, value, callback, source, options) {
+  var errors = [];
+  var validate = rule.required || !rule.required && source.hasOwnProperty(rule.field);
+
+  if (validate) {
+    if (isEmptyValue(value) && !rule.required) {
+      return callback();
+    }
+
+    rules.required(rule, value, source, errors, options);
+
+    if (value !== undefined) {
+      rules.type(rule, value, source, errors, options);
+      rules.range(rule, value, source, errors, options);
+    }
+  }
+
+  callback(errors);
+}
+
+/**
+ *  Validates a number is a floating point number.
+ *
+ *  @param rule The validation rule.
+ *  @param value The value of the field on the source object.
+ *  @param callback The callback function.
+ *  @param source The source object being validated.
+ *  @param options The validation options.
+ *  @param options.messages The validation messages.
+ */
+
+function floatFn(rule, value, callback, source, options) {
+  var errors = [];
+  var validate = rule.required || !rule.required && source.hasOwnProperty(rule.field);
+
+  if (validate) {
+    if (isEmptyValue(value) && !rule.required) {
+      return callback();
+    }
+
+    rules.required(rule, value, source, errors, options);
+
+    if (value !== undefined) {
+      rules.type(rule, value, source, errors, options);
+      rules.range(rule, value, source, errors, options);
+    }
+  }
+
+  callback(errors);
+}
+
+/**
+ *  Validates an array.
+ *
+ *  @param rule The validation rule.
+ *  @param value The value of the field on the source object.
+ *  @param callback The callback function.
+ *  @param source The source object being validated.
+ *  @param options The validation options.
+ *  @param options.messages The validation messages.
+ */
+
+function array(rule, value, callback, source, options) {
+  var errors = [];
+  var validate = rule.required || !rule.required && source.hasOwnProperty(rule.field);
+
+  if (validate) {
+    if ((value === undefined || value === null) && !rule.required) {
+      return callback();
+    }
+
+    rules.required(rule, value, source, errors, options, 'array');
+
+    if (value !== undefined && value !== null) {
+      rules.type(rule, value, source, errors, options);
+      rules.range(rule, value, source, errors, options);
+    }
+  }
+
+  callback(errors);
+}
+
+/**
+ *  Validates an object.
+ *
+ *  @param rule The validation rule.
+ *  @param value The value of the field on the source object.
+ *  @param callback The callback function.
+ *  @param source The source object being validated.
+ *  @param options The validation options.
+ *  @param options.messages The validation messages.
+ */
+
+function object(rule, value, callback, source, options) {
+  var errors = [];
+  var validate = rule.required || !rule.required && source.hasOwnProperty(rule.field);
+
+  if (validate) {
+    if (isEmptyValue(value) && !rule.required) {
+      return callback();
+    }
+
+    rules.required(rule, value, source, errors, options);
+
+    if (value !== undefined) {
+      rules.type(rule, value, source, errors, options);
+    }
+  }
+
+  callback(errors);
+}
+
+var ENUM$1 = 'enum';
+/**
+ *  Validates an enumerable list.
+ *
+ *  @param rule The validation rule.
+ *  @param value The value of the field on the source object.
+ *  @param callback The callback function.
+ *  @param source The source object being validated.
+ *  @param options The validation options.
+ *  @param options.messages The validation messages.
+ */
+
+function enumerable$1(rule, value, callback, source, options) {
+  var errors = [];
+  var validate = rule.required || !rule.required && source.hasOwnProperty(rule.field);
+
+  if (validate) {
+    if (isEmptyValue(value) && !rule.required) {
+      return callback();
+    }
+
+    rules.required(rule, value, source, errors, options);
+
+    if (value !== undefined) {
+      rules[ENUM$1](rule, value, source, errors, options);
+    }
+  }
+
+  callback(errors);
+}
+
+/**
+ *  Validates a regular expression pattern.
+ *
+ *  Performs validation when a rule only contains
+ *  a pattern property but is not declared as a string type.
+ *
+ *  @param rule The validation rule.
+ *  @param value The value of the field on the source object.
+ *  @param callback The callback function.
+ *  @param source The source object being validated.
+ *  @param options The validation options.
+ *  @param options.messages The validation messages.
+ */
+
+function pattern$2(rule, value, callback, source, options) {
+  var errors = [];
+  var validate = rule.required || !rule.required && source.hasOwnProperty(rule.field);
+
+  if (validate) {
+    if (isEmptyValue(value, 'string') && !rule.required) {
+      return callback();
+    }
+
+    rules.required(rule, value, source, errors, options);
+
+    if (!isEmptyValue(value, 'string')) {
+      rules.pattern(rule, value, source, errors, options);
+    }
+  }
+
+  callback(errors);
+}
+
+function date(rule, value, callback, source, options) {
+  // console.log('integer rule called %j', rule);
+  var errors = [];
+  var validate = rule.required || !rule.required && source.hasOwnProperty(rule.field); // console.log('validate on %s value', value);
+
+  if (validate) {
+    if (isEmptyValue(value, 'date') && !rule.required) {
+      return callback();
+    }
+
+    rules.required(rule, value, source, errors, options);
+
+    if (!isEmptyValue(value, 'date')) {
+      var dateObject;
+
+      if (value instanceof Date) {
+        dateObject = value;
+      } else {
+        dateObject = new Date(value);
+      }
+
+      rules.type(rule, dateObject, source, errors, options);
+
+      if (dateObject) {
+        rules.range(rule, dateObject.getTime(), source, errors, options);
+      }
+    }
+  }
+
+  callback(errors);
+}
+
+function required$1(rule, value, callback, source, options) {
+  var errors = [];
+  var type = Array.isArray(value) ? 'array' : typeof value;
+  rules.required(rule, value, source, errors, options, type);
+  callback(errors);
+}
+
+function type$1(rule, value, callback, source, options) {
+  var ruleType = rule.type;
+  var errors = [];
+  var validate = rule.required || !rule.required && source.hasOwnProperty(rule.field);
+
+  if (validate) {
+    if (isEmptyValue(value, ruleType) && !rule.required) {
+      return callback();
+    }
+
+    rules.required(rule, value, source, errors, options, ruleType);
+
+    if (!isEmptyValue(value, ruleType)) {
+      rules.type(rule, value, source, errors, options);
+    }
+  }
+
+  callback(errors);
+}
+
+/**
+ *  Performs validation for any type.
+ *
+ *  @param rule The validation rule.
+ *  @param value The value of the field on the source object.
+ *  @param callback The callback function.
+ *  @param source The source object being validated.
+ *  @param options The validation options.
+ *  @param options.messages The validation messages.
+ */
+
+function any(rule, value, callback, source, options) {
+  var errors = [];
+  var validate = rule.required || !rule.required && source.hasOwnProperty(rule.field);
+
+  if (validate) {
+    if (isEmptyValue(value) && !rule.required) {
+      return callback();
+    }
+
+    rules.required(rule, value, source, errors, options);
+  }
+
+  callback(errors);
+}
+
+var validators = {
+  string: string,
+  method: method,
+  number: number,
+  "boolean": _boolean,
+  regexp: regexp,
+  integer: integer,
+  "float": floatFn,
+  array: array,
+  object: object,
+  "enum": enumerable$1,
+  pattern: pattern$2,
+  date: date,
+  url: type$1,
+  hex: type$1,
+  email: type$1,
+  required: required$1,
+  any: any
+};
+
+function newMessages() {
+  return {
+    "default": 'Validation error on field %s',
+    required: '%s is required',
+    "enum": '%s must be one of %s',
+    whitespace: '%s cannot be empty',
+    date: {
+      format: '%s date %s is invalid for format %s',
+      parse: '%s date could not be parsed, %s is invalid ',
+      invalid: '%s date %s is invalid'
+    },
+    types: {
+      string: '%s is not a %s',
+      method: '%s is not a %s (function)',
+      array: '%s is not an %s',
+      object: '%s is not an %s',
+      number: '%s is not a %s',
+      date: '%s is not a %s',
+      "boolean": '%s is not a %s',
+      integer: '%s is not an %s',
+      "float": '%s is not a %s',
+      regexp: '%s is not a valid %s',
+      email: '%s is not a valid %s',
+      url: '%s is not a valid %s',
+      hex: '%s is not a valid %s'
+    },
+    string: {
+      len: '%s must be exactly %s characters',
+      min: '%s must be at least %s characters',
+      max: '%s cannot be longer than %s characters',
+      range: '%s must be between %s and %s characters'
+    },
+    number: {
+      len: '%s must equal %s',
+      min: '%s cannot be less than %s',
+      max: '%s cannot be greater than %s',
+      range: '%s must be between %s and %s'
+    },
+    array: {
+      len: '%s must be exactly %s in length',
+      min: '%s cannot be less than %s in length',
+      max: '%s cannot be greater than %s in length',
+      range: '%s must be between %s and %s in length'
+    },
+    pattern: {
+      mismatch: '%s value %s does not match pattern %s'
+    },
+    clone: function clone() {
+      var cloned = JSON.parse(JSON.stringify(this));
+      cloned.clone = this.clone;
+      return cloned;
+    }
+  };
+}
+var messages = newMessages();
+
+/**
+ *  Encapsulates a validation schema.
+ *
+ *  @param descriptor An object declaring validation rules
+ *  for this schema.
+ */
+
+function Schema(descriptor) {
+  this.rules = null;
+  this._messages = messages;
+  this.define(descriptor);
+}
+
+Schema.prototype = {
+  messages: function messages(_messages) {
+    if (_messages) {
+      this._messages = deepMerge(newMessages(), _messages);
+    }
+
+    return this._messages;
+  },
+  define: function define(rules) {
+    if (!rules) {
+      throw new Error('Cannot configure a schema with no rules');
+    }
+
+    if (typeof rules !== 'object' || Array.isArray(rules)) {
+      throw new Error('Rules must be an object');
+    }
+
+    this.rules = {};
+    var z;
+    var item;
+
+    for (z in rules) {
+      if (rules.hasOwnProperty(z)) {
+        item = rules[z];
+        this.rules[z] = Array.isArray(item) ? item : [item];
+      }
+    }
+  },
+  validate: function validate(source_, o, oc) {
+    var _this = this;
+
+    if (o === void 0) {
+      o = {};
+    }
+
+    if (oc === void 0) {
+      oc = function oc() {};
+    }
+
+    var source = source_;
+    var options = o;
+    var callback = oc;
+
+    if (typeof options === 'function') {
+      callback = options;
+      options = {};
+    }
+
+    if (!this.rules || Object.keys(this.rules).length === 0) {
+      if (callback) {
+        callback();
+      }
+
+      return Promise.resolve();
+    }
+
+    function complete(results) {
+      var i;
+      var errors = [];
+      var fields = {};
+
+      function add(e) {
+        if (Array.isArray(e)) {
+          var _errors;
+
+          errors = (_errors = errors).concat.apply(_errors, e);
+        } else {
+          errors.push(e);
+        }
+      }
+
+      for (i = 0; i < results.length; i++) {
+        add(results[i]);
+      }
+
+      if (!errors.length) {
+        errors = null;
+        fields = null;
+      } else {
+        fields = convertFieldsError(errors);
+      }
+
+      callback(errors, fields);
+    }
+
+    if (options.messages) {
+      var messages$1 = this.messages();
+
+      if (messages$1 === messages) {
+        messages$1 = newMessages();
+      }
+
+      deepMerge(messages$1, options.messages);
+      options.messages = messages$1;
+    } else {
+      options.messages = this.messages();
+    }
+
+    var arr;
+    var value;
+    var series = {};
+    var keys = options.keys || Object.keys(this.rules);
+    keys.forEach(function (z) {
+      arr = _this.rules[z];
+      value = source[z];
+      arr.forEach(function (r) {
+        var rule = r;
+
+        if (typeof rule.transform === 'function') {
+          if (source === source_) {
+            source = _extends({}, source);
+          }
+
+          value = source[z] = rule.transform(value);
+        }
+
+        if (typeof rule === 'function') {
+          rule = {
+            validator: rule
+          };
+        } else {
+          rule = _extends({}, rule);
+        }
+
+        rule.validator = _this.getValidationMethod(rule);
+        rule.field = z;
+        rule.fullField = rule.fullField || z;
+        rule.type = _this.getType(rule);
+
+        if (!rule.validator) {
+          return;
+        }
+
+        series[z] = series[z] || [];
+        series[z].push({
+          rule: rule,
+          value: value,
+          source: source,
+          field: z
+        });
+      });
+    });
+    var errorFields = {};
+    return asyncMap(series, options, function (data, doIt) {
+      var rule = data.rule;
+      var deep = (rule.type === 'object' || rule.type === 'array') && (typeof rule.fields === 'object' || typeof rule.defaultField === 'object');
+      deep = deep && (rule.required || !rule.required && data.value);
+      rule.field = data.field;
+
+      function addFullfield(key, schema) {
+        return _extends({}, schema, {
+          fullField: rule.fullField + "." + key
+        });
+      }
+
+      function cb(e) {
+        if (e === void 0) {
+          e = [];
+        }
+
+        var errors = e;
+
+        if (!Array.isArray(errors)) {
+          errors = [errors];
+        }
+
+        if (!options.suppressWarning && errors.length) {
+          Schema.warning('async-validator:', errors);
+        }
+
+        if (errors.length && rule.message !== undefined) {
+          errors = [].concat(rule.message);
+        }
+
+        errors = errors.map(complementError(rule));
+
+        if (options.first && errors.length) {
+          errorFields[rule.field] = 1;
+          return doIt(errors);
+        }
+
+        if (!deep) {
+          doIt(errors);
+        } else {
+          // if rule is required but the target object
+          // does not exist fail at the rule level and don't
+          // go deeper
+          if (rule.required && !data.value) {
+            if (rule.message !== undefined) {
+              errors = [].concat(rule.message).map(complementError(rule));
+            } else if (options.error) {
+              errors = [options.error(rule, format(options.messages.required, rule.field))];
+            }
+
+            return doIt(errors);
+          }
+
+          var fieldsSchema = {};
+
+          if (rule.defaultField) {
+            for (var k in data.value) {
+              if (data.value.hasOwnProperty(k)) {
+                fieldsSchema[k] = rule.defaultField;
+              }
+            }
+          }
+
+          fieldsSchema = _extends({}, fieldsSchema, data.rule.fields);
+
+          for (var f in fieldsSchema) {
+            if (fieldsSchema.hasOwnProperty(f)) {
+              var fieldSchema = Array.isArray(fieldsSchema[f]) ? fieldsSchema[f] : [fieldsSchema[f]];
+              fieldsSchema[f] = fieldSchema.map(addFullfield.bind(null, f));
+            }
+          }
+
+          var schema = new Schema(fieldsSchema);
+          schema.messages(options.messages);
+
+          if (data.rule.options) {
+            data.rule.options.messages = options.messages;
+            data.rule.options.error = options.error;
+          }
+
+          schema.validate(data.value, data.rule.options || options, function (errs) {
+            var finalErrors = [];
+
+            if (errors && errors.length) {
+              finalErrors.push.apply(finalErrors, errors);
+            }
+
+            if (errs && errs.length) {
+              finalErrors.push.apply(finalErrors, errs);
+            }
+
+            doIt(finalErrors.length ? finalErrors : null);
+          });
+        }
+      }
+
+      var res;
+
+      if (rule.asyncValidator) {
+        res = rule.asyncValidator(rule, data.value, cb, data.source, options);
+      } else if (rule.validator) {
+        res = rule.validator(rule, data.value, cb, data.source, options);
+
+        if (res === true) {
+          cb();
+        } else if (res === false) {
+          cb(rule.message || rule.field + " fails");
+        } else if (res instanceof Array) {
+          cb(res);
+        } else if (res instanceof Error) {
+          cb(res.message);
+        }
+      }
+
+      if (res && res.then) {
+        res.then(function () {
+          return cb();
+        }, function (e) {
+          return cb(e);
+        });
+      }
+    }, function (results) {
+      complete(results);
+    });
+  },
+  getType: function getType(rule) {
+    if (rule.type === undefined && rule.pattern instanceof RegExp) {
+      rule.type = 'pattern';
+    }
+
+    if (typeof rule.validator !== 'function' && rule.type && !validators.hasOwnProperty(rule.type)) {
+      throw new Error(format('Unknown rule type %s', rule.type));
+    }
+
+    return rule.type || 'string';
+  },
+  getValidationMethod: function getValidationMethod(rule) {
+    if (typeof rule.validator === 'function') {
+      return rule.validator;
+    }
+
+    var keys = Object.keys(rule);
+    var messageIndex = keys.indexOf('message');
+
+    if (messageIndex !== -1) {
+      keys.splice(messageIndex, 1);
+    }
+
+    if (keys.length === 1 && keys[0] === 'required') {
+      return validators.required;
+    }
+
+    return validators[this.getType(rule)] || false;
+  }
+};
+
+Schema.register = function register(type, validator) {
+  if (typeof validator !== 'function') {
+    throw new Error('Cannot register a validator by type, validator is not a function');
+  }
+
+  validators[type] = validator;
+};
+
+Schema.warning = warning;
+Schema.messages = messages;
+Schema.validators = validators;
+
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (Schema);
+//# sourceMappingURL=index.js.map
+
+
+/***/ }),
+
+/***/ "./node_modules/axios/index.js":
+/*!*************************************!*\
+  !*** ./node_modules/axios/index.js ***!
+  \*************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+module.exports = __webpack_require__(/*! ./lib/axios */ "./node_modules/axios/lib/axios.js");
+
+/***/ }),
+
+/***/ "./node_modules/axios/lib/adapters/xhr.js":
+/*!************************************************!*\
+  !*** ./node_modules/axios/lib/adapters/xhr.js ***!
+  \************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+"use strict";
+
+
+var utils = __webpack_require__(/*! ./../utils */ "./node_modules/axios/lib/utils.js");
+var settle = __webpack_require__(/*! ./../core/settle */ "./node_modules/axios/lib/core/settle.js");
+var cookies = __webpack_require__(/*! ./../helpers/cookies */ "./node_modules/axios/lib/helpers/cookies.js");
+var buildURL = __webpack_require__(/*! ./../helpers/buildURL */ "./node_modules/axios/lib/helpers/buildURL.js");
+var buildFullPath = __webpack_require__(/*! ../core/buildFullPath */ "./node_modules/axios/lib/core/buildFullPath.js");
+var parseHeaders = __webpack_require__(/*! ./../helpers/parseHeaders */ "./node_modules/axios/lib/helpers/parseHeaders.js");
+var isURLSameOrigin = __webpack_require__(/*! ./../helpers/isURLSameOrigin */ "./node_modules/axios/lib/helpers/isURLSameOrigin.js");
+var createError = __webpack_require__(/*! ../core/createError */ "./node_modules/axios/lib/core/createError.js");
+
+module.exports = function xhrAdapter(config) {
+  return new Promise(function dispatchXhrRequest(resolve, reject) {
+    var requestData = config.data;
+    var requestHeaders = config.headers;
+    var responseType = config.responseType;
+
+    if (utils.isFormData(requestData)) {
+      delete requestHeaders['Content-Type']; // Let the browser set it
+    }
+
+    var request = new XMLHttpRequest();
+
+    // HTTP basic authentication
+    if (config.auth) {
+      var username = config.auth.username || '';
+      var password = config.auth.password ? unescape(encodeURIComponent(config.auth.password)) : '';
+      requestHeaders.Authorization = 'Basic ' + btoa(username + ':' + password);
+    }
+
+    var fullPath = buildFullPath(config.baseURL, config.url);
+    request.open(config.method.toUpperCase(), buildURL(fullPath, config.params, config.paramsSerializer), true);
+
+    // Set the request timeout in MS
+    request.timeout = config.timeout;
+
+    function onloadend() {
+      if (!request) {
+        return;
+      }
+      // Prepare the response
+      var responseHeaders = 'getAllResponseHeaders' in request ? parseHeaders(request.getAllResponseHeaders()) : null;
+      var responseData = !responseType || responseType === 'text' ||  responseType === 'json' ?
+        request.responseText : request.response;
+      var response = {
+        data: responseData,
+        status: request.status,
+        statusText: request.statusText,
+        headers: responseHeaders,
+        config: config,
+        request: request
+      };
+
+      settle(resolve, reject, response);
+
+      // Clean up request
+      request = null;
+    }
+
+    if ('onloadend' in request) {
+      // Use onloadend if available
+      request.onloadend = onloadend;
+    } else {
+      // Listen for ready state to emulate onloadend
+      request.onreadystatechange = function handleLoad() {
+        if (!request || request.readyState !== 4) {
+          return;
+        }
+
+        // The request errored out and we didn't get a response, this will be
+        // handled by onerror instead
+        // With one exception: request that using file: protocol, most browsers
+        // will return status as 0 even though it's a successful request
+        if (request.status === 0 && !(request.responseURL && request.responseURL.indexOf('file:') === 0)) {
+          return;
+        }
+        // readystate handler is calling before onerror or ontimeout handlers,
+        // so we should call onloadend on the next 'tick'
+        setTimeout(onloadend);
+      };
+    }
+
+    // Handle browser request cancellation (as opposed to a manual cancellation)
+    request.onabort = function handleAbort() {
+      if (!request) {
+        return;
+      }
+
+      reject(createError('Request aborted', config, 'ECONNABORTED', request));
+
+      // Clean up request
+      request = null;
+    };
+
+    // Handle low level network errors
+    request.onerror = function handleError() {
+      // Real errors are hidden from us by the browser
+      // onerror should only fire if it's a network error
+      reject(createError('Network Error', config, null, request));
+
+      // Clean up request
+      request = null;
+    };
+
+    // Handle timeout
+    request.ontimeout = function handleTimeout() {
+      var timeoutErrorMessage = 'timeout of ' + config.timeout + 'ms exceeded';
+      if (config.timeoutErrorMessage) {
+        timeoutErrorMessage = config.timeoutErrorMessage;
+      }
+      reject(createError(
+        timeoutErrorMessage,
+        config,
+        config.transitional && config.transitional.clarifyTimeoutError ? 'ETIMEDOUT' : 'ECONNABORTED',
+        request));
+
+      // Clean up request
+      request = null;
+    };
+
+    // Add xsrf header
+    // This is only done if running in a standard browser environment.
+    // Specifically not if we're in a web worker, or react-native.
+    if (utils.isStandardBrowserEnv()) {
+      // Add xsrf header
+      var xsrfValue = (config.withCredentials || isURLSameOrigin(fullPath)) && config.xsrfCookieName ?
+        cookies.read(config.xsrfCookieName) :
+        undefined;
+
+      if (xsrfValue) {
+        requestHeaders[config.xsrfHeaderName] = xsrfValue;
+      }
+    }
+
+    // Add headers to the request
+    if ('setRequestHeader' in request) {
+      utils.forEach(requestHeaders, function setRequestHeader(val, key) {
+        if (typeof requestData === 'undefined' && key.toLowerCase() === 'content-type') {
+          // Remove Content-Type if data is undefined
+          delete requestHeaders[key];
+        } else {
+          // Otherwise add header to the request
+          request.setRequestHeader(key, val);
+        }
+      });
+    }
+
+    // Add withCredentials to request if needed
+    if (!utils.isUndefined(config.withCredentials)) {
+      request.withCredentials = !!config.withCredentials;
+    }
+
+    // Add responseType to request if needed
+    if (responseType && responseType !== 'json') {
+      request.responseType = config.responseType;
+    }
+
+    // Handle progress if needed
+    if (typeof config.onDownloadProgress === 'function') {
+      request.addEventListener('progress', config.onDownloadProgress);
+    }
+
+    // Not all browsers support upload events
+    if (typeof config.onUploadProgress === 'function' && request.upload) {
+      request.upload.addEventListener('progress', config.onUploadProgress);
+    }
+
+    if (config.cancelToken) {
+      // Handle cancellation
+      config.cancelToken.promise.then(function onCanceled(cancel) {
+        if (!request) {
+          return;
+        }
+
+        request.abort();
+        reject(cancel);
+        // Clean up request
+        request = null;
+      });
+    }
+
+    if (!requestData) {
+      requestData = null;
+    }
+
+    // Send the request
+    request.send(requestData);
+  });
+};
+
+
+/***/ }),
+
+/***/ "./node_modules/axios/lib/axios.js":
+/*!*****************************************!*\
+  !*** ./node_modules/axios/lib/axios.js ***!
+  \*****************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+"use strict";
+
+
+var utils = __webpack_require__(/*! ./utils */ "./node_modules/axios/lib/utils.js");
+var bind = __webpack_require__(/*! ./helpers/bind */ "./node_modules/axios/lib/helpers/bind.js");
+var Axios = __webpack_require__(/*! ./core/Axios */ "./node_modules/axios/lib/core/Axios.js");
+var mergeConfig = __webpack_require__(/*! ./core/mergeConfig */ "./node_modules/axios/lib/core/mergeConfig.js");
+var defaults = __webpack_require__(/*! ./defaults */ "./node_modules/axios/lib/defaults.js");
+
+/**
+ * Create an instance of Axios
+ *
+ * @param {Object} defaultConfig The default config for the instance
+ * @return {Axios} A new instance of Axios
+ */
+function createInstance(defaultConfig) {
+  var context = new Axios(defaultConfig);
+  var instance = bind(Axios.prototype.request, context);
+
+  // Copy axios.prototype to instance
+  utils.extend(instance, Axios.prototype, context);
+
+  // Copy context to instance
+  utils.extend(instance, context);
+
+  return instance;
+}
+
+// Create the default instance to be exported
+var axios = createInstance(defaults);
+
+// Expose Axios class to allow class inheritance
+axios.Axios = Axios;
+
+// Factory for creating new instances
+axios.create = function create(instanceConfig) {
+  return createInstance(mergeConfig(axios.defaults, instanceConfig));
+};
+
+// Expose Cancel & CancelToken
+axios.Cancel = __webpack_require__(/*! ./cancel/Cancel */ "./node_modules/axios/lib/cancel/Cancel.js");
+axios.CancelToken = __webpack_require__(/*! ./cancel/CancelToken */ "./node_modules/axios/lib/cancel/CancelToken.js");
+axios.isCancel = __webpack_require__(/*! ./cancel/isCancel */ "./node_modules/axios/lib/cancel/isCancel.js");
+
+// Expose all/spread
+axios.all = function all(promises) {
+  return Promise.all(promises);
+};
+axios.spread = __webpack_require__(/*! ./helpers/spread */ "./node_modules/axios/lib/helpers/spread.js");
+
+// Expose isAxiosError
+axios.isAxiosError = __webpack_require__(/*! ./helpers/isAxiosError */ "./node_modules/axios/lib/helpers/isAxiosError.js");
+
+module.exports = axios;
+
+// Allow use of default import syntax in TypeScript
+module.exports["default"] = axios;
+
+
+/***/ }),
+
+/***/ "./node_modules/axios/lib/cancel/Cancel.js":
+/*!*************************************************!*\
+  !*** ./node_modules/axios/lib/cancel/Cancel.js ***!
+  \*************************************************/
+/***/ ((module) => {
+
+"use strict";
+
+
+/**
+ * A `Cancel` is an object that is thrown when an operation is canceled.
+ *
+ * @class
+ * @param {string=} message The message.
+ */
+function Cancel(message) {
+  this.message = message;
+}
+
+Cancel.prototype.toString = function toString() {
+  return 'Cancel' + (this.message ? ': ' + this.message : '');
+};
+
+Cancel.prototype.__CANCEL__ = true;
+
+module.exports = Cancel;
+
+
+/***/ }),
+
+/***/ "./node_modules/axios/lib/cancel/CancelToken.js":
+/*!******************************************************!*\
+  !*** ./node_modules/axios/lib/cancel/CancelToken.js ***!
+  \******************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+"use strict";
+
+
+var Cancel = __webpack_require__(/*! ./Cancel */ "./node_modules/axios/lib/cancel/Cancel.js");
+
+/**
+ * A `CancelToken` is an object that can be used to request cancellation of an operation.
+ *
+ * @class
+ * @param {Function} executor The executor function.
+ */
+function CancelToken(executor) {
+  if (typeof executor !== 'function') {
+    throw new TypeError('executor must be a function.');
+  }
+
+  var resolvePromise;
+  this.promise = new Promise(function promiseExecutor(resolve) {
+    resolvePromise = resolve;
+  });
+
+  var token = this;
+  executor(function cancel(message) {
+    if (token.reason) {
+      // Cancellation has already been requested
+      return;
+    }
+
+    token.reason = new Cancel(message);
+    resolvePromise(token.reason);
+  });
+}
+
+/**
+ * Throws a `Cancel` if cancellation has been requested.
+ */
+CancelToken.prototype.throwIfRequested = function throwIfRequested() {
+  if (this.reason) {
+    throw this.reason;
+  }
+};
+
+/**
+ * Returns an object that contains a new `CancelToken` and a function that, when called,
+ * cancels the `CancelToken`.
+ */
+CancelToken.source = function source() {
+  var cancel;
+  var token = new CancelToken(function executor(c) {
+    cancel = c;
+  });
+  return {
+    token: token,
+    cancel: cancel
+  };
+};
+
+module.exports = CancelToken;
+
+
+/***/ }),
+
+/***/ "./node_modules/axios/lib/cancel/isCancel.js":
+/*!***************************************************!*\
+  !*** ./node_modules/axios/lib/cancel/isCancel.js ***!
+  \***************************************************/
+/***/ ((module) => {
+
+"use strict";
+
+
+module.exports = function isCancel(value) {
+  return !!(value && value.__CANCEL__);
+};
+
+
+/***/ }),
+
+/***/ "./node_modules/axios/lib/core/Axios.js":
+/*!**********************************************!*\
+  !*** ./node_modules/axios/lib/core/Axios.js ***!
+  \**********************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+"use strict";
+
+
+var utils = __webpack_require__(/*! ./../utils */ "./node_modules/axios/lib/utils.js");
+var buildURL = __webpack_require__(/*! ../helpers/buildURL */ "./node_modules/axios/lib/helpers/buildURL.js");
+var InterceptorManager = __webpack_require__(/*! ./InterceptorManager */ "./node_modules/axios/lib/core/InterceptorManager.js");
+var dispatchRequest = __webpack_require__(/*! ./dispatchRequest */ "./node_modules/axios/lib/core/dispatchRequest.js");
+var mergeConfig = __webpack_require__(/*! ./mergeConfig */ "./node_modules/axios/lib/core/mergeConfig.js");
+var validator = __webpack_require__(/*! ../helpers/validator */ "./node_modules/axios/lib/helpers/validator.js");
+
+var validators = validator.validators;
+/**
+ * Create a new instance of Axios
+ *
+ * @param {Object} instanceConfig The default config for the instance
+ */
+function Axios(instanceConfig) {
+  this.defaults = instanceConfig;
+  this.interceptors = {
+    request: new InterceptorManager(),
+    response: new InterceptorManager()
+  };
+}
+
+/**
+ * Dispatch a request
+ *
+ * @param {Object} config The config specific for this request (merged with this.defaults)
+ */
+Axios.prototype.request = function request(config) {
+  /*eslint no-param-reassign:0*/
+  // Allow for axios('example/url'[, config]) a la fetch API
+  if (typeof config === 'string') {
+    config = arguments[1] || {};
+    config.url = arguments[0];
+  } else {
+    config = config || {};
+  }
+
+  config = mergeConfig(this.defaults, config);
+
+  // Set config.method
+  if (config.method) {
+    config.method = config.method.toLowerCase();
+  } else if (this.defaults.method) {
+    config.method = this.defaults.method.toLowerCase();
+  } else {
+    config.method = 'get';
+  }
+
+  var transitional = config.transitional;
+
+  if (transitional !== undefined) {
+    validator.assertOptions(transitional, {
+      silentJSONParsing: validators.transitional(validators.boolean, '1.0.0'),
+      forcedJSONParsing: validators.transitional(validators.boolean, '1.0.0'),
+      clarifyTimeoutError: validators.transitional(validators.boolean, '1.0.0')
+    }, false);
+  }
+
+  // filter out skipped interceptors
+  var requestInterceptorChain = [];
+  var synchronousRequestInterceptors = true;
+  this.interceptors.request.forEach(function unshiftRequestInterceptors(interceptor) {
+    if (typeof interceptor.runWhen === 'function' && interceptor.runWhen(config) === false) {
+      return;
+    }
+
+    synchronousRequestInterceptors = synchronousRequestInterceptors && interceptor.synchronous;
+
+    requestInterceptorChain.unshift(interceptor.fulfilled, interceptor.rejected);
+  });
+
+  var responseInterceptorChain = [];
+  this.interceptors.response.forEach(function pushResponseInterceptors(interceptor) {
+    responseInterceptorChain.push(interceptor.fulfilled, interceptor.rejected);
+  });
+
+  var promise;
+
+  if (!synchronousRequestInterceptors) {
+    var chain = [dispatchRequest, undefined];
+
+    Array.prototype.unshift.apply(chain, requestInterceptorChain);
+    chain = chain.concat(responseInterceptorChain);
+
+    promise = Promise.resolve(config);
+    while (chain.length) {
+      promise = promise.then(chain.shift(), chain.shift());
+    }
+
+    return promise;
+  }
+
+
+  var newConfig = config;
+  while (requestInterceptorChain.length) {
+    var onFulfilled = requestInterceptorChain.shift();
+    var onRejected = requestInterceptorChain.shift();
+    try {
+      newConfig = onFulfilled(newConfig);
+    } catch (error) {
+      onRejected(error);
+      break;
+    }
+  }
+
+  try {
+    promise = dispatchRequest(newConfig);
+  } catch (error) {
+    return Promise.reject(error);
+  }
+
+  while (responseInterceptorChain.length) {
+    promise = promise.then(responseInterceptorChain.shift(), responseInterceptorChain.shift());
+  }
+
+  return promise;
+};
+
+Axios.prototype.getUri = function getUri(config) {
+  config = mergeConfig(this.defaults, config);
+  return buildURL(config.url, config.params, config.paramsSerializer).replace(/^\?/, '');
+};
+
+// Provide aliases for supported request methods
+utils.forEach(['delete', 'get', 'head', 'options'], function forEachMethodNoData(method) {
+  /*eslint func-names:0*/
+  Axios.prototype[method] = function(url, config) {
+    return this.request(mergeConfig(config || {}, {
+      method: method,
+      url: url,
+      data: (config || {}).data
+    }));
+  };
+});
+
+utils.forEach(['post', 'put', 'patch'], function forEachMethodWithData(method) {
+  /*eslint func-names:0*/
+  Axios.prototype[method] = function(url, data, config) {
+    return this.request(mergeConfig(config || {}, {
+      method: method,
+      url: url,
+      data: data
+    }));
+  };
+});
+
+module.exports = Axios;
+
+
+/***/ }),
+
+/***/ "./node_modules/axios/lib/core/InterceptorManager.js":
+/*!***********************************************************!*\
+  !*** ./node_modules/axios/lib/core/InterceptorManager.js ***!
+  \***********************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+"use strict";
+
+
+var utils = __webpack_require__(/*! ./../utils */ "./node_modules/axios/lib/utils.js");
+
+function InterceptorManager() {
+  this.handlers = [];
+}
+
+/**
+ * Add a new interceptor to the stack
+ *
+ * @param {Function} fulfilled The function to handle `then` for a `Promise`
+ * @param {Function} rejected The function to handle `reject` for a `Promise`
+ *
+ * @return {Number} An ID used to remove interceptor later
+ */
+InterceptorManager.prototype.use = function use(fulfilled, rejected, options) {
+  this.handlers.push({
+    fulfilled: fulfilled,
+    rejected: rejected,
+    synchronous: options ? options.synchronous : false,
+    runWhen: options ? options.runWhen : null
+  });
+  return this.handlers.length - 1;
+};
+
+/**
+ * Remove an interceptor from the stack
+ *
+ * @param {Number} id The ID that was returned by `use`
+ */
+InterceptorManager.prototype.eject = function eject(id) {
+  if (this.handlers[id]) {
+    this.handlers[id] = null;
+  }
+};
+
+/**
+ * Iterate over all the registered interceptors
+ *
+ * This method is particularly useful for skipping over any
+ * interceptors that may have become `null` calling `eject`.
+ *
+ * @param {Function} fn The function to call for each interceptor
+ */
+InterceptorManager.prototype.forEach = function forEach(fn) {
+  utils.forEach(this.handlers, function forEachHandler(h) {
+    if (h !== null) {
+      fn(h);
+    }
+  });
+};
+
+module.exports = InterceptorManager;
+
+
+/***/ }),
+
+/***/ "./node_modules/axios/lib/core/buildFullPath.js":
+/*!******************************************************!*\
+  !*** ./node_modules/axios/lib/core/buildFullPath.js ***!
+  \******************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+"use strict";
+
+
+var isAbsoluteURL = __webpack_require__(/*! ../helpers/isAbsoluteURL */ "./node_modules/axios/lib/helpers/isAbsoluteURL.js");
+var combineURLs = __webpack_require__(/*! ../helpers/combineURLs */ "./node_modules/axios/lib/helpers/combineURLs.js");
+
+/**
+ * Creates a new URL by combining the baseURL with the requestedURL,
+ * only when the requestedURL is not already an absolute URL.
+ * If the requestURL is absolute, this function returns the requestedURL untouched.
+ *
+ * @param {string} baseURL The base URL
+ * @param {string} requestedURL Absolute or relative URL to combine
+ * @returns {string} The combined full path
+ */
+module.exports = function buildFullPath(baseURL, requestedURL) {
+  if (baseURL && !isAbsoluteURL(requestedURL)) {
+    return combineURLs(baseURL, requestedURL);
+  }
+  return requestedURL;
+};
+
+
+/***/ }),
+
+/***/ "./node_modules/axios/lib/core/createError.js":
+/*!****************************************************!*\
+  !*** ./node_modules/axios/lib/core/createError.js ***!
+  \****************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+"use strict";
+
+
+var enhanceError = __webpack_require__(/*! ./enhanceError */ "./node_modules/axios/lib/core/enhanceError.js");
+
+/**
+ * Create an Error with the specified message, config, error code, request and response.
+ *
+ * @param {string} message The error message.
+ * @param {Object} config The config.
+ * @param {string} [code] The error code (for example, 'ECONNABORTED').
+ * @param {Object} [request] The request.
+ * @param {Object} [response] The response.
+ * @returns {Error} The created error.
+ */
+module.exports = function createError(message, config, code, request, response) {
+  var error = new Error(message);
+  return enhanceError(error, config, code, request, response);
+};
+
+
+/***/ }),
+
+/***/ "./node_modules/axios/lib/core/dispatchRequest.js":
+/*!********************************************************!*\
+  !*** ./node_modules/axios/lib/core/dispatchRequest.js ***!
+  \********************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+"use strict";
+
+
+var utils = __webpack_require__(/*! ./../utils */ "./node_modules/axios/lib/utils.js");
+var transformData = __webpack_require__(/*! ./transformData */ "./node_modules/axios/lib/core/transformData.js");
+var isCancel = __webpack_require__(/*! ../cancel/isCancel */ "./node_modules/axios/lib/cancel/isCancel.js");
+var defaults = __webpack_require__(/*! ../defaults */ "./node_modules/axios/lib/defaults.js");
+
+/**
+ * Throws a `Cancel` if cancellation has been requested.
+ */
+function throwIfCancellationRequested(config) {
+  if (config.cancelToken) {
+    config.cancelToken.throwIfRequested();
+  }
+}
+
+/**
+ * Dispatch a request to the server using the configured adapter.
+ *
+ * @param {object} config The config that is to be used for the request
+ * @returns {Promise} The Promise to be fulfilled
+ */
+module.exports = function dispatchRequest(config) {
+  throwIfCancellationRequested(config);
+
+  // Ensure headers exist
+  config.headers = config.headers || {};
+
+  // Transform request data
+  config.data = transformData.call(
+    config,
+    config.data,
+    config.headers,
+    config.transformRequest
+  );
+
+  // Flatten headers
+  config.headers = utils.merge(
+    config.headers.common || {},
+    config.headers[config.method] || {},
+    config.headers
+  );
+
+  utils.forEach(
+    ['delete', 'get', 'head', 'post', 'put', 'patch', 'common'],
+    function cleanHeaderConfig(method) {
+      delete config.headers[method];
+    }
+  );
+
+  var adapter = config.adapter || defaults.adapter;
+
+  return adapter(config).then(function onAdapterResolution(response) {
+    throwIfCancellationRequested(config);
+
+    // Transform response data
+    response.data = transformData.call(
+      config,
+      response.data,
+      response.headers,
+      config.transformResponse
+    );
+
+    return response;
+  }, function onAdapterRejection(reason) {
+    if (!isCancel(reason)) {
+      throwIfCancellationRequested(config);
+
+      // Transform response data
+      if (reason && reason.response) {
+        reason.response.data = transformData.call(
+          config,
+          reason.response.data,
+          reason.response.headers,
+          config.transformResponse
+        );
+      }
+    }
+
+    return Promise.reject(reason);
+  });
+};
+
+
+/***/ }),
+
+/***/ "./node_modules/axios/lib/core/enhanceError.js":
+/*!*****************************************************!*\
+  !*** ./node_modules/axios/lib/core/enhanceError.js ***!
+  \*****************************************************/
+/***/ ((module) => {
+
+"use strict";
+
+
+/**
+ * Update an Error with the specified config, error code, and response.
+ *
+ * @param {Error} error The error to update.
+ * @param {Object} config The config.
+ * @param {string} [code] The error code (for example, 'ECONNABORTED').
+ * @param {Object} [request] The request.
+ * @param {Object} [response] The response.
+ * @returns {Error} The error.
+ */
+module.exports = function enhanceError(error, config, code, request, response) {
+  error.config = config;
+  if (code) {
+    error.code = code;
+  }
+
+  error.request = request;
+  error.response = response;
+  error.isAxiosError = true;
+
+  error.toJSON = function toJSON() {
+    return {
+      // Standard
+      message: this.message,
+      name: this.name,
+      // Microsoft
+      description: this.description,
+      number: this.number,
+      // Mozilla
+      fileName: this.fileName,
+      lineNumber: this.lineNumber,
+      columnNumber: this.columnNumber,
+      stack: this.stack,
+      // Axios
+      config: this.config,
+      code: this.code
+    };
+  };
+  return error;
+};
+
+
+/***/ }),
+
+/***/ "./node_modules/axios/lib/core/mergeConfig.js":
+/*!****************************************************!*\
+  !*** ./node_modules/axios/lib/core/mergeConfig.js ***!
+  \****************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+"use strict";
+
+
+var utils = __webpack_require__(/*! ../utils */ "./node_modules/axios/lib/utils.js");
+
+/**
+ * Config-specific merge-function which creates a new config-object
+ * by merging two configuration objects together.
+ *
+ * @param {Object} config1
+ * @param {Object} config2
+ * @returns {Object} New object resulting from merging config2 to config1
+ */
+module.exports = function mergeConfig(config1, config2) {
+  // eslint-disable-next-line no-param-reassign
+  config2 = config2 || {};
+  var config = {};
+
+  var valueFromConfig2Keys = ['url', 'method', 'data'];
+  var mergeDeepPropertiesKeys = ['headers', 'auth', 'proxy', 'params'];
+  var defaultToConfig2Keys = [
+    'baseURL', 'transformRequest', 'transformResponse', 'paramsSerializer',
+    'timeout', 'timeoutMessage', 'withCredentials', 'adapter', 'responseType', 'xsrfCookieName',
+    'xsrfHeaderName', 'onUploadProgress', 'onDownloadProgress', 'decompress',
+    'maxContentLength', 'maxBodyLength', 'maxRedirects', 'transport', 'httpAgent',
+    'httpsAgent', 'cancelToken', 'socketPath', 'responseEncoding'
+  ];
+  var directMergeKeys = ['validateStatus'];
+
+  function getMergedValue(target, source) {
+    if (utils.isPlainObject(target) && utils.isPlainObject(source)) {
+      return utils.merge(target, source);
+    } else if (utils.isPlainObject(source)) {
+      return utils.merge({}, source);
+    } else if (utils.isArray(source)) {
+      return source.slice();
+    }
+    return source;
+  }
+
+  function mergeDeepProperties(prop) {
+    if (!utils.isUndefined(config2[prop])) {
+      config[prop] = getMergedValue(config1[prop], config2[prop]);
+    } else if (!utils.isUndefined(config1[prop])) {
+      config[prop] = getMergedValue(undefined, config1[prop]);
+    }
+  }
+
+  utils.forEach(valueFromConfig2Keys, function valueFromConfig2(prop) {
+    if (!utils.isUndefined(config2[prop])) {
+      config[prop] = getMergedValue(undefined, config2[prop]);
+    }
+  });
+
+  utils.forEach(mergeDeepPropertiesKeys, mergeDeepProperties);
+
+  utils.forEach(defaultToConfig2Keys, function defaultToConfig2(prop) {
+    if (!utils.isUndefined(config2[prop])) {
+      config[prop] = getMergedValue(undefined, config2[prop]);
+    } else if (!utils.isUndefined(config1[prop])) {
+      config[prop] = getMergedValue(undefined, config1[prop]);
+    }
+  });
+
+  utils.forEach(directMergeKeys, function merge(prop) {
+    if (prop in config2) {
+      config[prop] = getMergedValue(config1[prop], config2[prop]);
+    } else if (prop in config1) {
+      config[prop] = getMergedValue(undefined, config1[prop]);
+    }
+  });
+
+  var axiosKeys = valueFromConfig2Keys
+    .concat(mergeDeepPropertiesKeys)
+    .concat(defaultToConfig2Keys)
+    .concat(directMergeKeys);
+
+  var otherKeys = Object
+    .keys(config1)
+    .concat(Object.keys(config2))
+    .filter(function filterAxiosKeys(key) {
+      return axiosKeys.indexOf(key) === -1;
+    });
+
+  utils.forEach(otherKeys, mergeDeepProperties);
+
+  return config;
+};
+
+
+/***/ }),
+
+/***/ "./node_modules/axios/lib/core/settle.js":
+/*!***********************************************!*\
+  !*** ./node_modules/axios/lib/core/settle.js ***!
+  \***********************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+"use strict";
+
+
+var createError = __webpack_require__(/*! ./createError */ "./node_modules/axios/lib/core/createError.js");
+
+/**
+ * Resolve or reject a Promise based on response status.
+ *
+ * @param {Function} resolve A function that resolves the promise.
+ * @param {Function} reject A function that rejects the promise.
+ * @param {object} response The response.
+ */
+module.exports = function settle(resolve, reject, response) {
+  var validateStatus = response.config.validateStatus;
+  if (!response.status || !validateStatus || validateStatus(response.status)) {
+    resolve(response);
+  } else {
+    reject(createError(
+      'Request failed with status code ' + response.status,
+      response.config,
+      null,
+      response.request,
+      response
+    ));
+  }
+};
+
+
+/***/ }),
+
+/***/ "./node_modules/axios/lib/core/transformData.js":
+/*!******************************************************!*\
+  !*** ./node_modules/axios/lib/core/transformData.js ***!
+  \******************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+"use strict";
+
+
+var utils = __webpack_require__(/*! ./../utils */ "./node_modules/axios/lib/utils.js");
+var defaults = __webpack_require__(/*! ./../defaults */ "./node_modules/axios/lib/defaults.js");
+
+/**
+ * Transform the data for a request or a response
+ *
+ * @param {Object|String} data The data to be transformed
+ * @param {Array} headers The headers for the request or response
+ * @param {Array|Function} fns A single function or Array of functions
+ * @returns {*} The resulting transformed data
+ */
+module.exports = function transformData(data, headers, fns) {
+  var context = this || defaults;
+  /*eslint no-param-reassign:0*/
+  utils.forEach(fns, function transform(fn) {
+    data = fn.call(context, data, headers);
+  });
+
+  return data;
+};
+
+
+/***/ }),
+
+/***/ "./node_modules/axios/lib/defaults.js":
+/*!********************************************!*\
+  !*** ./node_modules/axios/lib/defaults.js ***!
+  \********************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+"use strict";
+/* provided dependency */ var process = __webpack_require__(/*! process/browser */ "./node_modules/process/browser.js");
+
+
+var utils = __webpack_require__(/*! ./utils */ "./node_modules/axios/lib/utils.js");
+var normalizeHeaderName = __webpack_require__(/*! ./helpers/normalizeHeaderName */ "./node_modules/axios/lib/helpers/normalizeHeaderName.js");
+var enhanceError = __webpack_require__(/*! ./core/enhanceError */ "./node_modules/axios/lib/core/enhanceError.js");
+
+var DEFAULT_CONTENT_TYPE = {
+  'Content-Type': 'application/x-www-form-urlencoded'
+};
+
+function setContentTypeIfUnset(headers, value) {
+  if (!utils.isUndefined(headers) && utils.isUndefined(headers['Content-Type'])) {
+    headers['Content-Type'] = value;
+  }
+}
+
+function getDefaultAdapter() {
+  var adapter;
+  if (typeof XMLHttpRequest !== 'undefined') {
+    // For browsers use XHR adapter
+    adapter = __webpack_require__(/*! ./adapters/xhr */ "./node_modules/axios/lib/adapters/xhr.js");
+  } else if (typeof process !== 'undefined' && Object.prototype.toString.call(process) === '[object process]') {
+    // For node use HTTP adapter
+    adapter = __webpack_require__(/*! ./adapters/http */ "./node_modules/axios/lib/adapters/xhr.js");
+  }
+  return adapter;
+}
+
+function stringifySafely(rawValue, parser, encoder) {
+  if (utils.isString(rawValue)) {
+    try {
+      (parser || JSON.parse)(rawValue);
+      return utils.trim(rawValue);
+    } catch (e) {
+      if (e.name !== 'SyntaxError') {
+        throw e;
+      }
+    }
+  }
+
+  return (encoder || JSON.stringify)(rawValue);
+}
+
+var defaults = {
+
+  transitional: {
+    silentJSONParsing: true,
+    forcedJSONParsing: true,
+    clarifyTimeoutError: false
+  },
+
+  adapter: getDefaultAdapter(),
+
+  transformRequest: [function transformRequest(data, headers) {
+    normalizeHeaderName(headers, 'Accept');
+    normalizeHeaderName(headers, 'Content-Type');
+
+    if (utils.isFormData(data) ||
+      utils.isArrayBuffer(data) ||
+      utils.isBuffer(data) ||
+      utils.isStream(data) ||
+      utils.isFile(data) ||
+      utils.isBlob(data)
+    ) {
+      return data;
+    }
+    if (utils.isArrayBufferView(data)) {
+      return data.buffer;
+    }
+    if (utils.isURLSearchParams(data)) {
+      setContentTypeIfUnset(headers, 'application/x-www-form-urlencoded;charset=utf-8');
+      return data.toString();
+    }
+    if (utils.isObject(data) || (headers && headers['Content-Type'] === 'application/json')) {
+      setContentTypeIfUnset(headers, 'application/json');
+      return stringifySafely(data);
+    }
+    return data;
+  }],
+
+  transformResponse: [function transformResponse(data) {
+    var transitional = this.transitional;
+    var silentJSONParsing = transitional && transitional.silentJSONParsing;
+    var forcedJSONParsing = transitional && transitional.forcedJSONParsing;
+    var strictJSONParsing = !silentJSONParsing && this.responseType === 'json';
+
+    if (strictJSONParsing || (forcedJSONParsing && utils.isString(data) && data.length)) {
+      try {
+        return JSON.parse(data);
+      } catch (e) {
+        if (strictJSONParsing) {
+          if (e.name === 'SyntaxError') {
+            throw enhanceError(e, this, 'E_JSON_PARSE');
+          }
+          throw e;
+        }
+      }
+    }
+
+    return data;
+  }],
+
+  /**
+   * A timeout in milliseconds to abort a request. If set to 0 (default) a
+   * timeout is not created.
+   */
+  timeout: 0,
+
+  xsrfCookieName: 'XSRF-TOKEN',
+  xsrfHeaderName: 'X-XSRF-TOKEN',
+
+  maxContentLength: -1,
+  maxBodyLength: -1,
+
+  validateStatus: function validateStatus(status) {
+    return status >= 200 && status < 300;
+  }
+};
+
+defaults.headers = {
+  common: {
+    'Accept': 'application/json, text/plain, */*'
+  }
+};
+
+utils.forEach(['delete', 'get', 'head'], function forEachMethodNoData(method) {
+  defaults.headers[method] = {};
+});
+
+utils.forEach(['post', 'put', 'patch'], function forEachMethodWithData(method) {
+  defaults.headers[method] = utils.merge(DEFAULT_CONTENT_TYPE);
+});
+
+module.exports = defaults;
+
+
+/***/ }),
+
+/***/ "./node_modules/axios/lib/helpers/bind.js":
+/*!************************************************!*\
+  !*** ./node_modules/axios/lib/helpers/bind.js ***!
+  \************************************************/
+/***/ ((module) => {
+
+"use strict";
+
+
+module.exports = function bind(fn, thisArg) {
+  return function wrap() {
+    var args = new Array(arguments.length);
+    for (var i = 0; i < args.length; i++) {
+      args[i] = arguments[i];
+    }
+    return fn.apply(thisArg, args);
+  };
+};
+
+
+/***/ }),
+
+/***/ "./node_modules/axios/lib/helpers/buildURL.js":
+/*!****************************************************!*\
+  !*** ./node_modules/axios/lib/helpers/buildURL.js ***!
+  \****************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+"use strict";
+
+
+var utils = __webpack_require__(/*! ./../utils */ "./node_modules/axios/lib/utils.js");
+
+function encode(val) {
+  return encodeURIComponent(val).
+    replace(/%3A/gi, ':').
+    replace(/%24/g, '$').
+    replace(/%2C/gi, ',').
+    replace(/%20/g, '+').
+    replace(/%5B/gi, '[').
+    replace(/%5D/gi, ']');
+}
+
+/**
+ * Build a URL by appending params to the end
+ *
+ * @param {string} url The base of the url (e.g., http://www.google.com)
+ * @param {object} [params] The params to be appended
+ * @returns {string} The formatted url
+ */
+module.exports = function buildURL(url, params, paramsSerializer) {
+  /*eslint no-param-reassign:0*/
+  if (!params) {
+    return url;
+  }
+
+  var serializedParams;
+  if (paramsSerializer) {
+    serializedParams = paramsSerializer(params);
+  } else if (utils.isURLSearchParams(params)) {
+    serializedParams = params.toString();
+  } else {
+    var parts = [];
+
+    utils.forEach(params, function serialize(val, key) {
+      if (val === null || typeof val === 'undefined') {
+        return;
+      }
+
+      if (utils.isArray(val)) {
+        key = key + '[]';
+      } else {
+        val = [val];
+      }
+
+      utils.forEach(val, function parseValue(v) {
+        if (utils.isDate(v)) {
+          v = v.toISOString();
+        } else if (utils.isObject(v)) {
+          v = JSON.stringify(v);
+        }
+        parts.push(encode(key) + '=' + encode(v));
+      });
+    });
+
+    serializedParams = parts.join('&');
+  }
+
+  if (serializedParams) {
+    var hashmarkIndex = url.indexOf('#');
+    if (hashmarkIndex !== -1) {
+      url = url.slice(0, hashmarkIndex);
+    }
+
+    url += (url.indexOf('?') === -1 ? '?' : '&') + serializedParams;
+  }
+
+  return url;
+};
+
+
+/***/ }),
+
+/***/ "./node_modules/axios/lib/helpers/combineURLs.js":
+/*!*******************************************************!*\
+  !*** ./node_modules/axios/lib/helpers/combineURLs.js ***!
+  \*******************************************************/
+/***/ ((module) => {
+
+"use strict";
+
+
+/**
+ * Creates a new URL by combining the specified URLs
+ *
+ * @param {string} baseURL The base URL
+ * @param {string} relativeURL The relative URL
+ * @returns {string} The combined URL
+ */
+module.exports = function combineURLs(baseURL, relativeURL) {
+  return relativeURL
+    ? baseURL.replace(/\/+$/, '') + '/' + relativeURL.replace(/^\/+/, '')
+    : baseURL;
+};
+
+
+/***/ }),
+
+/***/ "./node_modules/axios/lib/helpers/cookies.js":
+/*!***************************************************!*\
+  !*** ./node_modules/axios/lib/helpers/cookies.js ***!
+  \***************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+"use strict";
+
+
+var utils = __webpack_require__(/*! ./../utils */ "./node_modules/axios/lib/utils.js");
+
+module.exports = (
+  utils.isStandardBrowserEnv() ?
+
+  // Standard browser envs support document.cookie
+    (function standardBrowserEnv() {
+      return {
+        write: function write(name, value, expires, path, domain, secure) {
+          var cookie = [];
+          cookie.push(name + '=' + encodeURIComponent(value));
+
+          if (utils.isNumber(expires)) {
+            cookie.push('expires=' + new Date(expires).toGMTString());
+          }
+
+          if (utils.isString(path)) {
+            cookie.push('path=' + path);
+          }
+
+          if (utils.isString(domain)) {
+            cookie.push('domain=' + domain);
+          }
+
+          if (secure === true) {
+            cookie.push('secure');
+          }
+
+          document.cookie = cookie.join('; ');
+        },
+
+        read: function read(name) {
+          var match = document.cookie.match(new RegExp('(^|;\\s*)(' + name + ')=([^;]*)'));
+          return (match ? decodeURIComponent(match[3]) : null);
+        },
+
+        remove: function remove(name) {
+          this.write(name, '', Date.now() - 86400000);
+        }
+      };
+    })() :
+
+  // Non standard browser env (web workers, react-native) lack needed support.
+    (function nonStandardBrowserEnv() {
+      return {
+        write: function write() {},
+        read: function read() { return null; },
+        remove: function remove() {}
+      };
+    })()
+);
+
+
+/***/ }),
+
+/***/ "./node_modules/axios/lib/helpers/isAbsoluteURL.js":
+/*!*********************************************************!*\
+  !*** ./node_modules/axios/lib/helpers/isAbsoluteURL.js ***!
+  \*********************************************************/
+/***/ ((module) => {
+
+"use strict";
+
+
+/**
+ * Determines whether the specified URL is absolute
+ *
+ * @param {string} url The URL to test
+ * @returns {boolean} True if the specified URL is absolute, otherwise false
+ */
+module.exports = function isAbsoluteURL(url) {
+  // A URL is considered absolute if it begins with "<scheme>://" or "//" (protocol-relative URL).
+  // RFC 3986 defines scheme name as a sequence of characters beginning with a letter and followed
+  // by any combination of letters, digits, plus, period, or hyphen.
+  return /^([a-z][a-z\d\+\-\.]*:)?\/\//i.test(url);
+};
+
+
+/***/ }),
+
+/***/ "./node_modules/axios/lib/helpers/isAxiosError.js":
+/*!********************************************************!*\
+  !*** ./node_modules/axios/lib/helpers/isAxiosError.js ***!
+  \********************************************************/
+/***/ ((module) => {
+
+"use strict";
+
+
+/**
+ * Determines whether the payload is an error thrown by Axios
+ *
+ * @param {*} payload The value to test
+ * @returns {boolean} True if the payload is an error thrown by Axios, otherwise false
+ */
+module.exports = function isAxiosError(payload) {
+  return (typeof payload === 'object') && (payload.isAxiosError === true);
+};
+
+
+/***/ }),
+
+/***/ "./node_modules/axios/lib/helpers/isURLSameOrigin.js":
+/*!***********************************************************!*\
+  !*** ./node_modules/axios/lib/helpers/isURLSameOrigin.js ***!
+  \***********************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+"use strict";
+
+
+var utils = __webpack_require__(/*! ./../utils */ "./node_modules/axios/lib/utils.js");
+
+module.exports = (
+  utils.isStandardBrowserEnv() ?
+
+  // Standard browser envs have full support of the APIs needed to test
+  // whether the request URL is of the same origin as current location.
+    (function standardBrowserEnv() {
+      var msie = /(msie|trident)/i.test(navigator.userAgent);
+      var urlParsingNode = document.createElement('a');
+      var originURL;
+
+      /**
+    * Parse a URL to discover it's components
+    *
+    * @param {String} url The URL to be parsed
+    * @returns {Object}
+    */
+      function resolveURL(url) {
+        var href = url;
+
+        if (msie) {
+        // IE needs attribute set twice to normalize properties
+          urlParsingNode.setAttribute('href', href);
+          href = urlParsingNode.href;
+        }
+
+        urlParsingNode.setAttribute('href', href);
+
+        // urlParsingNode provides the UrlUtils interface - http://url.spec.whatwg.org/#urlutils
+        return {
+          href: urlParsingNode.href,
+          protocol: urlParsingNode.protocol ? urlParsingNode.protocol.replace(/:$/, '') : '',
+          host: urlParsingNode.host,
+          search: urlParsingNode.search ? urlParsingNode.search.replace(/^\?/, '') : '',
+          hash: urlParsingNode.hash ? urlParsingNode.hash.replace(/^#/, '') : '',
+          hostname: urlParsingNode.hostname,
+          port: urlParsingNode.port,
+          pathname: (urlParsingNode.pathname.charAt(0) === '/') ?
+            urlParsingNode.pathname :
+            '/' + urlParsingNode.pathname
+        };
+      }
+
+      originURL = resolveURL(window.location.href);
+
+      /**
+    * Determine if a URL shares the same origin as the current location
+    *
+    * @param {String} requestURL The URL to test
+    * @returns {boolean} True if URL shares the same origin, otherwise false
+    */
+      return function isURLSameOrigin(requestURL) {
+        var parsed = (utils.isString(requestURL)) ? resolveURL(requestURL) : requestURL;
+        return (parsed.protocol === originURL.protocol &&
+            parsed.host === originURL.host);
+      };
+    })() :
+
+  // Non standard browser envs (web workers, react-native) lack needed support.
+    (function nonStandardBrowserEnv() {
+      return function isURLSameOrigin() {
+        return true;
+      };
+    })()
+);
+
+
+/***/ }),
+
+/***/ "./node_modules/axios/lib/helpers/normalizeHeaderName.js":
+/*!***************************************************************!*\
+  !*** ./node_modules/axios/lib/helpers/normalizeHeaderName.js ***!
+  \***************************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+"use strict";
+
+
+var utils = __webpack_require__(/*! ../utils */ "./node_modules/axios/lib/utils.js");
+
+module.exports = function normalizeHeaderName(headers, normalizedName) {
+  utils.forEach(headers, function processHeader(value, name) {
+    if (name !== normalizedName && name.toUpperCase() === normalizedName.toUpperCase()) {
+      headers[normalizedName] = value;
+      delete headers[name];
+    }
+  });
+};
+
+
+/***/ }),
+
+/***/ "./node_modules/axios/lib/helpers/parseHeaders.js":
+/*!********************************************************!*\
+  !*** ./node_modules/axios/lib/helpers/parseHeaders.js ***!
+  \********************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+"use strict";
+
+
+var utils = __webpack_require__(/*! ./../utils */ "./node_modules/axios/lib/utils.js");
+
+// Headers whose duplicates are ignored by node
+// c.f. https://nodejs.org/api/http.html#http_message_headers
+var ignoreDuplicateOf = [
+  'age', 'authorization', 'content-length', 'content-type', 'etag',
+  'expires', 'from', 'host', 'if-modified-since', 'if-unmodified-since',
+  'last-modified', 'location', 'max-forwards', 'proxy-authorization',
+  'referer', 'retry-after', 'user-agent'
+];
+
+/**
+ * Parse headers into an object
+ *
+ * ```
+ * Date: Wed, 27 Aug 2014 08:58:49 GMT
+ * Content-Type: application/json
+ * Connection: keep-alive
+ * Transfer-Encoding: chunked
+ * ```
+ *
+ * @param {String} headers Headers needing to be parsed
+ * @returns {Object} Headers parsed into an object
+ */
+module.exports = function parseHeaders(headers) {
+  var parsed = {};
+  var key;
+  var val;
+  var i;
+
+  if (!headers) { return parsed; }
+
+  utils.forEach(headers.split('\n'), function parser(line) {
+    i = line.indexOf(':');
+    key = utils.trim(line.substr(0, i)).toLowerCase();
+    val = utils.trim(line.substr(i + 1));
+
+    if (key) {
+      if (parsed[key] && ignoreDuplicateOf.indexOf(key) >= 0) {
+        return;
+      }
+      if (key === 'set-cookie') {
+        parsed[key] = (parsed[key] ? parsed[key] : []).concat([val]);
+      } else {
+        parsed[key] = parsed[key] ? parsed[key] + ', ' + val : val;
+      }
+    }
+  });
+
+  return parsed;
+};
+
+
+/***/ }),
+
+/***/ "./node_modules/axios/lib/helpers/spread.js":
+/*!**************************************************!*\
+  !*** ./node_modules/axios/lib/helpers/spread.js ***!
+  \**************************************************/
+/***/ ((module) => {
+
+"use strict";
+
+
+/**
+ * Syntactic sugar for invoking a function and expanding an array for arguments.
+ *
+ * Common use case would be to use `Function.prototype.apply`.
+ *
+ *  ```js
+ *  function f(x, y, z) {}
+ *  var args = [1, 2, 3];
+ *  f.apply(null, args);
+ *  ```
+ *
+ * With `spread` this example can be re-written.
+ *
+ *  ```js
+ *  spread(function(x, y, z) {})([1, 2, 3]);
+ *  ```
+ *
+ * @param {Function} callback
+ * @returns {Function}
+ */
+module.exports = function spread(callback) {
+  return function wrap(arr) {
+    return callback.apply(null, arr);
+  };
+};
+
+
+/***/ }),
+
+/***/ "./node_modules/axios/lib/helpers/validator.js":
+/*!*****************************************************!*\
+  !*** ./node_modules/axios/lib/helpers/validator.js ***!
+  \*****************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+"use strict";
+
+
+var pkg = __webpack_require__(/*! ./../../package.json */ "./node_modules/axios/package.json");
+
+var validators = {};
+
+// eslint-disable-next-line func-names
+['object', 'boolean', 'number', 'function', 'string', 'symbol'].forEach(function(type, i) {
+  validators[type] = function validator(thing) {
+    return typeof thing === type || 'a' + (i < 1 ? 'n ' : ' ') + type;
+  };
+});
+
+var deprecatedWarnings = {};
+var currentVerArr = pkg.version.split('.');
+
+/**
+ * Compare package versions
+ * @param {string} version
+ * @param {string?} thanVersion
+ * @returns {boolean}
+ */
+function isOlderVersion(version, thanVersion) {
+  var pkgVersionArr = thanVersion ? thanVersion.split('.') : currentVerArr;
+  var destVer = version.split('.');
+  for (var i = 0; i < 3; i++) {
+    if (pkgVersionArr[i] > destVer[i]) {
+      return true;
+    } else if (pkgVersionArr[i] < destVer[i]) {
+      return false;
+    }
+  }
+  return false;
+}
+
+/**
+ * Transitional option validator
+ * @param {function|boolean?} validator
+ * @param {string?} version
+ * @param {string} message
+ * @returns {function}
+ */
+validators.transitional = function transitional(validator, version, message) {
+  var isDeprecated = version && isOlderVersion(version);
+
+  function formatMessage(opt, desc) {
+    return '[Axios v' + pkg.version + '] Transitional option \'' + opt + '\'' + desc + (message ? '. ' + message : '');
+  }
+
+  // eslint-disable-next-line func-names
+  return function(value, opt, opts) {
+    if (validator === false) {
+      throw new Error(formatMessage(opt, ' has been removed in ' + version));
+    }
+
+    if (isDeprecated && !deprecatedWarnings[opt]) {
+      deprecatedWarnings[opt] = true;
+      // eslint-disable-next-line no-console
+      console.warn(
+        formatMessage(
+          opt,
+          ' has been deprecated since v' + version + ' and will be removed in the near future'
+        )
+      );
+    }
+
+    return validator ? validator(value, opt, opts) : true;
+  };
+};
+
+/**
+ * Assert object's properties type
+ * @param {object} options
+ * @param {object} schema
+ * @param {boolean?} allowUnknown
+ */
+
+function assertOptions(options, schema, allowUnknown) {
+  if (typeof options !== 'object') {
+    throw new TypeError('options must be an object');
+  }
+  var keys = Object.keys(options);
+  var i = keys.length;
+  while (i-- > 0) {
+    var opt = keys[i];
+    var validator = schema[opt];
+    if (validator) {
+      var value = options[opt];
+      var result = value === undefined || validator(value, opt, options);
+      if (result !== true) {
+        throw new TypeError('option ' + opt + ' must be ' + result);
+      }
+      continue;
+    }
+    if (allowUnknown !== true) {
+      throw Error('Unknown option ' + opt);
+    }
+  }
+}
+
+module.exports = {
+  isOlderVersion: isOlderVersion,
+  assertOptions: assertOptions,
+  validators: validators
+};
+
+
+/***/ }),
+
+/***/ "./node_modules/axios/lib/utils.js":
+/*!*****************************************!*\
+  !*** ./node_modules/axios/lib/utils.js ***!
+  \*****************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+"use strict";
+
+
+var bind = __webpack_require__(/*! ./helpers/bind */ "./node_modules/axios/lib/helpers/bind.js");
+
+// utils is a library of generic helper functions non-specific to axios
+
+var toString = Object.prototype.toString;
+
+/**
+ * Determine if a value is an Array
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is an Array, otherwise false
+ */
+function isArray(val) {
+  return toString.call(val) === '[object Array]';
+}
+
+/**
+ * Determine if a value is undefined
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if the value is undefined, otherwise false
+ */
+function isUndefined(val) {
+  return typeof val === 'undefined';
+}
+
+/**
+ * Determine if a value is a Buffer
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a Buffer, otherwise false
+ */
+function isBuffer(val) {
+  return val !== null && !isUndefined(val) && val.constructor !== null && !isUndefined(val.constructor)
+    && typeof val.constructor.isBuffer === 'function' && val.constructor.isBuffer(val);
+}
+
+/**
+ * Determine if a value is an ArrayBuffer
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is an ArrayBuffer, otherwise false
+ */
+function isArrayBuffer(val) {
+  return toString.call(val) === '[object ArrayBuffer]';
+}
+
+/**
+ * Determine if a value is a FormData
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is an FormData, otherwise false
+ */
+function isFormData(val) {
+  return (typeof FormData !== 'undefined') && (val instanceof FormData);
+}
+
+/**
+ * Determine if a value is a view on an ArrayBuffer
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a view on an ArrayBuffer, otherwise false
+ */
+function isArrayBufferView(val) {
+  var result;
+  if ((typeof ArrayBuffer !== 'undefined') && (ArrayBuffer.isView)) {
+    result = ArrayBuffer.isView(val);
+  } else {
+    result = (val) && (val.buffer) && (val.buffer instanceof ArrayBuffer);
+  }
+  return result;
+}
+
+/**
+ * Determine if a value is a String
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a String, otherwise false
+ */
+function isString(val) {
+  return typeof val === 'string';
+}
+
+/**
+ * Determine if a value is a Number
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a Number, otherwise false
+ */
+function isNumber(val) {
+  return typeof val === 'number';
+}
+
+/**
+ * Determine if a value is an Object
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is an Object, otherwise false
+ */
+function isObject(val) {
+  return val !== null && typeof val === 'object';
+}
+
+/**
+ * Determine if a value is a plain Object
+ *
+ * @param {Object} val The value to test
+ * @return {boolean} True if value is a plain Object, otherwise false
+ */
+function isPlainObject(val) {
+  if (toString.call(val) !== '[object Object]') {
+    return false;
+  }
+
+  var prototype = Object.getPrototypeOf(val);
+  return prototype === null || prototype === Object.prototype;
+}
+
+/**
+ * Determine if a value is a Date
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a Date, otherwise false
+ */
+function isDate(val) {
+  return toString.call(val) === '[object Date]';
+}
+
+/**
+ * Determine if a value is a File
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a File, otherwise false
+ */
+function isFile(val) {
+  return toString.call(val) === '[object File]';
+}
+
+/**
+ * Determine if a value is a Blob
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a Blob, otherwise false
+ */
+function isBlob(val) {
+  return toString.call(val) === '[object Blob]';
+}
+
+/**
+ * Determine if a value is a Function
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a Function, otherwise false
+ */
+function isFunction(val) {
+  return toString.call(val) === '[object Function]';
+}
+
+/**
+ * Determine if a value is a Stream
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a Stream, otherwise false
+ */
+function isStream(val) {
+  return isObject(val) && isFunction(val.pipe);
+}
+
+/**
+ * Determine if a value is a URLSearchParams object
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a URLSearchParams object, otherwise false
+ */
+function isURLSearchParams(val) {
+  return typeof URLSearchParams !== 'undefined' && val instanceof URLSearchParams;
+}
+
+/**
+ * Trim excess whitespace off the beginning and end of a string
+ *
+ * @param {String} str The String to trim
+ * @returns {String} The String freed of excess whitespace
+ */
+function trim(str) {
+  return str.trim ? str.trim() : str.replace(/^\s+|\s+$/g, '');
+}
+
+/**
+ * Determine if we're running in a standard browser environment
+ *
+ * This allows axios to run in a web worker, and react-native.
+ * Both environments support XMLHttpRequest, but not fully standard globals.
+ *
+ * web workers:
+ *  typeof window -> undefined
+ *  typeof document -> undefined
+ *
+ * react-native:
+ *  navigator.product -> 'ReactNative'
+ * nativescript
+ *  navigator.product -> 'NativeScript' or 'NS'
+ */
+function isStandardBrowserEnv() {
+  if (typeof navigator !== 'undefined' && (navigator.product === 'ReactNative' ||
+                                           navigator.product === 'NativeScript' ||
+                                           navigator.product === 'NS')) {
+    return false;
+  }
+  return (
+    typeof window !== 'undefined' &&
+    typeof document !== 'undefined'
+  );
+}
+
+/**
+ * Iterate over an Array or an Object invoking a function for each item.
+ *
+ * If `obj` is an Array callback will be called passing
+ * the value, index, and complete array for each item.
+ *
+ * If 'obj' is an Object callback will be called passing
+ * the value, key, and complete object for each property.
+ *
+ * @param {Object|Array} obj The object to iterate
+ * @param {Function} fn The callback to invoke for each item
+ */
+function forEach(obj, fn) {
+  // Don't bother if no value provided
+  if (obj === null || typeof obj === 'undefined') {
+    return;
+  }
+
+  // Force an array if not already something iterable
+  if (typeof obj !== 'object') {
+    /*eslint no-param-reassign:0*/
+    obj = [obj];
+  }
+
+  if (isArray(obj)) {
+    // Iterate over array values
+    for (var i = 0, l = obj.length; i < l; i++) {
+      fn.call(null, obj[i], i, obj);
+    }
+  } else {
+    // Iterate over object keys
+    for (var key in obj) {
+      if (Object.prototype.hasOwnProperty.call(obj, key)) {
+        fn.call(null, obj[key], key, obj);
+      }
+    }
+  }
+}
+
+/**
+ * Accepts varargs expecting each argument to be an object, then
+ * immutably merges the properties of each object and returns result.
+ *
+ * When multiple objects contain the same key the later object in
+ * the arguments list will take precedence.
+ *
+ * Example:
+ *
+ * ```js
+ * var result = merge({foo: 123}, {foo: 456});
+ * console.log(result.foo); // outputs 456
+ * ```
+ *
+ * @param {Object} obj1 Object to merge
+ * @returns {Object} Result of all merge properties
+ */
+function merge(/* obj1, obj2, obj3, ... */) {
+  var result = {};
+  function assignValue(val, key) {
+    if (isPlainObject(result[key]) && isPlainObject(val)) {
+      result[key] = merge(result[key], val);
+    } else if (isPlainObject(val)) {
+      result[key] = merge({}, val);
+    } else if (isArray(val)) {
+      result[key] = val.slice();
+    } else {
+      result[key] = val;
+    }
+  }
+
+  for (var i = 0, l = arguments.length; i < l; i++) {
+    forEach(arguments[i], assignValue);
+  }
+  return result;
+}
+
+/**
+ * Extends object a by mutably adding to it the properties of object b.
+ *
+ * @param {Object} a The object to be extended
+ * @param {Object} b The object to copy properties from
+ * @param {Object} thisArg The object to bind function to
+ * @return {Object} The resulting value of object a
+ */
+function extend(a, b, thisArg) {
+  forEach(b, function assignValue(val, key) {
+    if (thisArg && typeof val === 'function') {
+      a[key] = bind(val, thisArg);
+    } else {
+      a[key] = val;
+    }
+  });
+  return a;
+}
+
+/**
+ * Remove byte order marker. This catches EF BB BF (the UTF-8 BOM)
+ *
+ * @param {string} content with BOM
+ * @return {string} content value without BOM
+ */
+function stripBOM(content) {
+  if (content.charCodeAt(0) === 0xFEFF) {
+    content = content.slice(1);
+  }
+  return content;
+}
+
+module.exports = {
+  isArray: isArray,
+  isArrayBuffer: isArrayBuffer,
+  isBuffer: isBuffer,
+  isFormData: isFormData,
+  isArrayBufferView: isArrayBufferView,
+  isString: isString,
+  isNumber: isNumber,
+  isObject: isObject,
+  isPlainObject: isPlainObject,
+  isUndefined: isUndefined,
+  isDate: isDate,
+  isFile: isFile,
+  isBlob: isBlob,
+  isFunction: isFunction,
+  isStream: isStream,
+  isURLSearchParams: isURLSearchParams,
+  isStandardBrowserEnv: isStandardBrowserEnv,
+  forEach: forEach,
+  merge: merge,
+  extend: extend,
+  trim: trim,
+  stripBOM: stripBOM
+};
+
+
+/***/ }),
+
 /***/ "./node_modules/babel-helper-vue-jsx-merge-props/index.js":
 /*!****************************************************************!*\
   !*** ./node_modules/babel-helper-vue-jsx-merge-props/index.js ***!
@@ -23733,53 +30180,54 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _section_Header_vue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./section/Header.vue */ "./resources/js/components/section/Header.vue");
 /* harmony import */ var _section_Body_vue__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./section/Body.vue */ "./resources/js/components/section/Body.vue");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_2__);
 //
 //
 //
 //
 //
 //
+
 
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   components: {
     Header: _section_Header_vue__WEBPACK_IMPORTED_MODULE_0__["default"],
     Body: _section_Body_vue__WEBPACK_IMPORTED_MODULE_1__["default"]
-  }
-});
-
-/***/ }),
-
-/***/ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-5[0].rules[0].use[0]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/js/components/Home.vue?vue&type=script&lang=js&":
-/*!***********************************************************************************************************************************************************************************************************!*\
-  !*** ./node_modules/babel-loader/lib/index.js??clonedRuleSet-5[0].rules[0].use[0]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/js/components/Home.vue?vue&type=script&lang=js& ***!
-  \***********************************************************************************************************************************************************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
-/* harmony export */ });
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
+  },
+  data: function data() {
+    return {
+      items: [],
+      username: null,
+      email: null
+    };
+  },
   methods: {
-    onSearch: function onSearch(value) {
-      console.log(value);
+    getList: function getList() {
+      var _this = this;
+
+      axios__WEBPACK_IMPORTED_MODULE_2___default().get('api/items').then(function (res) {
+        _this.items = res.data;
+      })["catch"](function (err) {
+        console.log(err);
+      });
+    },
+    init: function init() {
+      var _this2 = this;
+
+      axios__WEBPACK_IMPORTED_MODULE_2___default().get('api/auth/init').then(function (res) {
+        console.log(res.data);
+        _this2.username = res.data.username;
+        _this2.email = res.data.email;
+      })["catch"](function (err) {
+        console.log(err);
+      });
     }
+  },
+  created: function created() {
+    this.getList();
+    this.init();
   }
 });
 
@@ -23796,7 +30244,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
-/* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.esm.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_0__);
 //
 //
 //
@@ -23814,9 +30263,34 @@ __webpack_require__.r(__webpack_exports__);
 //
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
-  setup: function setup(props, _ref) {
-    var emit = _ref.emit;
-    var text = (0,vue__WEBPACK_IMPORTED_MODULE_0__.ref)('');
+  props: ['username', 'email'],
+  data: function data() {
+    return {
+      item: {
+        username: username,
+        email: email,
+        text: ""
+      }
+    };
+  },
+  methods: {
+    addItem: function addItem() {
+      var _this = this;
+
+      if (this.item.text == "") return;
+      console.log(this.item);
+      axios__WEBPACK_IMPORTED_MODULE_0___default().post("api/item/store", {
+        item: this.item
+      }).then(function (res) {
+        if (res.status == 201) {
+          _this.item.text = "";
+
+          _this.$emit('reloadlist');
+        }
+      })["catch"](function (err) {
+        console.log(err);
+      });
+    }
   }
 });
 
@@ -23861,6 +30335,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_0__);
 //
 //
 //
@@ -23876,24 +30352,33 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
-  methods: {},
+  props: ["item"],
+  methods: {
+    updateCheck: function updateCheck() {
+      var _this = this;
+
+      axios__WEBPACK_IMPORTED_MODULE_0___default().put("api/item/" + this.item.id, {
+        item: this.item
+      }).then(function (res) {
+        if (res.status == 200) _this.$emit("itemchanged");
+      })["catch"](function (err) {
+        console.log(err);
+      });
+    }
+  },
   data: function data() {
     return {
       value: true
     };
-  },
-  props: {
-    model: {
-      required: true,
-      "default": {
-        id: 0,
-        fullName: "Vasia Punko",
-        email: "email@mail.ru",
-        text: "Lorem impsume Lorem impsume Lorem impsume Lorem impsume Lorem impsume Lorem impsume Lorem impsume Lorem impsume Lorem impsume Lorem impsume Lorem impsume Lorem impsume ",
-        status: false
-      }
-    }
   }
 });
 
@@ -23920,9 +30405,15 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
 
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
+  props: ["items", "username", "email"],
   components: {
     AddTask: _basic_add_task_vue__WEBPACK_IMPORTED_MODULE_0__["default"],
     TaskItem: _basic_task_item_vue__WEBPACK_IMPORTED_MODULE_1__["default"]
@@ -23969,6 +30460,385 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ }),
 
+/***/ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-5[0].rules[0].use[0]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/js/components/section/Auth/Login.vue?vue&type=script&lang=js&":
+/*!*************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/babel-loader/lib/index.js??clonedRuleSet-5[0].rules[0].use[0]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/js/components/section/Auth/Login.vue?vue&type=script&lang=js& ***!
+  \*************************************************************************************************************************************************************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_0__);
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
+
+function hasErrors(fieldsError) {
+  return Object.keys(fieldsError).some(function (field) {
+    return fieldsError[field];
+  });
+}
+
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
+  name: "login",
+  data: function data() {
+    return {
+      hasErrors: hasErrors,
+      form: this.$form.createForm(this, {
+        name: "login"
+      })
+    };
+  },
+  mounted: function mounted() {
+    var _this = this;
+
+    this.$nextTick(function () {
+      // To disabled submit button at the beginning.
+      _this.form.validateFields();
+    });
+  },
+  methods: {
+    // Only show error after a field is touched.
+    emailError: function emailError() {
+      var _this$form = this.form,
+          getFieldError = _this$form.getFieldError,
+          isFieldTouched = _this$form.isFieldTouched;
+      return isFieldTouched("email") && getFieldError("email");
+    },
+    // Only show error after a field is touched.
+    passwordError: function passwordError() {
+      var _this$form2 = this.form,
+          getFieldError = _this$form2.getFieldError,
+          isFieldTouched = _this$form2.isFieldTouched;
+      return isFieldTouched("password") && getFieldError("password");
+    },
+    validEmail: function validEmail(rule, value, callback) {
+      this.email = value;
+      var re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+      if (!re.test(this.email) && this.email) callback("Incorrect email!");
+      callback();
+    },
+    handleSubmit: function handleSubmit(e) {
+      var _this2 = this;
+
+      e.preventDefault();
+      this.form.validateFields(function (err, values) {
+        if (!err) {
+          var data = {
+            email: values.email,
+            password: values.password
+          };
+          axios__WEBPACK_IMPORTED_MODULE_0___default().post("api/auth/login", data).then(function (res) {
+            _this2.$router.push("/");
+          })["catch"](function (err) {
+            return console.log(err);
+          });
+        }
+      });
+    }
+  }
+});
+
+/***/ }),
+
+/***/ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-5[0].rules[0].use[0]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/js/components/section/Auth/Register.vue?vue&type=script&lang=js&":
+/*!****************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/babel-loader/lib/index.js??clonedRuleSet-5[0].rules[0].use[0]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/js/components/section/Auth/Register.vue?vue&type=script&lang=js& ***!
+  \****************************************************************************************************************************************************************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_0__);
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
+
+function hasErrors(fieldsError) {
+  return Object.keys(fieldsError).some(function (field) {
+    return fieldsError[field];
+  });
+}
+
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
+  name: "register",
+  data: function data() {
+    return {
+      hasErrors: hasErrors,
+      form: this.$form.createForm(this, {
+        name: "register"
+      })
+    };
+  },
+  mounted: function mounted() {
+    var _this = this;
+
+    this.$nextTick(function () {
+      // To disabled submit button at the beginning.
+      _this.form.validateFields();
+    });
+  },
+  methods: {
+    // Only show error after a field is touched.
+    userNameError: function userNameError() {
+      var _this$form = this.form,
+          getFieldError = _this$form.getFieldError,
+          isFieldTouched = _this$form.isFieldTouched;
+      return isFieldTouched("userName") && getFieldError("userName");
+    },
+    emailError: function emailError() {
+      var _this$form2 = this.form,
+          getFieldError = _this$form2.getFieldError,
+          isFieldTouched = _this$form2.isFieldTouched;
+      return isFieldTouched("email") && getFieldError("email");
+    },
+    // Only show error after a field is touched.
+    passwordError: function passwordError() {
+      var _this$form3 = this.form,
+          getFieldError = _this$form3.getFieldError,
+          isFieldTouched = _this$form3.isFieldTouched;
+      return isFieldTouched("password") && getFieldError("password");
+    },
+    passwordErrorConfirmed: function passwordErrorConfirmed() {
+      var _this$form4 = this.form,
+          getFieldError = _this$form4.getFieldError,
+          isFieldTouched = _this$form4.isFieldTouched;
+      return isFieldTouched("password_confirmed") && getFieldError("password_confirmed");
+    },
+    validEmail: function validEmail(rule, value, callback) {
+      this.email = value;
+      var re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+      if (!re.test(this.email) && this.email) callback("Incorrect email!");
+      callback();
+    },
+    handlePass: function handlePass(rule, value, callback) {
+      this.password = value;
+      callback();
+    },
+    handleConfirmedPass: function handleConfirmedPass(rule, value, callback) {
+      this.password_confirmed = value;
+
+      if (this.password !== this.password_confirmed) {
+        callback("Password not confirmed!");
+      }
+
+      callback();
+    },
+    handleSubmit: function handleSubmit(e) {
+      var _this2 = this;
+
+      e.preventDefault();
+      this.form.validateFields(function (err, values) {
+        if (!err) {
+          var data = {
+            username: values.username,
+            email: values.email,
+            password: values.password
+          };
+          axios__WEBPACK_IMPORTED_MODULE_0___default().post('api/auth/register', data).then(function (res) {
+            _this2.$router.push('/login');
+          })["catch"](function (err) {
+            return console.log(err);
+          });
+        }
+      });
+    }
+  }
+});
+
+/***/ }),
+
 /***/ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-5[0].rules[0].use[0]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/js/components/section/Body.vue?vue&type=script&lang=js&":
 /*!*******************************************************************************************************************************************************************************************************************!*\
   !*** ./node_modules/babel-loader/lib/index.js??clonedRuleSet-5[0].rules[0].use[0]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/js/components/section/Body.vue?vue&type=script&lang=js& ***!
@@ -23992,6 +30862,7 @@ __webpack_require__.r(__webpack_exports__);
 
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
+  props: ["items", "username", "email"],
   components: {
     ToolBar: _common_tool_bar_vue__WEBPACK_IMPORTED_MODULE_0__["default"],
     MainBackground: _common_main_background_vue__WEBPACK_IMPORTED_MODULE_1__["default"]
@@ -24025,6 +30896,9 @@ __webpack_require__.r(__webpack_exports__);
   methods: {
     onSearch: function onSearch(value) {
       console.log(value);
+    },
+    Link: function Link() {
+      this.$router.push('/register');
     }
   }
 });
@@ -24040,7 +30914,7 @@ __webpack_require__.r(__webpack_exports__);
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.esm.js");
-/* harmony import */ var vue_router__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! vue-router */ "./node_modules/vue-router/dist/vue-router.esm.js");
+/* harmony import */ var vue_router__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! vue-router */ "./node_modules/vue-router/dist/vue-router.esm.js");
 /* harmony import */ var ant_design_vue__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ant-design-vue */ "./node_modules/ant-design-vue/es/date-picker/index.js");
 /* harmony import */ var ant_design_vue__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ant-design-vue */ "./node_modules/ant-design-vue/es/avatar/index.js");
 /* harmony import */ var ant_design_vue__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ant-design-vue */ "./node_modules/ant-design-vue/es/input/index.js");
@@ -24048,10 +30922,12 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var ant_design_vue__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ant-design-vue */ "./node_modules/ant-design-vue/es/dropdown/index.js");
 /* harmony import */ var ant_design_vue__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ant-design-vue */ "./node_modules/ant-design-vue/es/icon/index.js");
 /* harmony import */ var ant_design_vue__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ant-design-vue */ "./node_modules/ant-design-vue/es/menu/index.js");
+/* harmony import */ var ant_design_vue__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ant-design-vue */ "./node_modules/ant-design-vue/es/form/index.js");
+/* harmony import */ var ant_design_vue__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ant-design-vue */ "./node_modules/ant-design-vue/es/popover/index.js");
 /* harmony import */ var ant_design_vue_dist_antd_css__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ant-design-vue/dist/antd.css */ "./node_modules/ant-design-vue/dist/antd.css");
-/* harmony import */ var _components_App__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./components/App */ "./resources/js/components/App.vue");
-/* harmony import */ var _components_Hello__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./components/Hello */ "./resources/js/components/Hello.vue");
-/* harmony import */ var _components_Home__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ./components/Home */ "./resources/js/components/Home.vue");
+/* harmony import */ var _components_App__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ./components/App */ "./resources/js/components/App.vue");
+/* harmony import */ var _components_section_Auth_Register_vue__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! ./components/section/Auth/Register.vue */ "./resources/js/components/section/Auth/Register.vue");
+/* harmony import */ var _components_section_Auth_Login_vue__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! ./components/section/Auth/Login.vue */ "./resources/js/components/section/Auth/Login.vue");
 
 
 
@@ -24063,26 +30939,32 @@ vue__WEBPACK_IMPORTED_MODULE_1__["default"].use(ant_design_vue__WEBPACK_IMPORTED
 vue__WEBPACK_IMPORTED_MODULE_1__["default"].use(ant_design_vue__WEBPACK_IMPORTED_MODULE_6__["default"]);
 vue__WEBPACK_IMPORTED_MODULE_1__["default"].use(ant_design_vue__WEBPACK_IMPORTED_MODULE_7__["default"]);
 vue__WEBPACK_IMPORTED_MODULE_1__["default"].use(ant_design_vue__WEBPACK_IMPORTED_MODULE_8__["default"]);
-vue__WEBPACK_IMPORTED_MODULE_1__["default"].use(vue_router__WEBPACK_IMPORTED_MODULE_9__["default"]);
+vue__WEBPACK_IMPORTED_MODULE_1__["default"].use(ant_design_vue__WEBPACK_IMPORTED_MODULE_9__["default"]);
+vue__WEBPACK_IMPORTED_MODULE_1__["default"].use(ant_design_vue__WEBPACK_IMPORTED_MODULE_10__["default"]);
+vue__WEBPACK_IMPORTED_MODULE_1__["default"].use(vue_router__WEBPACK_IMPORTED_MODULE_11__["default"]);
 
 
 
-var router = new vue_router__WEBPACK_IMPORTED_MODULE_9__["default"]({
+var router = new vue_router__WEBPACK_IMPORTED_MODULE_11__["default"]({
   mode: 'history',
   routes: [{
     path: '/',
     name: 'home',
-    component: _components_Home__WEBPACK_IMPORTED_MODULE_12__["default"]
+    component: _components_App__WEBPACK_IMPORTED_MODULE_12__["default"]
   }, {
-    path: '/hello',
-    name: 'hello',
-    component: _components_Hello__WEBPACK_IMPORTED_MODULE_11__["default"]
+    path: '/register',
+    name: 'register',
+    component: _components_section_Auth_Register_vue__WEBPACK_IMPORTED_MODULE_13__["default"]
+  }, {
+    path: '/login',
+    name: 'login',
+    component: _components_section_Auth_Login_vue__WEBPACK_IMPORTED_MODULE_14__["default"]
   }]
 });
 var app = new vue__WEBPACK_IMPORTED_MODULE_1__["default"]({
   el: '#app',
   components: {
-    App: _components_App__WEBPACK_IMPORTED_MODULE_10__["default"]
+    App: _components_App__WEBPACK_IMPORTED_MODULE_12__["default"]
   },
   router: router
 });
@@ -26691,35 +33573,6 @@ ___CSS_LOADER_EXPORT___.locals = {
 
 /***/ }),
 
-/***/ "./node_modules/css-loader/dist/cjs.js??clonedRuleSet-11[0].rules[0].use[1]!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-11[0].rules[0].use[2]!./node_modules/sass-loader/dist/cjs.js??clonedRuleSet-11[0].rules[0].use[3]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/js/components/Home.vue?vue&type=style&index=0&lang=scss&module=true&":
-/*!**************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
-  !*** ./node_modules/css-loader/dist/cjs.js??clonedRuleSet-11[0].rules[0].use[1]!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-11[0].rules[0].use[2]!./node_modules/sass-loader/dist/cjs.js??clonedRuleSet-11[0].rules[0].use[3]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/js/components/Home.vue?vue&type=style&index=0&lang=scss&module=true& ***!
-  \**************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************/
-/***/ ((module, __webpack_exports__, __webpack_require__) => {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
-/* harmony export */ });
-/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/api.js */ "./node_modules/css-loader/dist/runtime/api.js");
-/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_0__);
-// Imports
-
-var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_0___default()(function(i){return i[1]});
-// Module
-___CSS_LOADER_EXPORT___.push([module.id, ".L8OEXb5hNqVsKivSJvJFI {\n  width: 100%;\n  max-width: 900px;\n  margin: 0 auto;\n  padding: 0;\n}\n.L8OEXb5hNqVsKivSJvJFI .aqL2vz2dkwVFcVxLf2w48 {\n  height: 80px;\n  width: 100%;\n  display: flex;\n  justify-content: space-between;\n  align-items: center;\n}\n.L8OEXb5hNqVsKivSJvJFI .aqL2vz2dkwVFcVxLf2w48 .CbkP1RuDK3BCKWoJu3Wum {\n  font-weight: 700;\n  font-size: 24px;\n}", ""]);
-// Exports
-___CSS_LOADER_EXPORT___.locals = {
-	"container": "L8OEXb5hNqVsKivSJvJFI",
-	"header": "aqL2vz2dkwVFcVxLf2w48",
-	"logo": "CbkP1RuDK3BCKWoJu3Wum"
-};
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
-
-
-/***/ }),
-
 /***/ "./node_modules/css-loader/dist/cjs.js??clonedRuleSet-11[0].rules[0].use[1]!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-11[0].rules[0].use[2]!./node_modules/sass-loader/dist/cjs.js??clonedRuleSet-11[0].rules[0].use[3]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/js/components/section/Header.vue?vue&type=style&index=0&lang=scss&module=true&":
 /*!************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
   !*** ./node_modules/css-loader/dist/cjs.js??clonedRuleSet-11[0].rules[0].use[1]!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-11[0].rules[0].use[2]!./node_modules/sass-loader/dist/cjs.js??clonedRuleSet-11[0].rules[0].use[3]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/js/components/section/Header.vue?vue&type=style&index=0&lang=scss&module=true& ***!
@@ -26737,7 +33590,7 @@ __webpack_require__.r(__webpack_exports__);
 
 var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_0___default()(function(i){return i[1]});
 // Module
-___CSS_LOADER_EXPORT___.push([module.id, "._3dhhKDxY6hP3tjApt9CT5z {\n  height: 80px;\n  width: 100%;\n  display: flex;\n  justify-content: space-between;\n  align-items: center;\n}\n._3dhhKDxY6hP3tjApt9CT5z ._1sjvsLIEJ61RLdd4r8sWCy {\n  font-weight: 700;\n  font-size: 24px;\n}\n._3dhhKDxY6hP3tjApt9CT5z ._2Kw08qrUJzxusp_EXx0pYD {\n  display: flex;\n  justify-content: flex-end;\n}\n._3dhhKDxY6hP3tjApt9CT5z ._1sjvsLIEJ61RLdd4r8sWCy,\n._3dhhKDxY6hP3tjApt9CT5z ._2Kw08qrUJzxusp_EXx0pYD {\n  width: 10%;\n}", ""]);
+___CSS_LOADER_EXPORT___.push([module.id, "._3dhhKDxY6hP3tjApt9CT5z {\n  height: 80px;\n  width: 100%;\n  display: flex;\n  justify-content: space-between;\n  align-items: center;\n}\n._3dhhKDxY6hP3tjApt9CT5z ._1sjvsLIEJ61RLdd4r8sWCy {\n  font-weight: 700;\n  font-size: 24px;\n}\n._3dhhKDxY6hP3tjApt9CT5z ._2Kw08qrUJzxusp_EXx0pYD {\n  display: flex;\n  justify-content: flex-end;\n}\n._3dhhKDxY6hP3tjApt9CT5z ._1sjvsLIEJ61RLdd4r8sWCy,\n._3dhhKDxY6hP3tjApt9CT5z ._2Kw08qrUJzxusp_EXx0pYD {\n  width: 10%;\n  cursor: pointer;\n}", ""]);
 // Exports
 ___CSS_LOADER_EXPORT___.locals = {
 	"header": "_3dhhKDxY6hP3tjApt9CT5z",
@@ -26766,7 +33619,7 @@ __webpack_require__.r(__webpack_exports__);
 
 var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_0___default()(function(i){return i[1]});
 // Module
-___CSS_LOADER_EXPORT___.push([module.id, ".icon-plus {\n  font-size: 20px;\n  opacity: 0.5;\n  position: absolute;\n  background-color: transparent;\n  border: none;\n  z-index: -1;\n}\n.add-task {\n  display: flex;\n  align-items: center;\n  position: relative;\n  box-shadow: 0 1px 0 0px #e5e5e5;\n}\n.add-task .input {\n  width: 100%;\n  padding: 16px 12px 16px 36px;\n  border: none;\n  background: transparent;\n}\n.add-task .input:focus {\n  border-bottom: 1px solid black;\n}", ""]);
+___CSS_LOADER_EXPORT___.push([module.id, ".icon-plus {\n  font-size: 20px;\n  opacity: 0.5;\n  position: absolute;\n  background-color: transparent;\n  border: none;\n  cursor: pointer;\n  z-index: 1;\n}\n.add-task {\n  display: flex;\n  align-items: center;\n  position: relative;\n  box-shadow: 0 1px 0 0px #e5e5e5;\n}\n.add-task .input {\n  width: 100%;\n  padding: 16px 12px 16px 36px;\n  border: none;\n  background: transparent;\n}\n.add-task .input:focus {\n  border-bottom: 1px solid black;\n}", ""]);
 // Exports
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
 
@@ -26814,7 +33667,7 @@ __webpack_require__.r(__webpack_exports__);
 
 var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_0___default()(function(i){return i[1]});
 // Module
-___CSS_LOADER_EXPORT___.push([module.id, ".icon-check {\n  font-size: 20px;\n  opacity: 0;\n  top: 11px;\n  left: 6px;\n  position: absolute;\n}\n.task-item {\n  display: flex;\n  align-items: center;\n  position: relative;\n}\n.task-item-name {\n  font-size: 18px;\n  font-weight: 700;\n}\n.task-item-email {\n  font-size: 14px;\n}\n.task-item-text {\n  margin-top: 10px;\n  font-size: 16px;\n  font-weight: 500;\n}\n.task-item:hover .icon-check {\n  opacity: 0.2;\n}\n.task-item-wrapper {\n  flex: 1 1 0px;\n  padding: 8px 12px 8px 36px;\n  cursor: pointer;\n}\n.icon-check-active {\n  font-size: 20px;\n  position: absolute;\n  top: 11px;\n  left: 6px;\n  opacity: 1;\n  color: #3e69e4;\n}", ""]);
+___CSS_LOADER_EXPORT___.push([module.id, ".icon-check {\n  font-size: 20px;\n  opacity: 0;\n  top: 11px;\n  left: 6px;\n  position: absolute;\n}\n.task-item {\n  display: flex;\n  align-items: center;\n  position: relative;\n}\n.task-item-name {\n  font-size: 18px;\n  font-weight: 700;\n}\n.task-item-email {\n  font-size: 14px;\n}\n.task-item-text {\n  margin-top: 10px;\n  font-size: 16px;\n  font-weight: 500;\n}\n.task-item:hover .no-active {\n  opacity: 0.2;\n}\n.task-item-wrapper {\n  flex: 1 1 0px;\n  padding: 8px 12px 8px 36px;\n  cursor: pointer;\n}\n.no-active {\n  opacity: 0;\n}\n.active {\n  opacity: 1;\n  color: #3e69e4;\n}", ""]);
 // Exports
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
 
@@ -26863,6 +33716,54 @@ __webpack_require__.r(__webpack_exports__);
 var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_0___default()(function(i){return i[1]});
 // Module
 ___CSS_LOADER_EXPORT___.push([module.id, ".tool-bar-top {\n  display: flex;\n  justify-content: space-between;\n  align-items: center;\n  margin-bottom: 50px;\n}\n.tool-bar-title {\n  font-size: 26px;\n  font-weight: 700;\n  margin: 0;\n}\n.icon {\n  transform: rotate(90deg);\n}", ""]);
+// Exports
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
+
+
+/***/ }),
+
+/***/ "./node_modules/css-loader/dist/cjs.js??clonedRuleSet-12[0].rules[0].use[1]!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-12[0].rules[0].use[2]!./node_modules/sass-loader/dist/cjs.js??clonedRuleSet-12[0].rules[0].use[3]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/js/components/section/Auth/Login.vue?vue&type=style&index=0&lang=scss&":
+/*!****************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/css-loader/dist/cjs.js??clonedRuleSet-12[0].rules[0].use[1]!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-12[0].rules[0].use[2]!./node_modules/sass-loader/dist/cjs.js??clonedRuleSet-12[0].rules[0].use[3]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/js/components/section/Auth/Login.vue?vue&type=style&index=0&lang=scss& ***!
+  \****************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************/
+/***/ ((module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../../../node_modules/css-loader/dist/runtime/api.js */ "./node_modules/css-loader/dist/runtime/api.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_0__);
+// Imports
+
+var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_0___default()(function(i){return i[1]});
+// Module
+___CSS_LOADER_EXPORT___.push([module.id, ".form-body {\n  width: 100%;\n  height: 100%;\n  display: flex;\n  justify-content: space-between;\n  align-items: center;\n}\n.form-body .form-wrapper {\n  display: flex;\n  width: 100%;\n}\n.form-body .form-content {\n  width: 320px;\n  margin: auto;\n  padding: 20px;\n  border-radius: 10px;\n  box-shadow: 3px 3px 15px rgba(0, 0, 0, 0.1);\n}\n.form-body .form-button {\n  width: 100%;\n}\n.form-body .form-link {\n  width: 100%;\n  text-align: center;\n}", ""]);
+// Exports
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
+
+
+/***/ }),
+
+/***/ "./node_modules/css-loader/dist/cjs.js??clonedRuleSet-12[0].rules[0].use[1]!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-12[0].rules[0].use[2]!./node_modules/sass-loader/dist/cjs.js??clonedRuleSet-12[0].rules[0].use[3]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/js/components/section/Auth/Register.vue?vue&type=style&index=0&lang=scss&":
+/*!*******************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/css-loader/dist/cjs.js??clonedRuleSet-12[0].rules[0].use[1]!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-12[0].rules[0].use[2]!./node_modules/sass-loader/dist/cjs.js??clonedRuleSet-12[0].rules[0].use[3]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/js/components/section/Auth/Register.vue?vue&type=style&index=0&lang=scss& ***!
+  \*******************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************/
+/***/ ((module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../../../node_modules/css-loader/dist/runtime/api.js */ "./node_modules/css-loader/dist/runtime/api.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_0__);
+// Imports
+
+var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_0___default()(function(i){return i[1]});
+// Module
+___CSS_LOADER_EXPORT___.push([module.id, ".form-body {\n  width: 100%;\n  height: 100%;\n  display: flex;\n  justify-content: space-between;\n  align-items: center;\n}\n.form-body .form-wrapper {\n  display: flex;\n  width: 100%;\n}\n.form-body .form-content {\n  width: 320px;\n  margin: auto;\n  padding: 20px;\n  border-radius: 10px;\n  box-shadow: 3px 3px 15px rgba(0, 0, 0, 0.1);\n}\n.form-body .form-button {\n  width: 100%;\n}\n.form-body .form-link {\n  width: 100%;\n  text-align: center;\n}", ""]);
 // Exports
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
 
@@ -29012,6 +35913,354 @@ function scrollIntoView(elem, container, config) {
 
 /***/ }),
 
+/***/ "./node_modules/enquire.js/src/MediaQuery.js":
+/*!***************************************************!*\
+  !*** ./node_modules/enquire.js/src/MediaQuery.js ***!
+  \***************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var QueryHandler = __webpack_require__(/*! ./QueryHandler */ "./node_modules/enquire.js/src/QueryHandler.js");
+var each = __webpack_require__(/*! ./Util */ "./node_modules/enquire.js/src/Util.js").each;
+
+/**
+ * Represents a single media query, manages it's state and registered handlers for this query
+ *
+ * @constructor
+ * @param {string} query the media query string
+ * @param {boolean} [isUnconditional=false] whether the media query should run regardless of whether the conditions are met. Primarily for helping older browsers deal with mobile-first design
+ */
+function MediaQuery(query, isUnconditional) {
+    this.query = query;
+    this.isUnconditional = isUnconditional;
+    this.handlers = [];
+    this.mql = window.matchMedia(query);
+
+    var self = this;
+    this.listener = function(mql) {
+        // Chrome passes an MediaQueryListEvent object, while other browsers pass MediaQueryList directly
+        self.mql = mql.currentTarget || mql;
+        self.assess();
+    };
+    this.mql.addListener(this.listener);
+}
+
+MediaQuery.prototype = {
+
+    constuctor : MediaQuery,
+
+    /**
+     * add a handler for this query, triggering if already active
+     *
+     * @param {object} handler
+     * @param {function} handler.match callback for when query is activated
+     * @param {function} [handler.unmatch] callback for when query is deactivated
+     * @param {function} [handler.setup] callback for immediate execution when a query handler is registered
+     * @param {boolean} [handler.deferSetup=false] should the setup callback be deferred until the first time the handler is matched?
+     */
+    addHandler : function(handler) {
+        var qh = new QueryHandler(handler);
+        this.handlers.push(qh);
+
+        this.matches() && qh.on();
+    },
+
+    /**
+     * removes the given handler from the collection, and calls it's destroy methods
+     *
+     * @param {object || function} handler the handler to remove
+     */
+    removeHandler : function(handler) {
+        var handlers = this.handlers;
+        each(handlers, function(h, i) {
+            if(h.equals(handler)) {
+                h.destroy();
+                return !handlers.splice(i,1); //remove from array and exit each early
+            }
+        });
+    },
+
+    /**
+     * Determine whether the media query should be considered a match
+     *
+     * @return {Boolean} true if media query can be considered a match, false otherwise
+     */
+    matches : function() {
+        return this.mql.matches || this.isUnconditional;
+    },
+
+    /**
+     * Clears all handlers and unbinds events
+     */
+    clear : function() {
+        each(this.handlers, function(handler) {
+            handler.destroy();
+        });
+        this.mql.removeListener(this.listener);
+        this.handlers.length = 0; //clear array
+    },
+
+    /*
+        * Assesses the query, turning on all handlers if it matches, turning them off if it doesn't match
+        */
+    assess : function() {
+        var action = this.matches() ? 'on' : 'off';
+
+        each(this.handlers, function(handler) {
+            handler[action]();
+        });
+    }
+};
+
+module.exports = MediaQuery;
+
+
+/***/ }),
+
+/***/ "./node_modules/enquire.js/src/MediaQueryDispatch.js":
+/*!***********************************************************!*\
+  !*** ./node_modules/enquire.js/src/MediaQueryDispatch.js ***!
+  \***********************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var MediaQuery = __webpack_require__(/*! ./MediaQuery */ "./node_modules/enquire.js/src/MediaQuery.js");
+var Util = __webpack_require__(/*! ./Util */ "./node_modules/enquire.js/src/Util.js");
+var each = Util.each;
+var isFunction = Util.isFunction;
+var isArray = Util.isArray;
+
+/**
+ * Allows for registration of query handlers.
+ * Manages the query handler's state and is responsible for wiring up browser events
+ *
+ * @constructor
+ */
+function MediaQueryDispatch () {
+    if(!window.matchMedia) {
+        throw new Error('matchMedia not present, legacy browsers require a polyfill');
+    }
+
+    this.queries = {};
+    this.browserIsIncapable = !window.matchMedia('only all').matches;
+}
+
+MediaQueryDispatch.prototype = {
+
+    constructor : MediaQueryDispatch,
+
+    /**
+     * Registers a handler for the given media query
+     *
+     * @param {string} q the media query
+     * @param {object || Array || Function} options either a single query handler object, a function, or an array of query handlers
+     * @param {function} options.match fired when query matched
+     * @param {function} [options.unmatch] fired when a query is no longer matched
+     * @param {function} [options.setup] fired when handler first triggered
+     * @param {boolean} [options.deferSetup=false] whether setup should be run immediately or deferred until query is first matched
+     * @param {boolean} [shouldDegrade=false] whether this particular media query should always run on incapable browsers
+     */
+    register : function(q, options, shouldDegrade) {
+        var queries         = this.queries,
+            isUnconditional = shouldDegrade && this.browserIsIncapable;
+
+        if(!queries[q]) {
+            queries[q] = new MediaQuery(q, isUnconditional);
+        }
+
+        //normalise to object in an array
+        if(isFunction(options)) {
+            options = { match : options };
+        }
+        if(!isArray(options)) {
+            options = [options];
+        }
+        each(options, function(handler) {
+            if (isFunction(handler)) {
+                handler = { match : handler };
+            }
+            queries[q].addHandler(handler);
+        });
+
+        return this;
+    },
+
+    /**
+     * unregisters a query and all it's handlers, or a specific handler for a query
+     *
+     * @param {string} q the media query to target
+     * @param {object || function} [handler] specific handler to unregister
+     */
+    unregister : function(q, handler) {
+        var query = this.queries[q];
+
+        if(query) {
+            if(handler) {
+                query.removeHandler(handler);
+            }
+            else {
+                query.clear();
+                delete this.queries[q];
+            }
+        }
+
+        return this;
+    }
+};
+
+module.exports = MediaQueryDispatch;
+
+
+/***/ }),
+
+/***/ "./node_modules/enquire.js/src/QueryHandler.js":
+/*!*****************************************************!*\
+  !*** ./node_modules/enquire.js/src/QueryHandler.js ***!
+  \*****************************************************/
+/***/ ((module) => {
+
+/**
+ * Delegate to handle a media query being matched and unmatched.
+ *
+ * @param {object} options
+ * @param {function} options.match callback for when the media query is matched
+ * @param {function} [options.unmatch] callback for when the media query is unmatched
+ * @param {function} [options.setup] one-time callback triggered the first time a query is matched
+ * @param {boolean} [options.deferSetup=false] should the setup callback be run immediately, rather than first time query is matched?
+ * @constructor
+ */
+function QueryHandler(options) {
+    this.options = options;
+    !options.deferSetup && this.setup();
+}
+
+QueryHandler.prototype = {
+
+    constructor : QueryHandler,
+
+    /**
+     * coordinates setup of the handler
+     *
+     * @function
+     */
+    setup : function() {
+        if(this.options.setup) {
+            this.options.setup();
+        }
+        this.initialised = true;
+    },
+
+    /**
+     * coordinates setup and triggering of the handler
+     *
+     * @function
+     */
+    on : function() {
+        !this.initialised && this.setup();
+        this.options.match && this.options.match();
+    },
+
+    /**
+     * coordinates the unmatch event for the handler
+     *
+     * @function
+     */
+    off : function() {
+        this.options.unmatch && this.options.unmatch();
+    },
+
+    /**
+     * called when a handler is to be destroyed.
+     * delegates to the destroy or unmatch callbacks, depending on availability.
+     *
+     * @function
+     */
+    destroy : function() {
+        this.options.destroy ? this.options.destroy() : this.off();
+    },
+
+    /**
+     * determines equality by reference.
+     * if object is supplied compare options, if function, compare match callback
+     *
+     * @function
+     * @param {object || function} [target] the target for comparison
+     */
+    equals : function(target) {
+        return this.options === target || this.options.match === target;
+    }
+
+};
+
+module.exports = QueryHandler;
+
+
+/***/ }),
+
+/***/ "./node_modules/enquire.js/src/Util.js":
+/*!*********************************************!*\
+  !*** ./node_modules/enquire.js/src/Util.js ***!
+  \*********************************************/
+/***/ ((module) => {
+
+/**
+ * Helper function for iterating over a collection
+ *
+ * @param collection
+ * @param fn
+ */
+function each(collection, fn) {
+    var i      = 0,
+        length = collection.length,
+        cont;
+
+    for(i; i < length; i++) {
+        cont = fn(collection[i], i);
+        if(cont === false) {
+            break; //allow early exit
+        }
+    }
+}
+
+/**
+ * Helper function for determining whether target object is an array
+ *
+ * @param target the object under test
+ * @return {Boolean} true if array, false otherwise
+ */
+function isArray(target) {
+    return Object.prototype.toString.apply(target) === '[object Array]';
+}
+
+/**
+ * Helper function for determining whether target object is a function
+ *
+ * @param target the object under test
+ * @return {Boolean} true if function, false otherwise
+ */
+function isFunction(target) {
+    return typeof target === 'function';
+}
+
+module.exports = {
+    isFunction : isFunction,
+    isArray : isArray,
+    each : each
+};
+
+
+/***/ }),
+
+/***/ "./node_modules/enquire.js/src/index.js":
+/*!**********************************************!*\
+  !*** ./node_modules/enquire.js/src/index.js ***!
+  \**********************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var MediaQueryDispatch = __webpack_require__(/*! ./MediaQueryDispatch */ "./node_modules/enquire.js/src/MediaQueryDispatch.js");
+module.exports = new MediaQueryDispatch();
+
+
+/***/ }),
+
 /***/ "./node_modules/is-mobile/index.js":
 /*!*****************************************!*\
   !*** ./node_modules/is-mobile/index.js ***!
@@ -29248,6 +36497,43 @@ var getNative = __webpack_require__(/*! ./_getNative */ "./node_modules/lodash/_
 var Set = getNative(root, 'Set');
 
 module.exports = Set;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_SetCache.js":
+/*!******************************************!*\
+  !*** ./node_modules/lodash/_SetCache.js ***!
+  \******************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var MapCache = __webpack_require__(/*! ./_MapCache */ "./node_modules/lodash/_MapCache.js"),
+    setCacheAdd = __webpack_require__(/*! ./_setCacheAdd */ "./node_modules/lodash/_setCacheAdd.js"),
+    setCacheHas = __webpack_require__(/*! ./_setCacheHas */ "./node_modules/lodash/_setCacheHas.js");
+
+/**
+ *
+ * Creates an array cache object to store unique values.
+ *
+ * @private
+ * @constructor
+ * @param {Array} [values] The values to cache.
+ */
+function SetCache(values) {
+  var index = -1,
+      length = values == null ? 0 : values.length;
+
+  this.__data__ = new MapCache;
+  while (++index < length) {
+    this.add(values[index]);
+  }
+}
+
+// Add methods to `SetCache`.
+SetCache.prototype.add = SetCache.prototype.push = setCacheAdd;
+SetCache.prototype.has = setCacheHas;
+
+module.exports = SetCache;
 
 
 /***/ }),
@@ -29552,6 +36838,39 @@ function arrayPush(array, values) {
 }
 
 module.exports = arrayPush;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_arraySome.js":
+/*!*******************************************!*\
+  !*** ./node_modules/lodash/_arraySome.js ***!
+  \*******************************************/
+/***/ ((module) => {
+
+/**
+ * A specialized version of `_.some` for arrays without support for iteratee
+ * shorthands.
+ *
+ * @private
+ * @param {Array} [array] The array to iterate over.
+ * @param {Function} predicate The function invoked per iteration.
+ * @returns {boolean} Returns `true` if any element passes the predicate check,
+ *  else `false`.
+ */
+function arraySome(array, predicate) {
+  var index = -1,
+      length = array == null ? 0 : array.length;
+
+  while (++index < length) {
+    if (predicate(array[index], index, array)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+module.exports = arraySome;
 
 
 /***/ }),
@@ -29930,6 +37249,40 @@ module.exports = baseCreate;
 
 /***/ }),
 
+/***/ "./node_modules/lodash/_baseFindIndex.js":
+/*!***********************************************!*\
+  !*** ./node_modules/lodash/_baseFindIndex.js ***!
+  \***********************************************/
+/***/ ((module) => {
+
+/**
+ * The base implementation of `_.findIndex` and `_.findLastIndex` without
+ * support for iteratee shorthands.
+ *
+ * @private
+ * @param {Array} array The array to inspect.
+ * @param {Function} predicate The function invoked per iteration.
+ * @param {number} fromIndex The index to search from.
+ * @param {boolean} [fromRight] Specify iterating from right to left.
+ * @returns {number} Returns the index of the matched value, else `-1`.
+ */
+function baseFindIndex(array, predicate, fromIndex, fromRight) {
+  var length = array.length,
+      index = fromIndex + (fromRight ? 1 : -1);
+
+  while ((fromRight ? index-- : ++index < length)) {
+    if (predicate(array[index], index, array)) {
+      return index;
+    }
+  }
+  return -1;
+}
+
+module.exports = baseFindIndex;
+
+
+/***/ }),
+
 /***/ "./node_modules/lodash/_baseFlatten.js":
 /*!*********************************************!*\
   !*** ./node_modules/lodash/_baseFlatten.js ***!
@@ -30080,6 +37433,58 @@ module.exports = baseGetTag;
 
 /***/ }),
 
+/***/ "./node_modules/lodash/_baseHas.js":
+/*!*****************************************!*\
+  !*** ./node_modules/lodash/_baseHas.js ***!
+  \*****************************************/
+/***/ ((module) => {
+
+/** Used for built-in method references. */
+var objectProto = Object.prototype;
+
+/** Used to check objects for own properties. */
+var hasOwnProperty = objectProto.hasOwnProperty;
+
+/**
+ * The base implementation of `_.has` without support for deep paths.
+ *
+ * @private
+ * @param {Object} [object] The object to query.
+ * @param {Array|string} key The key to check.
+ * @returns {boolean} Returns `true` if `key` exists, else `false`.
+ */
+function baseHas(object, key) {
+  return object != null && hasOwnProperty.call(object, key);
+}
+
+module.exports = baseHas;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_baseHasIn.js":
+/*!*******************************************!*\
+  !*** ./node_modules/lodash/_baseHasIn.js ***!
+  \*******************************************/
+/***/ ((module) => {
+
+/**
+ * The base implementation of `_.hasIn` without support for deep paths.
+ *
+ * @private
+ * @param {Object} [object] The object to query.
+ * @param {Array|string} key The key to check.
+ * @returns {boolean} Returns `true` if `key` exists, else `false`.
+ */
+function baseHasIn(object, key) {
+  return object != null && key in Object(object);
+}
+
+module.exports = baseHasIn;
+
+
+/***/ }),
+
 /***/ "./node_modules/lodash/_baseIsArguments.js":
 /*!*************************************************!*\
   !*** ./node_modules/lodash/_baseIsArguments.js ***!
@@ -30108,6 +37513,137 @@ module.exports = baseIsArguments;
 
 /***/ }),
 
+/***/ "./node_modules/lodash/_baseIsEqual.js":
+/*!*********************************************!*\
+  !*** ./node_modules/lodash/_baseIsEqual.js ***!
+  \*********************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var baseIsEqualDeep = __webpack_require__(/*! ./_baseIsEqualDeep */ "./node_modules/lodash/_baseIsEqualDeep.js"),
+    isObjectLike = __webpack_require__(/*! ./isObjectLike */ "./node_modules/lodash/isObjectLike.js");
+
+/**
+ * The base implementation of `_.isEqual` which supports partial comparisons
+ * and tracks traversed objects.
+ *
+ * @private
+ * @param {*} value The value to compare.
+ * @param {*} other The other value to compare.
+ * @param {boolean} bitmask The bitmask flags.
+ *  1 - Unordered comparison
+ *  2 - Partial comparison
+ * @param {Function} [customizer] The function to customize comparisons.
+ * @param {Object} [stack] Tracks traversed `value` and `other` objects.
+ * @returns {boolean} Returns `true` if the values are equivalent, else `false`.
+ */
+function baseIsEqual(value, other, bitmask, customizer, stack) {
+  if (value === other) {
+    return true;
+  }
+  if (value == null || other == null || (!isObjectLike(value) && !isObjectLike(other))) {
+    return value !== value && other !== other;
+  }
+  return baseIsEqualDeep(value, other, bitmask, customizer, baseIsEqual, stack);
+}
+
+module.exports = baseIsEqual;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_baseIsEqualDeep.js":
+/*!*************************************************!*\
+  !*** ./node_modules/lodash/_baseIsEqualDeep.js ***!
+  \*************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var Stack = __webpack_require__(/*! ./_Stack */ "./node_modules/lodash/_Stack.js"),
+    equalArrays = __webpack_require__(/*! ./_equalArrays */ "./node_modules/lodash/_equalArrays.js"),
+    equalByTag = __webpack_require__(/*! ./_equalByTag */ "./node_modules/lodash/_equalByTag.js"),
+    equalObjects = __webpack_require__(/*! ./_equalObjects */ "./node_modules/lodash/_equalObjects.js"),
+    getTag = __webpack_require__(/*! ./_getTag */ "./node_modules/lodash/_getTag.js"),
+    isArray = __webpack_require__(/*! ./isArray */ "./node_modules/lodash/isArray.js"),
+    isBuffer = __webpack_require__(/*! ./isBuffer */ "./node_modules/lodash/isBuffer.js"),
+    isTypedArray = __webpack_require__(/*! ./isTypedArray */ "./node_modules/lodash/isTypedArray.js");
+
+/** Used to compose bitmasks for value comparisons. */
+var COMPARE_PARTIAL_FLAG = 1;
+
+/** `Object#toString` result references. */
+var argsTag = '[object Arguments]',
+    arrayTag = '[object Array]',
+    objectTag = '[object Object]';
+
+/** Used for built-in method references. */
+var objectProto = Object.prototype;
+
+/** Used to check objects for own properties. */
+var hasOwnProperty = objectProto.hasOwnProperty;
+
+/**
+ * A specialized version of `baseIsEqual` for arrays and objects which performs
+ * deep comparisons and tracks traversed objects enabling objects with circular
+ * references to be compared.
+ *
+ * @private
+ * @param {Object} object The object to compare.
+ * @param {Object} other The other object to compare.
+ * @param {number} bitmask The bitmask flags. See `baseIsEqual` for more details.
+ * @param {Function} customizer The function to customize comparisons.
+ * @param {Function} equalFunc The function to determine equivalents of values.
+ * @param {Object} [stack] Tracks traversed `object` and `other` objects.
+ * @returns {boolean} Returns `true` if the objects are equivalent, else `false`.
+ */
+function baseIsEqualDeep(object, other, bitmask, customizer, equalFunc, stack) {
+  var objIsArr = isArray(object),
+      othIsArr = isArray(other),
+      objTag = objIsArr ? arrayTag : getTag(object),
+      othTag = othIsArr ? arrayTag : getTag(other);
+
+  objTag = objTag == argsTag ? objectTag : objTag;
+  othTag = othTag == argsTag ? objectTag : othTag;
+
+  var objIsObj = objTag == objectTag,
+      othIsObj = othTag == objectTag,
+      isSameTag = objTag == othTag;
+
+  if (isSameTag && isBuffer(object)) {
+    if (!isBuffer(other)) {
+      return false;
+    }
+    objIsArr = true;
+    objIsObj = false;
+  }
+  if (isSameTag && !objIsObj) {
+    stack || (stack = new Stack);
+    return (objIsArr || isTypedArray(object))
+      ? equalArrays(object, other, bitmask, customizer, equalFunc, stack)
+      : equalByTag(object, other, objTag, bitmask, customizer, equalFunc, stack);
+  }
+  if (!(bitmask & COMPARE_PARTIAL_FLAG)) {
+    var objIsWrapped = objIsObj && hasOwnProperty.call(object, '__wrapped__'),
+        othIsWrapped = othIsObj && hasOwnProperty.call(other, '__wrapped__');
+
+    if (objIsWrapped || othIsWrapped) {
+      var objUnwrapped = objIsWrapped ? object.value() : object,
+          othUnwrapped = othIsWrapped ? other.value() : other;
+
+      stack || (stack = new Stack);
+      return equalFunc(objUnwrapped, othUnwrapped, bitmask, customizer, stack);
+    }
+  }
+  if (!isSameTag) {
+    return false;
+  }
+  stack || (stack = new Stack);
+  return equalObjects(object, other, bitmask, customizer, equalFunc, stack);
+}
+
+module.exports = baseIsEqualDeep;
+
+
+/***/ }),
+
 /***/ "./node_modules/lodash/_baseIsMap.js":
 /*!*******************************************!*\
   !*** ./node_modules/lodash/_baseIsMap.js ***!
@@ -30132,6 +37668,78 @@ function baseIsMap(value) {
 }
 
 module.exports = baseIsMap;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_baseIsMatch.js":
+/*!*********************************************!*\
+  !*** ./node_modules/lodash/_baseIsMatch.js ***!
+  \*********************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var Stack = __webpack_require__(/*! ./_Stack */ "./node_modules/lodash/_Stack.js"),
+    baseIsEqual = __webpack_require__(/*! ./_baseIsEqual */ "./node_modules/lodash/_baseIsEqual.js");
+
+/** Used to compose bitmasks for value comparisons. */
+var COMPARE_PARTIAL_FLAG = 1,
+    COMPARE_UNORDERED_FLAG = 2;
+
+/**
+ * The base implementation of `_.isMatch` without support for iteratee shorthands.
+ *
+ * @private
+ * @param {Object} object The object to inspect.
+ * @param {Object} source The object of property values to match.
+ * @param {Array} matchData The property names, values, and compare flags to match.
+ * @param {Function} [customizer] The function to customize comparisons.
+ * @returns {boolean} Returns `true` if `object` is a match, else `false`.
+ */
+function baseIsMatch(object, source, matchData, customizer) {
+  var index = matchData.length,
+      length = index,
+      noCustomizer = !customizer;
+
+  if (object == null) {
+    return !length;
+  }
+  object = Object(object);
+  while (index--) {
+    var data = matchData[index];
+    if ((noCustomizer && data[2])
+          ? data[1] !== object[data[0]]
+          : !(data[0] in object)
+        ) {
+      return false;
+    }
+  }
+  while (++index < length) {
+    data = matchData[index];
+    var key = data[0],
+        objValue = object[key],
+        srcValue = data[1];
+
+    if (noCustomizer && data[2]) {
+      if (objValue === undefined && !(key in object)) {
+        return false;
+      }
+    } else {
+      var stack = new Stack;
+      if (customizer) {
+        var result = customizer(objValue, srcValue, key, object, source, stack);
+      }
+      if (!(result === undefined
+            ? baseIsEqual(srcValue, objValue, COMPARE_PARTIAL_FLAG | COMPARE_UNORDERED_FLAG, customizer, stack)
+            : result
+          )) {
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
+module.exports = baseIsMatch;
 
 
 /***/ }),
@@ -30189,6 +37797,34 @@ function baseIsNative(value) {
 }
 
 module.exports = baseIsNative;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_baseIsRegExp.js":
+/*!**********************************************!*\
+  !*** ./node_modules/lodash/_baseIsRegExp.js ***!
+  \**********************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var baseGetTag = __webpack_require__(/*! ./_baseGetTag */ "./node_modules/lodash/_baseGetTag.js"),
+    isObjectLike = __webpack_require__(/*! ./isObjectLike */ "./node_modules/lodash/isObjectLike.js");
+
+/** `Object#toString` result references. */
+var regexpTag = '[object RegExp]';
+
+/**
+ * The base implementation of `_.isRegExp` without Node.js optimizations.
+ *
+ * @private
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is a regexp, else `false`.
+ */
+function baseIsRegExp(value) {
+  return isObjectLike(value) && baseGetTag(value) == regexpTag;
+}
+
+module.exports = baseIsRegExp;
 
 
 /***/ }),
@@ -30291,6 +37927,47 @@ module.exports = baseIsTypedArray;
 
 /***/ }),
 
+/***/ "./node_modules/lodash/_baseIteratee.js":
+/*!**********************************************!*\
+  !*** ./node_modules/lodash/_baseIteratee.js ***!
+  \**********************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var baseMatches = __webpack_require__(/*! ./_baseMatches */ "./node_modules/lodash/_baseMatches.js"),
+    baseMatchesProperty = __webpack_require__(/*! ./_baseMatchesProperty */ "./node_modules/lodash/_baseMatchesProperty.js"),
+    identity = __webpack_require__(/*! ./identity */ "./node_modules/lodash/identity.js"),
+    isArray = __webpack_require__(/*! ./isArray */ "./node_modules/lodash/isArray.js"),
+    property = __webpack_require__(/*! ./property */ "./node_modules/lodash/property.js");
+
+/**
+ * The base implementation of `_.iteratee`.
+ *
+ * @private
+ * @param {*} [value=_.identity] The value to convert to an iteratee.
+ * @returns {Function} Returns the iteratee.
+ */
+function baseIteratee(value) {
+  // Don't store the `typeof` result in a variable to avoid a JIT bug in Safari 9.
+  // See https://bugs.webkit.org/show_bug.cgi?id=156034 for more details.
+  if (typeof value == 'function') {
+    return value;
+  }
+  if (value == null) {
+    return identity;
+  }
+  if (typeof value == 'object') {
+    return isArray(value)
+      ? baseMatchesProperty(value[0], value[1])
+      : baseMatches(value);
+  }
+  return property(value);
+}
+
+module.exports = baseIteratee;
+
+
+/***/ }),
+
 /***/ "./node_modules/lodash/_baseKeys.js":
 /*!******************************************!*\
   !*** ./node_modules/lodash/_baseKeys.js ***!
@@ -30370,6 +38047,192 @@ function baseKeysIn(object) {
 }
 
 module.exports = baseKeysIn;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_baseMatches.js":
+/*!*********************************************!*\
+  !*** ./node_modules/lodash/_baseMatches.js ***!
+  \*********************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var baseIsMatch = __webpack_require__(/*! ./_baseIsMatch */ "./node_modules/lodash/_baseIsMatch.js"),
+    getMatchData = __webpack_require__(/*! ./_getMatchData */ "./node_modules/lodash/_getMatchData.js"),
+    matchesStrictComparable = __webpack_require__(/*! ./_matchesStrictComparable */ "./node_modules/lodash/_matchesStrictComparable.js");
+
+/**
+ * The base implementation of `_.matches` which doesn't clone `source`.
+ *
+ * @private
+ * @param {Object} source The object of property values to match.
+ * @returns {Function} Returns the new spec function.
+ */
+function baseMatches(source) {
+  var matchData = getMatchData(source);
+  if (matchData.length == 1 && matchData[0][2]) {
+    return matchesStrictComparable(matchData[0][0], matchData[0][1]);
+  }
+  return function(object) {
+    return object === source || baseIsMatch(object, source, matchData);
+  };
+}
+
+module.exports = baseMatches;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_baseMatchesProperty.js":
+/*!*****************************************************!*\
+  !*** ./node_modules/lodash/_baseMatchesProperty.js ***!
+  \*****************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var baseIsEqual = __webpack_require__(/*! ./_baseIsEqual */ "./node_modules/lodash/_baseIsEqual.js"),
+    get = __webpack_require__(/*! ./get */ "./node_modules/lodash/get.js"),
+    hasIn = __webpack_require__(/*! ./hasIn */ "./node_modules/lodash/hasIn.js"),
+    isKey = __webpack_require__(/*! ./_isKey */ "./node_modules/lodash/_isKey.js"),
+    isStrictComparable = __webpack_require__(/*! ./_isStrictComparable */ "./node_modules/lodash/_isStrictComparable.js"),
+    matchesStrictComparable = __webpack_require__(/*! ./_matchesStrictComparable */ "./node_modules/lodash/_matchesStrictComparable.js"),
+    toKey = __webpack_require__(/*! ./_toKey */ "./node_modules/lodash/_toKey.js");
+
+/** Used to compose bitmasks for value comparisons. */
+var COMPARE_PARTIAL_FLAG = 1,
+    COMPARE_UNORDERED_FLAG = 2;
+
+/**
+ * The base implementation of `_.matchesProperty` which doesn't clone `srcValue`.
+ *
+ * @private
+ * @param {string} path The path of the property to get.
+ * @param {*} srcValue The value to match.
+ * @returns {Function} Returns the new spec function.
+ */
+function baseMatchesProperty(path, srcValue) {
+  if (isKey(path) && isStrictComparable(srcValue)) {
+    return matchesStrictComparable(toKey(path), srcValue);
+  }
+  return function(object) {
+    var objValue = get(object, path);
+    return (objValue === undefined && objValue === srcValue)
+      ? hasIn(object, path)
+      : baseIsEqual(srcValue, objValue, COMPARE_PARTIAL_FLAG | COMPARE_UNORDERED_FLAG);
+  };
+}
+
+module.exports = baseMatchesProperty;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_baseProperty.js":
+/*!**********************************************!*\
+  !*** ./node_modules/lodash/_baseProperty.js ***!
+  \**********************************************/
+/***/ ((module) => {
+
+/**
+ * The base implementation of `_.property` without support for deep paths.
+ *
+ * @private
+ * @param {string} key The key of the property to get.
+ * @returns {Function} Returns the new accessor function.
+ */
+function baseProperty(key) {
+  return function(object) {
+    return object == null ? undefined : object[key];
+  };
+}
+
+module.exports = baseProperty;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_basePropertyDeep.js":
+/*!**************************************************!*\
+  !*** ./node_modules/lodash/_basePropertyDeep.js ***!
+  \**************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var baseGet = __webpack_require__(/*! ./_baseGet */ "./node_modules/lodash/_baseGet.js");
+
+/**
+ * A specialized version of `baseProperty` which supports deep paths.
+ *
+ * @private
+ * @param {Array|string} path The path of the property to get.
+ * @returns {Function} Returns the new accessor function.
+ */
+function basePropertyDeep(path) {
+  return function(object) {
+    return baseGet(object, path);
+  };
+}
+
+module.exports = basePropertyDeep;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_baseSet.js":
+/*!*****************************************!*\
+  !*** ./node_modules/lodash/_baseSet.js ***!
+  \*****************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var assignValue = __webpack_require__(/*! ./_assignValue */ "./node_modules/lodash/_assignValue.js"),
+    castPath = __webpack_require__(/*! ./_castPath */ "./node_modules/lodash/_castPath.js"),
+    isIndex = __webpack_require__(/*! ./_isIndex */ "./node_modules/lodash/_isIndex.js"),
+    isObject = __webpack_require__(/*! ./isObject */ "./node_modules/lodash/isObject.js"),
+    toKey = __webpack_require__(/*! ./_toKey */ "./node_modules/lodash/_toKey.js");
+
+/**
+ * The base implementation of `_.set`.
+ *
+ * @private
+ * @param {Object} object The object to modify.
+ * @param {Array|string} path The path of the property to set.
+ * @param {*} value The value to set.
+ * @param {Function} [customizer] The function to customize path creation.
+ * @returns {Object} Returns `object`.
+ */
+function baseSet(object, path, value, customizer) {
+  if (!isObject(object)) {
+    return object;
+  }
+  path = castPath(path, object);
+
+  var index = -1,
+      length = path.length,
+      lastIndex = length - 1,
+      nested = object;
+
+  while (nested != null && ++index < length) {
+    var key = toKey(path[index]),
+        newValue = value;
+
+    if (key === '__proto__' || key === 'constructor' || key === 'prototype') {
+      return object;
+    }
+
+    if (index != lastIndex) {
+      var objValue = nested[key];
+      newValue = customizer ? customizer(objValue, key, nested) : undefined;
+      if (newValue === undefined) {
+        newValue = isObject(objValue)
+          ? objValue
+          : (isIndex(path[index + 1]) ? [] : {});
+      }
+    }
+    assignValue(nested, key, newValue);
+    nested = nested[key];
+  }
+  return object;
+}
+
+module.exports = baseSet;
 
 
 /***/ }),
@@ -30524,6 +38387,35 @@ module.exports = baseToString;
 
 /***/ }),
 
+/***/ "./node_modules/lodash/_baseTrim.js":
+/*!******************************************!*\
+  !*** ./node_modules/lodash/_baseTrim.js ***!
+  \******************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var trimmedEndIndex = __webpack_require__(/*! ./_trimmedEndIndex */ "./node_modules/lodash/_trimmedEndIndex.js");
+
+/** Used to match leading whitespace. */
+var reTrimStart = /^\s+/;
+
+/**
+ * The base implementation of `_.trim`.
+ *
+ * @private
+ * @param {string} string The string to trim.
+ * @returns {string} Returns the trimmed string.
+ */
+function baseTrim(string) {
+  return string
+    ? string.slice(0, trimmedEndIndex(string) + 1).replace(reTrimStart, '')
+    : string;
+}
+
+module.exports = baseTrim;
+
+
+/***/ }),
+
 /***/ "./node_modules/lodash/_baseUnary.js":
 /*!*******************************************!*\
   !*** ./node_modules/lodash/_baseUnary.js ***!
@@ -30574,6 +38466,29 @@ function baseUnset(object, path) {
 }
 
 module.exports = baseUnset;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_cacheHas.js":
+/*!******************************************!*\
+  !*** ./node_modules/lodash/_cacheHas.js ***!
+  \******************************************/
+/***/ ((module) => {
+
+/**
+ * Checks if a `cache` value for `key` exists.
+ *
+ * @private
+ * @param {Object} cache The cache to query.
+ * @param {string} key The key of the entry to check.
+ * @returns {boolean} Returns `true` if an entry for `key` exists, else `false`.
+ */
+function cacheHas(cache, key) {
+  return cache.has(key);
+}
+
+module.exports = cacheHas;
 
 
 /***/ }),
@@ -30936,6 +38851,41 @@ module.exports = coreJsData;
 
 /***/ }),
 
+/***/ "./node_modules/lodash/_createFind.js":
+/*!********************************************!*\
+  !*** ./node_modules/lodash/_createFind.js ***!
+  \********************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var baseIteratee = __webpack_require__(/*! ./_baseIteratee */ "./node_modules/lodash/_baseIteratee.js"),
+    isArrayLike = __webpack_require__(/*! ./isArrayLike */ "./node_modules/lodash/isArrayLike.js"),
+    keys = __webpack_require__(/*! ./keys */ "./node_modules/lodash/keys.js");
+
+/**
+ * Creates a `_.find` or `_.findLast` function.
+ *
+ * @private
+ * @param {Function} findIndexFunc The function to find the collection index.
+ * @returns {Function} Returns the new find function.
+ */
+function createFind(findIndexFunc) {
+  return function(collection, predicate, fromIndex) {
+    var iterable = Object(collection);
+    if (!isArrayLike(collection)) {
+      var iteratee = baseIteratee(predicate, 3);
+      collection = keys(collection);
+      predicate = function(key) { return iteratee(iterable[key], key, iterable); };
+    }
+    var index = findIndexFunc(collection, predicate, fromIndex);
+    return index > -1 ? iterable[iteratee ? collection[index] : index] : undefined;
+  };
+}
+
+module.exports = createFind;
+
+
+/***/ }),
+
 /***/ "./node_modules/lodash/_customOmitClone.js":
 /*!*************************************************!*\
   !*** ./node_modules/lodash/_customOmitClone.js ***!
@@ -30979,6 +38929,322 @@ var defineProperty = (function() {
 }());
 
 module.exports = defineProperty;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_equalArrays.js":
+/*!*********************************************!*\
+  !*** ./node_modules/lodash/_equalArrays.js ***!
+  \*********************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var SetCache = __webpack_require__(/*! ./_SetCache */ "./node_modules/lodash/_SetCache.js"),
+    arraySome = __webpack_require__(/*! ./_arraySome */ "./node_modules/lodash/_arraySome.js"),
+    cacheHas = __webpack_require__(/*! ./_cacheHas */ "./node_modules/lodash/_cacheHas.js");
+
+/** Used to compose bitmasks for value comparisons. */
+var COMPARE_PARTIAL_FLAG = 1,
+    COMPARE_UNORDERED_FLAG = 2;
+
+/**
+ * A specialized version of `baseIsEqualDeep` for arrays with support for
+ * partial deep comparisons.
+ *
+ * @private
+ * @param {Array} array The array to compare.
+ * @param {Array} other The other array to compare.
+ * @param {number} bitmask The bitmask flags. See `baseIsEqual` for more details.
+ * @param {Function} customizer The function to customize comparisons.
+ * @param {Function} equalFunc The function to determine equivalents of values.
+ * @param {Object} stack Tracks traversed `array` and `other` objects.
+ * @returns {boolean} Returns `true` if the arrays are equivalent, else `false`.
+ */
+function equalArrays(array, other, bitmask, customizer, equalFunc, stack) {
+  var isPartial = bitmask & COMPARE_PARTIAL_FLAG,
+      arrLength = array.length,
+      othLength = other.length;
+
+  if (arrLength != othLength && !(isPartial && othLength > arrLength)) {
+    return false;
+  }
+  // Check that cyclic values are equal.
+  var arrStacked = stack.get(array);
+  var othStacked = stack.get(other);
+  if (arrStacked && othStacked) {
+    return arrStacked == other && othStacked == array;
+  }
+  var index = -1,
+      result = true,
+      seen = (bitmask & COMPARE_UNORDERED_FLAG) ? new SetCache : undefined;
+
+  stack.set(array, other);
+  stack.set(other, array);
+
+  // Ignore non-index properties.
+  while (++index < arrLength) {
+    var arrValue = array[index],
+        othValue = other[index];
+
+    if (customizer) {
+      var compared = isPartial
+        ? customizer(othValue, arrValue, index, other, array, stack)
+        : customizer(arrValue, othValue, index, array, other, stack);
+    }
+    if (compared !== undefined) {
+      if (compared) {
+        continue;
+      }
+      result = false;
+      break;
+    }
+    // Recursively compare arrays (susceptible to call stack limits).
+    if (seen) {
+      if (!arraySome(other, function(othValue, othIndex) {
+            if (!cacheHas(seen, othIndex) &&
+                (arrValue === othValue || equalFunc(arrValue, othValue, bitmask, customizer, stack))) {
+              return seen.push(othIndex);
+            }
+          })) {
+        result = false;
+        break;
+      }
+    } else if (!(
+          arrValue === othValue ||
+            equalFunc(arrValue, othValue, bitmask, customizer, stack)
+        )) {
+      result = false;
+      break;
+    }
+  }
+  stack['delete'](array);
+  stack['delete'](other);
+  return result;
+}
+
+module.exports = equalArrays;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_equalByTag.js":
+/*!********************************************!*\
+  !*** ./node_modules/lodash/_equalByTag.js ***!
+  \********************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var Symbol = __webpack_require__(/*! ./_Symbol */ "./node_modules/lodash/_Symbol.js"),
+    Uint8Array = __webpack_require__(/*! ./_Uint8Array */ "./node_modules/lodash/_Uint8Array.js"),
+    eq = __webpack_require__(/*! ./eq */ "./node_modules/lodash/eq.js"),
+    equalArrays = __webpack_require__(/*! ./_equalArrays */ "./node_modules/lodash/_equalArrays.js"),
+    mapToArray = __webpack_require__(/*! ./_mapToArray */ "./node_modules/lodash/_mapToArray.js"),
+    setToArray = __webpack_require__(/*! ./_setToArray */ "./node_modules/lodash/_setToArray.js");
+
+/** Used to compose bitmasks for value comparisons. */
+var COMPARE_PARTIAL_FLAG = 1,
+    COMPARE_UNORDERED_FLAG = 2;
+
+/** `Object#toString` result references. */
+var boolTag = '[object Boolean]',
+    dateTag = '[object Date]',
+    errorTag = '[object Error]',
+    mapTag = '[object Map]',
+    numberTag = '[object Number]',
+    regexpTag = '[object RegExp]',
+    setTag = '[object Set]',
+    stringTag = '[object String]',
+    symbolTag = '[object Symbol]';
+
+var arrayBufferTag = '[object ArrayBuffer]',
+    dataViewTag = '[object DataView]';
+
+/** Used to convert symbols to primitives and strings. */
+var symbolProto = Symbol ? Symbol.prototype : undefined,
+    symbolValueOf = symbolProto ? symbolProto.valueOf : undefined;
+
+/**
+ * A specialized version of `baseIsEqualDeep` for comparing objects of
+ * the same `toStringTag`.
+ *
+ * **Note:** This function only supports comparing values with tags of
+ * `Boolean`, `Date`, `Error`, `Number`, `RegExp`, or `String`.
+ *
+ * @private
+ * @param {Object} object The object to compare.
+ * @param {Object} other The other object to compare.
+ * @param {string} tag The `toStringTag` of the objects to compare.
+ * @param {number} bitmask The bitmask flags. See `baseIsEqual` for more details.
+ * @param {Function} customizer The function to customize comparisons.
+ * @param {Function} equalFunc The function to determine equivalents of values.
+ * @param {Object} stack Tracks traversed `object` and `other` objects.
+ * @returns {boolean} Returns `true` if the objects are equivalent, else `false`.
+ */
+function equalByTag(object, other, tag, bitmask, customizer, equalFunc, stack) {
+  switch (tag) {
+    case dataViewTag:
+      if ((object.byteLength != other.byteLength) ||
+          (object.byteOffset != other.byteOffset)) {
+        return false;
+      }
+      object = object.buffer;
+      other = other.buffer;
+
+    case arrayBufferTag:
+      if ((object.byteLength != other.byteLength) ||
+          !equalFunc(new Uint8Array(object), new Uint8Array(other))) {
+        return false;
+      }
+      return true;
+
+    case boolTag:
+    case dateTag:
+    case numberTag:
+      // Coerce booleans to `1` or `0` and dates to milliseconds.
+      // Invalid dates are coerced to `NaN`.
+      return eq(+object, +other);
+
+    case errorTag:
+      return object.name == other.name && object.message == other.message;
+
+    case regexpTag:
+    case stringTag:
+      // Coerce regexes to strings and treat strings, primitives and objects,
+      // as equal. See http://www.ecma-international.org/ecma-262/7.0/#sec-regexp.prototype.tostring
+      // for more details.
+      return object == (other + '');
+
+    case mapTag:
+      var convert = mapToArray;
+
+    case setTag:
+      var isPartial = bitmask & COMPARE_PARTIAL_FLAG;
+      convert || (convert = setToArray);
+
+      if (object.size != other.size && !isPartial) {
+        return false;
+      }
+      // Assume cyclic values are equal.
+      var stacked = stack.get(object);
+      if (stacked) {
+        return stacked == other;
+      }
+      bitmask |= COMPARE_UNORDERED_FLAG;
+
+      // Recursively compare objects (susceptible to call stack limits).
+      stack.set(object, other);
+      var result = equalArrays(convert(object), convert(other), bitmask, customizer, equalFunc, stack);
+      stack['delete'](object);
+      return result;
+
+    case symbolTag:
+      if (symbolValueOf) {
+        return symbolValueOf.call(object) == symbolValueOf.call(other);
+      }
+  }
+  return false;
+}
+
+module.exports = equalByTag;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_equalObjects.js":
+/*!**********************************************!*\
+  !*** ./node_modules/lodash/_equalObjects.js ***!
+  \**********************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var getAllKeys = __webpack_require__(/*! ./_getAllKeys */ "./node_modules/lodash/_getAllKeys.js");
+
+/** Used to compose bitmasks for value comparisons. */
+var COMPARE_PARTIAL_FLAG = 1;
+
+/** Used for built-in method references. */
+var objectProto = Object.prototype;
+
+/** Used to check objects for own properties. */
+var hasOwnProperty = objectProto.hasOwnProperty;
+
+/**
+ * A specialized version of `baseIsEqualDeep` for objects with support for
+ * partial deep comparisons.
+ *
+ * @private
+ * @param {Object} object The object to compare.
+ * @param {Object} other The other object to compare.
+ * @param {number} bitmask The bitmask flags. See `baseIsEqual` for more details.
+ * @param {Function} customizer The function to customize comparisons.
+ * @param {Function} equalFunc The function to determine equivalents of values.
+ * @param {Object} stack Tracks traversed `object` and `other` objects.
+ * @returns {boolean} Returns `true` if the objects are equivalent, else `false`.
+ */
+function equalObjects(object, other, bitmask, customizer, equalFunc, stack) {
+  var isPartial = bitmask & COMPARE_PARTIAL_FLAG,
+      objProps = getAllKeys(object),
+      objLength = objProps.length,
+      othProps = getAllKeys(other),
+      othLength = othProps.length;
+
+  if (objLength != othLength && !isPartial) {
+    return false;
+  }
+  var index = objLength;
+  while (index--) {
+    var key = objProps[index];
+    if (!(isPartial ? key in other : hasOwnProperty.call(other, key))) {
+      return false;
+    }
+  }
+  // Check that cyclic values are equal.
+  var objStacked = stack.get(object);
+  var othStacked = stack.get(other);
+  if (objStacked && othStacked) {
+    return objStacked == other && othStacked == object;
+  }
+  var result = true;
+  stack.set(object, other);
+  stack.set(other, object);
+
+  var skipCtor = isPartial;
+  while (++index < objLength) {
+    key = objProps[index];
+    var objValue = object[key],
+        othValue = other[key];
+
+    if (customizer) {
+      var compared = isPartial
+        ? customizer(othValue, objValue, key, other, object, stack)
+        : customizer(objValue, othValue, key, object, other, stack);
+    }
+    // Recursively compare objects (susceptible to call stack limits).
+    if (!(compared === undefined
+          ? (objValue === othValue || equalFunc(objValue, othValue, bitmask, customizer, stack))
+          : compared
+        )) {
+      result = false;
+      break;
+    }
+    skipCtor || (skipCtor = key == 'constructor');
+  }
+  if (result && !skipCtor) {
+    var objCtor = object.constructor,
+        othCtor = other.constructor;
+
+    // Non `Object` object instances with different constructors are not equal.
+    if (objCtor != othCtor &&
+        ('constructor' in object && 'constructor' in other) &&
+        !(typeof objCtor == 'function' && objCtor instanceof objCtor &&
+          typeof othCtor == 'function' && othCtor instanceof othCtor)) {
+      result = false;
+    }
+  }
+  stack['delete'](object);
+  stack['delete'](other);
+  return result;
+}
+
+module.exports = equalObjects;
 
 
 /***/ }),
@@ -31100,6 +39366,40 @@ function getMapData(map, key) {
 }
 
 module.exports = getMapData;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_getMatchData.js":
+/*!**********************************************!*\
+  !*** ./node_modules/lodash/_getMatchData.js ***!
+  \**********************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var isStrictComparable = __webpack_require__(/*! ./_isStrictComparable */ "./node_modules/lodash/_isStrictComparable.js"),
+    keys = __webpack_require__(/*! ./keys */ "./node_modules/lodash/keys.js");
+
+/**
+ * Gets the property names, values, and compare flags of `object`.
+ *
+ * @private
+ * @param {Object} object The object to query.
+ * @returns {Array} Returns the match data of `object`.
+ */
+function getMatchData(object) {
+  var result = keys(object),
+      length = result.length;
+
+  while (length--) {
+    var key = result[length],
+        value = object[key];
+
+    result[length] = [key, value, isStrictComparable(value)];
+  }
+  return result;
+}
+
+module.exports = getMatchData;
 
 
 /***/ }),
@@ -31365,6 +39665,55 @@ function getValue(object, key) {
 }
 
 module.exports = getValue;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_hasPath.js":
+/*!*****************************************!*\
+  !*** ./node_modules/lodash/_hasPath.js ***!
+  \*****************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var castPath = __webpack_require__(/*! ./_castPath */ "./node_modules/lodash/_castPath.js"),
+    isArguments = __webpack_require__(/*! ./isArguments */ "./node_modules/lodash/isArguments.js"),
+    isArray = __webpack_require__(/*! ./isArray */ "./node_modules/lodash/isArray.js"),
+    isIndex = __webpack_require__(/*! ./_isIndex */ "./node_modules/lodash/_isIndex.js"),
+    isLength = __webpack_require__(/*! ./isLength */ "./node_modules/lodash/isLength.js"),
+    toKey = __webpack_require__(/*! ./_toKey */ "./node_modules/lodash/_toKey.js");
+
+/**
+ * Checks if `path` exists on `object`.
+ *
+ * @private
+ * @param {Object} object The object to query.
+ * @param {Array|string} path The path to check.
+ * @param {Function} hasFunc The function to check properties.
+ * @returns {boolean} Returns `true` if `path` exists, else `false`.
+ */
+function hasPath(object, path, hasFunc) {
+  path = castPath(path, object);
+
+  var index = -1,
+      length = path.length,
+      result = false;
+
+  while (++index < length) {
+    var key = toKey(path[index]);
+    if (!(result = object != null && hasFunc(object, key))) {
+      break;
+    }
+    object = object[key];
+  }
+  if (result || ++index != length) {
+    return result;
+  }
+  length = object == null ? 0 : object.length;
+  return !!length && isLength(length) && isIndex(key, length) &&
+    (isArray(object) || isArguments(object));
+}
+
+module.exports = hasPath;
 
 
 /***/ }),
@@ -31865,6 +40214,31 @@ module.exports = isPrototype;
 
 /***/ }),
 
+/***/ "./node_modules/lodash/_isStrictComparable.js":
+/*!****************************************************!*\
+  !*** ./node_modules/lodash/_isStrictComparable.js ***!
+  \****************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var isObject = __webpack_require__(/*! ./isObject */ "./node_modules/lodash/isObject.js");
+
+/**
+ * Checks if `value` is suitable for strict equality comparisons, i.e. `===`.
+ *
+ * @private
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` if suitable for strict
+ *  equality comparisons, else `false`.
+ */
+function isStrictComparable(value) {
+  return value === value && !isObject(value);
+}
+
+module.exports = isStrictComparable;
+
+
+/***/ }),
+
 /***/ "./node_modules/lodash/_listCacheClear.js":
 /*!************************************************!*\
   !*** ./node_modules/lodash/_listCacheClear.js ***!
@@ -32167,6 +40541,64 @@ module.exports = mapCacheSet;
 
 /***/ }),
 
+/***/ "./node_modules/lodash/_mapToArray.js":
+/*!********************************************!*\
+  !*** ./node_modules/lodash/_mapToArray.js ***!
+  \********************************************/
+/***/ ((module) => {
+
+/**
+ * Converts `map` to its key-value pairs.
+ *
+ * @private
+ * @param {Object} map The map to convert.
+ * @returns {Array} Returns the key-value pairs.
+ */
+function mapToArray(map) {
+  var index = -1,
+      result = Array(map.size);
+
+  map.forEach(function(value, key) {
+    result[++index] = [key, value];
+  });
+  return result;
+}
+
+module.exports = mapToArray;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_matchesStrictComparable.js":
+/*!*********************************************************!*\
+  !*** ./node_modules/lodash/_matchesStrictComparable.js ***!
+  \*********************************************************/
+/***/ ((module) => {
+
+/**
+ * A specialized version of `matchesProperty` for source values suitable
+ * for strict equality comparisons, i.e. `===`.
+ *
+ * @private
+ * @param {string} key The key of the property to get.
+ * @param {*} srcValue The value to match.
+ * @returns {Function} Returns the new spec function.
+ */
+function matchesStrictComparable(key, srcValue) {
+  return function(object) {
+    if (object == null) {
+      return false;
+    }
+    return object[key] === srcValue &&
+      (srcValue !== undefined || (key in Object(object)));
+  };
+}
+
+module.exports = matchesStrictComparable;
+
+
+/***/ }),
+
 /***/ "./node_modules/lodash/_memoizeCapped.js":
 /*!***********************************************!*\
   !*** ./node_modules/lodash/_memoizeCapped.js ***!
@@ -32450,6 +40882,87 @@ var freeSelf = typeof self == 'object' && self && self.Object === Object && self
 var root = freeGlobal || freeSelf || Function('return this')();
 
 module.exports = root;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_setCacheAdd.js":
+/*!*********************************************!*\
+  !*** ./node_modules/lodash/_setCacheAdd.js ***!
+  \*********************************************/
+/***/ ((module) => {
+
+/** Used to stand-in for `undefined` hash values. */
+var HASH_UNDEFINED = '__lodash_hash_undefined__';
+
+/**
+ * Adds `value` to the array cache.
+ *
+ * @private
+ * @name add
+ * @memberOf SetCache
+ * @alias push
+ * @param {*} value The value to cache.
+ * @returns {Object} Returns the cache instance.
+ */
+function setCacheAdd(value) {
+  this.__data__.set(value, HASH_UNDEFINED);
+  return this;
+}
+
+module.exports = setCacheAdd;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_setCacheHas.js":
+/*!*********************************************!*\
+  !*** ./node_modules/lodash/_setCacheHas.js ***!
+  \*********************************************/
+/***/ ((module) => {
+
+/**
+ * Checks if `value` is in the array cache.
+ *
+ * @private
+ * @name has
+ * @memberOf SetCache
+ * @param {*} value The value to search for.
+ * @returns {number} Returns `true` if `value` is found, else `false`.
+ */
+function setCacheHas(value) {
+  return this.__data__.has(value);
+}
+
+module.exports = setCacheHas;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_setToArray.js":
+/*!********************************************!*\
+  !*** ./node_modules/lodash/_setToArray.js ***!
+  \********************************************/
+/***/ ((module) => {
+
+/**
+ * Converts `set` to an array of its values.
+ *
+ * @private
+ * @param {Object} set The set to convert.
+ * @returns {Array} Returns the values.
+ */
+function setToArray(set) {
+  var index = -1,
+      result = Array(set.size);
+
+  set.forEach(function(value) {
+    result[++index] = value;
+  });
+  return result;
+}
+
+module.exports = setToArray;
 
 
 /***/ }),
@@ -32774,6 +41287,35 @@ module.exports = toSource;
 
 /***/ }),
 
+/***/ "./node_modules/lodash/_trimmedEndIndex.js":
+/*!*************************************************!*\
+  !*** ./node_modules/lodash/_trimmedEndIndex.js ***!
+  \*************************************************/
+/***/ ((module) => {
+
+/** Used to match a single whitespace character. */
+var reWhitespace = /\s/;
+
+/**
+ * Used by `_.trim` and `_.trimEnd` to get the index of the last non-whitespace
+ * character of `string`.
+ *
+ * @private
+ * @param {string} string The string to inspect.
+ * @returns {number} Returns the index of the last non-whitespace character.
+ */
+function trimmedEndIndex(string) {
+  var index = string.length;
+
+  while (index-- && reWhitespace.test(string.charAt(index))) {}
+  return index;
+}
+
+module.exports = trimmedEndIndex;
+
+
+/***/ }),
+
 /***/ "./node_modules/lodash/cloneDeep.js":
 /*!******************************************!*\
   !*** ./node_modules/lodash/cloneDeep.js ***!
@@ -32896,6 +41438,123 @@ module.exports = eq;
 
 /***/ }),
 
+/***/ "./node_modules/lodash/find.js":
+/*!*************************************!*\
+  !*** ./node_modules/lodash/find.js ***!
+  \*************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var createFind = __webpack_require__(/*! ./_createFind */ "./node_modules/lodash/_createFind.js"),
+    findIndex = __webpack_require__(/*! ./findIndex */ "./node_modules/lodash/findIndex.js");
+
+/**
+ * Iterates over elements of `collection`, returning the first element
+ * `predicate` returns truthy for. The predicate is invoked with three
+ * arguments: (value, index|key, collection).
+ *
+ * @static
+ * @memberOf _
+ * @since 0.1.0
+ * @category Collection
+ * @param {Array|Object} collection The collection to inspect.
+ * @param {Function} [predicate=_.identity] The function invoked per iteration.
+ * @param {number} [fromIndex=0] The index to search from.
+ * @returns {*} Returns the matched element, else `undefined`.
+ * @example
+ *
+ * var users = [
+ *   { 'user': 'barney',  'age': 36, 'active': true },
+ *   { 'user': 'fred',    'age': 40, 'active': false },
+ *   { 'user': 'pebbles', 'age': 1,  'active': true }
+ * ];
+ *
+ * _.find(users, function(o) { return o.age < 40; });
+ * // => object for 'barney'
+ *
+ * // The `_.matches` iteratee shorthand.
+ * _.find(users, { 'age': 1, 'active': true });
+ * // => object for 'pebbles'
+ *
+ * // The `_.matchesProperty` iteratee shorthand.
+ * _.find(users, ['active', false]);
+ * // => object for 'fred'
+ *
+ * // The `_.property` iteratee shorthand.
+ * _.find(users, 'active');
+ * // => object for 'barney'
+ */
+var find = createFind(findIndex);
+
+module.exports = find;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/findIndex.js":
+/*!******************************************!*\
+  !*** ./node_modules/lodash/findIndex.js ***!
+  \******************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var baseFindIndex = __webpack_require__(/*! ./_baseFindIndex */ "./node_modules/lodash/_baseFindIndex.js"),
+    baseIteratee = __webpack_require__(/*! ./_baseIteratee */ "./node_modules/lodash/_baseIteratee.js"),
+    toInteger = __webpack_require__(/*! ./toInteger */ "./node_modules/lodash/toInteger.js");
+
+/* Built-in method references for those with the same name as other `lodash` methods. */
+var nativeMax = Math.max;
+
+/**
+ * This method is like `_.find` except that it returns the index of the first
+ * element `predicate` returns truthy for instead of the element itself.
+ *
+ * @static
+ * @memberOf _
+ * @since 1.1.0
+ * @category Array
+ * @param {Array} array The array to inspect.
+ * @param {Function} [predicate=_.identity] The function invoked per iteration.
+ * @param {number} [fromIndex=0] The index to search from.
+ * @returns {number} Returns the index of the found element, else `-1`.
+ * @example
+ *
+ * var users = [
+ *   { 'user': 'barney',  'active': false },
+ *   { 'user': 'fred',    'active': false },
+ *   { 'user': 'pebbles', 'active': true }
+ * ];
+ *
+ * _.findIndex(users, function(o) { return o.user == 'barney'; });
+ * // => 0
+ *
+ * // The `_.matches` iteratee shorthand.
+ * _.findIndex(users, { 'user': 'fred', 'active': false });
+ * // => 1
+ *
+ * // The `_.matchesProperty` iteratee shorthand.
+ * _.findIndex(users, ['active', false]);
+ * // => 0
+ *
+ * // The `_.property` iteratee shorthand.
+ * _.findIndex(users, 'active');
+ * // => 2
+ */
+function findIndex(array, predicate, fromIndex) {
+  var length = array == null ? 0 : array.length;
+  if (!length) {
+    return -1;
+  }
+  var index = fromIndex == null ? 0 : toInteger(fromIndex);
+  if (index < 0) {
+    index = nativeMax(length + index, 0);
+  }
+  return baseFindIndex(array, baseIteratee(predicate, 3), index);
+}
+
+module.exports = findIndex;
+
+
+/***/ }),
+
 /***/ "./node_modules/lodash/flatten.js":
 /*!****************************************!*\
   !*** ./node_modules/lodash/flatten.js ***!
@@ -32924,6 +41583,138 @@ function flatten(array) {
 }
 
 module.exports = flatten;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/get.js":
+/*!************************************!*\
+  !*** ./node_modules/lodash/get.js ***!
+  \************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var baseGet = __webpack_require__(/*! ./_baseGet */ "./node_modules/lodash/_baseGet.js");
+
+/**
+ * Gets the value at `path` of `object`. If the resolved value is
+ * `undefined`, the `defaultValue` is returned in its place.
+ *
+ * @static
+ * @memberOf _
+ * @since 3.7.0
+ * @category Object
+ * @param {Object} object The object to query.
+ * @param {Array|string} path The path of the property to get.
+ * @param {*} [defaultValue] The value returned for `undefined` resolved values.
+ * @returns {*} Returns the resolved value.
+ * @example
+ *
+ * var object = { 'a': [{ 'b': { 'c': 3 } }] };
+ *
+ * _.get(object, 'a[0].b.c');
+ * // => 3
+ *
+ * _.get(object, ['a', '0', 'b', 'c']);
+ * // => 3
+ *
+ * _.get(object, 'a.b.c', 'default');
+ * // => 'default'
+ */
+function get(object, path, defaultValue) {
+  var result = object == null ? undefined : baseGet(object, path);
+  return result === undefined ? defaultValue : result;
+}
+
+module.exports = get;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/has.js":
+/*!************************************!*\
+  !*** ./node_modules/lodash/has.js ***!
+  \************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var baseHas = __webpack_require__(/*! ./_baseHas */ "./node_modules/lodash/_baseHas.js"),
+    hasPath = __webpack_require__(/*! ./_hasPath */ "./node_modules/lodash/_hasPath.js");
+
+/**
+ * Checks if `path` is a direct property of `object`.
+ *
+ * @static
+ * @since 0.1.0
+ * @memberOf _
+ * @category Object
+ * @param {Object} object The object to query.
+ * @param {Array|string} path The path to check.
+ * @returns {boolean} Returns `true` if `path` exists, else `false`.
+ * @example
+ *
+ * var object = { 'a': { 'b': 2 } };
+ * var other = _.create({ 'a': _.create({ 'b': 2 }) });
+ *
+ * _.has(object, 'a');
+ * // => true
+ *
+ * _.has(object, 'a.b');
+ * // => true
+ *
+ * _.has(object, ['a', 'b']);
+ * // => true
+ *
+ * _.has(other, 'a');
+ * // => false
+ */
+function has(object, path) {
+  return object != null && hasPath(object, path, baseHas);
+}
+
+module.exports = has;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/hasIn.js":
+/*!**************************************!*\
+  !*** ./node_modules/lodash/hasIn.js ***!
+  \**************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var baseHasIn = __webpack_require__(/*! ./_baseHasIn */ "./node_modules/lodash/_baseHasIn.js"),
+    hasPath = __webpack_require__(/*! ./_hasPath */ "./node_modules/lodash/_hasPath.js");
+
+/**
+ * Checks if `path` is a direct or inherited property of `object`.
+ *
+ * @static
+ * @memberOf _
+ * @since 4.0.0
+ * @category Object
+ * @param {Object} object The object to query.
+ * @param {Array|string} path The path to check.
+ * @returns {boolean} Returns `true` if `path` exists, else `false`.
+ * @example
+ *
+ * var object = _.create({ 'a': _.create({ 'b': 2 }) });
+ *
+ * _.hasIn(object, 'a');
+ * // => true
+ *
+ * _.hasIn(object, 'a.b');
+ * // => true
+ *
+ * _.hasIn(object, ['a', 'b']);
+ * // => true
+ *
+ * _.hasIn(object, 'b');
+ * // => false
+ */
+function hasIn(object, path) {
+  return object != null && hasPath(object, path, baseHasIn);
+}
+
+module.exports = hasIn;
 
 
 /***/ }),
@@ -33449,6 +42240,43 @@ module.exports = isPlainObject;
 
 /***/ }),
 
+/***/ "./node_modules/lodash/isRegExp.js":
+/*!*****************************************!*\
+  !*** ./node_modules/lodash/isRegExp.js ***!
+  \*****************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var baseIsRegExp = __webpack_require__(/*! ./_baseIsRegExp */ "./node_modules/lodash/_baseIsRegExp.js"),
+    baseUnary = __webpack_require__(/*! ./_baseUnary */ "./node_modules/lodash/_baseUnary.js"),
+    nodeUtil = __webpack_require__(/*! ./_nodeUtil */ "./node_modules/lodash/_nodeUtil.js");
+
+/* Node.js helper references. */
+var nodeIsRegExp = nodeUtil && nodeUtil.isRegExp;
+
+/**
+ * Checks if `value` is classified as a `RegExp` object.
+ *
+ * @static
+ * @memberOf _
+ * @since 0.1.0
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is a regexp, else `false`.
+ * @example
+ *
+ * _.isRegExp(/abc/);
+ * // => true
+ *
+ * _.isRegExp('/abc/');
+ * // => false
+ */
+var isRegExp = nodeIsRegExp ? baseUnary(nodeIsRegExp) : baseIsRegExp;
+
+module.exports = isRegExp;
+
+
+/***/ }),
+
 /***/ "./node_modules/lodash/isSet.js":
 /*!**************************************!*\
   !*** ./node_modules/lodash/isSet.js ***!
@@ -33831,6 +42659,93 @@ module.exports = omit;
 
 /***/ }),
 
+/***/ "./node_modules/lodash/property.js":
+/*!*****************************************!*\
+  !*** ./node_modules/lodash/property.js ***!
+  \*****************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var baseProperty = __webpack_require__(/*! ./_baseProperty */ "./node_modules/lodash/_baseProperty.js"),
+    basePropertyDeep = __webpack_require__(/*! ./_basePropertyDeep */ "./node_modules/lodash/_basePropertyDeep.js"),
+    isKey = __webpack_require__(/*! ./_isKey */ "./node_modules/lodash/_isKey.js"),
+    toKey = __webpack_require__(/*! ./_toKey */ "./node_modules/lodash/_toKey.js");
+
+/**
+ * Creates a function that returns the value at `path` of a given object.
+ *
+ * @static
+ * @memberOf _
+ * @since 2.4.0
+ * @category Util
+ * @param {Array|string} path The path of the property to get.
+ * @returns {Function} Returns the new accessor function.
+ * @example
+ *
+ * var objects = [
+ *   { 'a': { 'b': 2 } },
+ *   { 'a': { 'b': 1 } }
+ * ];
+ *
+ * _.map(objects, _.property('a.b'));
+ * // => [2, 1]
+ *
+ * _.map(_.sortBy(objects, _.property(['a', 'b'])), 'a.b');
+ * // => [1, 2]
+ */
+function property(path) {
+  return isKey(path) ? baseProperty(toKey(path)) : basePropertyDeep(path);
+}
+
+module.exports = property;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/set.js":
+/*!************************************!*\
+  !*** ./node_modules/lodash/set.js ***!
+  \************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var baseSet = __webpack_require__(/*! ./_baseSet */ "./node_modules/lodash/_baseSet.js");
+
+/**
+ * Sets the value at `path` of `object`. If a portion of `path` doesn't exist,
+ * it's created. Arrays are created for missing index properties while objects
+ * are created for all other missing properties. Use `_.setWith` to customize
+ * `path` creation.
+ *
+ * **Note:** This method mutates `object`.
+ *
+ * @static
+ * @memberOf _
+ * @since 3.7.0
+ * @category Object
+ * @param {Object} object The object to modify.
+ * @param {Array|string} path The path of the property to set.
+ * @param {*} value The value to set.
+ * @returns {Object} Returns `object`.
+ * @example
+ *
+ * var object = { 'a': [{ 'b': { 'c': 3 } }] };
+ *
+ * _.set(object, 'a[0].b.c', 4);
+ * console.log(object.a[0].b.c);
+ * // => 4
+ *
+ * _.set(object, ['x', '0', 'y', 'z'], 5);
+ * console.log(object.x[0].y.z);
+ * // => 5
+ */
+function set(object, path, value) {
+  return object == null ? object : baseSet(object, path, value);
+}
+
+module.exports = set;
+
+
+/***/ }),
+
 /***/ "./node_modules/lodash/stubArray.js":
 /*!******************************************!*\
   !*** ./node_modules/lodash/stubArray.js ***!
@@ -33888,6 +42803,178 @@ function stubFalse() {
 }
 
 module.exports = stubFalse;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/toFinite.js":
+/*!*****************************************!*\
+  !*** ./node_modules/lodash/toFinite.js ***!
+  \*****************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var toNumber = __webpack_require__(/*! ./toNumber */ "./node_modules/lodash/toNumber.js");
+
+/** Used as references for various `Number` constants. */
+var INFINITY = 1 / 0,
+    MAX_INTEGER = 1.7976931348623157e+308;
+
+/**
+ * Converts `value` to a finite number.
+ *
+ * @static
+ * @memberOf _
+ * @since 4.12.0
+ * @category Lang
+ * @param {*} value The value to convert.
+ * @returns {number} Returns the converted number.
+ * @example
+ *
+ * _.toFinite(3.2);
+ * // => 3.2
+ *
+ * _.toFinite(Number.MIN_VALUE);
+ * // => 5e-324
+ *
+ * _.toFinite(Infinity);
+ * // => 1.7976931348623157e+308
+ *
+ * _.toFinite('3.2');
+ * // => 3.2
+ */
+function toFinite(value) {
+  if (!value) {
+    return value === 0 ? value : 0;
+  }
+  value = toNumber(value);
+  if (value === INFINITY || value === -INFINITY) {
+    var sign = (value < 0 ? -1 : 1);
+    return sign * MAX_INTEGER;
+  }
+  return value === value ? value : 0;
+}
+
+module.exports = toFinite;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/toInteger.js":
+/*!******************************************!*\
+  !*** ./node_modules/lodash/toInteger.js ***!
+  \******************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var toFinite = __webpack_require__(/*! ./toFinite */ "./node_modules/lodash/toFinite.js");
+
+/**
+ * Converts `value` to an integer.
+ *
+ * **Note:** This method is loosely based on
+ * [`ToInteger`](http://www.ecma-international.org/ecma-262/7.0/#sec-tointeger).
+ *
+ * @static
+ * @memberOf _
+ * @since 4.0.0
+ * @category Lang
+ * @param {*} value The value to convert.
+ * @returns {number} Returns the converted integer.
+ * @example
+ *
+ * _.toInteger(3.2);
+ * // => 3
+ *
+ * _.toInteger(Number.MIN_VALUE);
+ * // => 0
+ *
+ * _.toInteger(Infinity);
+ * // => 1.7976931348623157e+308
+ *
+ * _.toInteger('3.2');
+ * // => 3
+ */
+function toInteger(value) {
+  var result = toFinite(value),
+      remainder = result % 1;
+
+  return result === result ? (remainder ? result - remainder : result) : 0;
+}
+
+module.exports = toInteger;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/toNumber.js":
+/*!*****************************************!*\
+  !*** ./node_modules/lodash/toNumber.js ***!
+  \*****************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var baseTrim = __webpack_require__(/*! ./_baseTrim */ "./node_modules/lodash/_baseTrim.js"),
+    isObject = __webpack_require__(/*! ./isObject */ "./node_modules/lodash/isObject.js"),
+    isSymbol = __webpack_require__(/*! ./isSymbol */ "./node_modules/lodash/isSymbol.js");
+
+/** Used as references for various `Number` constants. */
+var NAN = 0 / 0;
+
+/** Used to detect bad signed hexadecimal string values. */
+var reIsBadHex = /^[-+]0x[0-9a-f]+$/i;
+
+/** Used to detect binary string values. */
+var reIsBinary = /^0b[01]+$/i;
+
+/** Used to detect octal string values. */
+var reIsOctal = /^0o[0-7]+$/i;
+
+/** Built-in method references without a dependency on `root`. */
+var freeParseInt = parseInt;
+
+/**
+ * Converts `value` to a number.
+ *
+ * @static
+ * @memberOf _
+ * @since 4.0.0
+ * @category Lang
+ * @param {*} value The value to process.
+ * @returns {number} Returns the number.
+ * @example
+ *
+ * _.toNumber(3.2);
+ * // => 3.2
+ *
+ * _.toNumber(Number.MIN_VALUE);
+ * // => 5e-324
+ *
+ * _.toNumber(Infinity);
+ * // => Infinity
+ *
+ * _.toNumber('3.2');
+ * // => 3.2
+ */
+function toNumber(value) {
+  if (typeof value == 'number') {
+    return value;
+  }
+  if (isSymbol(value)) {
+    return NAN;
+  }
+  if (isObject(value)) {
+    var other = typeof value.valueOf == 'function' ? value.valueOf() : value;
+    value = isObject(other) ? (other + '') : other;
+  }
+  if (typeof value != 'string') {
+    return value === 0 ? value : +value;
+  }
+  value = baseTrim(value);
+  var isBinary = reIsBinary.test(value);
+  return (isBinary || reIsOctal.test(value))
+    ? freeParseInt(value.slice(2), isBinary ? 2 : 8)
+    : (reIsBadHex.test(value) ? NAN : +value);
+}
+
+module.exports = toNumber;
 
 
 /***/ }),
@@ -56888,36 +65975,6 @@ var update = _node_modules_style_loader_dist_runtime_injectStylesIntoStyleTag_js
 
 /***/ }),
 
-/***/ "./node_modules/style-loader/dist/cjs.js!./node_modules/css-loader/dist/cjs.js??clonedRuleSet-11[0].rules[0].use[1]!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-11[0].rules[0].use[2]!./node_modules/sass-loader/dist/cjs.js??clonedRuleSet-11[0].rules[0].use[3]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/js/components/Home.vue?vue&type=style&index=0&lang=scss&module=true&":
-/*!******************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
-  !*** ./node_modules/style-loader/dist/cjs.js!./node_modules/css-loader/dist/cjs.js??clonedRuleSet-11[0].rules[0].use[1]!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-11[0].rules[0].use[2]!./node_modules/sass-loader/dist/cjs.js??clonedRuleSet-11[0].rules[0].use[3]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/js/components/Home.vue?vue&type=style&index=0&lang=scss&module=true& ***!
-  \******************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
-/* harmony export */ });
-/* harmony import */ var _node_modules_style_loader_dist_runtime_injectStylesIntoStyleTag_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! !../../../node_modules/style-loader/dist/runtime/injectStylesIntoStyleTag.js */ "./node_modules/style-loader/dist/runtime/injectStylesIntoStyleTag.js");
-/* harmony import */ var _node_modules_style_loader_dist_runtime_injectStylesIntoStyleTag_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_style_loader_dist_runtime_injectStylesIntoStyleTag_js__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var _node_modules_css_loader_dist_cjs_js_clonedRuleSet_11_0_rules_0_use_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_dist_cjs_js_clonedRuleSet_11_0_rules_0_use_2_node_modules_sass_loader_dist_cjs_js_clonedRuleSet_11_0_rules_0_use_3_node_modules_vue_loader_lib_index_js_vue_loader_options_Home_vue_vue_type_style_index_0_lang_scss_module_true___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! !!../../../node_modules/css-loader/dist/cjs.js??clonedRuleSet-11[0].rules[0].use[1]!../../../node_modules/vue-loader/lib/loaders/stylePostLoader.js!../../../node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-11[0].rules[0].use[2]!../../../node_modules/sass-loader/dist/cjs.js??clonedRuleSet-11[0].rules[0].use[3]!../../../node_modules/vue-loader/lib/index.js??vue-loader-options!./Home.vue?vue&type=style&index=0&lang=scss&module=true& */ "./node_modules/css-loader/dist/cjs.js??clonedRuleSet-11[0].rules[0].use[1]!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-11[0].rules[0].use[2]!./node_modules/sass-loader/dist/cjs.js??clonedRuleSet-11[0].rules[0].use[3]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/js/components/Home.vue?vue&type=style&index=0&lang=scss&module=true&");
-
-            
-
-var options = {};
-
-options.insert = "head";
-options.singleton = false;
-
-var update = _node_modules_style_loader_dist_runtime_injectStylesIntoStyleTag_js__WEBPACK_IMPORTED_MODULE_0___default()(_node_modules_css_loader_dist_cjs_js_clonedRuleSet_11_0_rules_0_use_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_dist_cjs_js_clonedRuleSet_11_0_rules_0_use_2_node_modules_sass_loader_dist_cjs_js_clonedRuleSet_11_0_rules_0_use_3_node_modules_vue_loader_lib_index_js_vue_loader_options_Home_vue_vue_type_style_index_0_lang_scss_module_true___WEBPACK_IMPORTED_MODULE_1__["default"], options);
-
-
-
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (_node_modules_css_loader_dist_cjs_js_clonedRuleSet_11_0_rules_0_use_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_dist_cjs_js_clonedRuleSet_11_0_rules_0_use_2_node_modules_sass_loader_dist_cjs_js_clonedRuleSet_11_0_rules_0_use_3_node_modules_vue_loader_lib_index_js_vue_loader_options_Home_vue_vue_type_style_index_0_lang_scss_module_true___WEBPACK_IMPORTED_MODULE_1__["default"].locals || {});
-
-/***/ }),
-
 /***/ "./node_modules/style-loader/dist/cjs.js!./node_modules/css-loader/dist/cjs.js??clonedRuleSet-11[0].rules[0].use[1]!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-11[0].rules[0].use[2]!./node_modules/sass-loader/dist/cjs.js??clonedRuleSet-11[0].rules[0].use[3]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/js/components/section/Header.vue?vue&type=style&index=0&lang=scss&module=true&":
 /*!****************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
   !*** ./node_modules/style-loader/dist/cjs.js!./node_modules/css-loader/dist/cjs.js??clonedRuleSet-11[0].rules[0].use[1]!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-11[0].rules[0].use[2]!./node_modules/sass-loader/dist/cjs.js??clonedRuleSet-11[0].rules[0].use[3]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/js/components/section/Header.vue?vue&type=style&index=0&lang=scss&module=true& ***!
@@ -57095,6 +66152,66 @@ var update = _node_modules_style_loader_dist_runtime_injectStylesIntoStyleTag_js
 
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (_node_modules_css_loader_dist_cjs_js_clonedRuleSet_12_0_rules_0_use_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_dist_cjs_js_clonedRuleSet_12_0_rules_0_use_2_node_modules_sass_loader_dist_cjs_js_clonedRuleSet_12_0_rules_0_use_3_node_modules_vue_loader_lib_index_js_vue_loader_options_tool_bar_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_1__["default"].locals || {});
+
+/***/ }),
+
+/***/ "./node_modules/style-loader/dist/cjs.js!./node_modules/css-loader/dist/cjs.js??clonedRuleSet-12[0].rules[0].use[1]!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-12[0].rules[0].use[2]!./node_modules/sass-loader/dist/cjs.js??clonedRuleSet-12[0].rules[0].use[3]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/js/components/section/Auth/Login.vue?vue&type=style&index=0&lang=scss&":
+/*!********************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/style-loader/dist/cjs.js!./node_modules/css-loader/dist/cjs.js??clonedRuleSet-12[0].rules[0].use[1]!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-12[0].rules[0].use[2]!./node_modules/sass-loader/dist/cjs.js??clonedRuleSet-12[0].rules[0].use[3]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/js/components/section/Auth/Login.vue?vue&type=style&index=0&lang=scss& ***!
+  \********************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _node_modules_style_loader_dist_runtime_injectStylesIntoStyleTag_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! !../../../../../node_modules/style-loader/dist/runtime/injectStylesIntoStyleTag.js */ "./node_modules/style-loader/dist/runtime/injectStylesIntoStyleTag.js");
+/* harmony import */ var _node_modules_style_loader_dist_runtime_injectStylesIntoStyleTag_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_style_loader_dist_runtime_injectStylesIntoStyleTag_js__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _node_modules_css_loader_dist_cjs_js_clonedRuleSet_12_0_rules_0_use_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_dist_cjs_js_clonedRuleSet_12_0_rules_0_use_2_node_modules_sass_loader_dist_cjs_js_clonedRuleSet_12_0_rules_0_use_3_node_modules_vue_loader_lib_index_js_vue_loader_options_Login_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! !!../../../../../node_modules/css-loader/dist/cjs.js??clonedRuleSet-12[0].rules[0].use[1]!../../../../../node_modules/vue-loader/lib/loaders/stylePostLoader.js!../../../../../node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-12[0].rules[0].use[2]!../../../../../node_modules/sass-loader/dist/cjs.js??clonedRuleSet-12[0].rules[0].use[3]!../../../../../node_modules/vue-loader/lib/index.js??vue-loader-options!./Login.vue?vue&type=style&index=0&lang=scss& */ "./node_modules/css-loader/dist/cjs.js??clonedRuleSet-12[0].rules[0].use[1]!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-12[0].rules[0].use[2]!./node_modules/sass-loader/dist/cjs.js??clonedRuleSet-12[0].rules[0].use[3]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/js/components/section/Auth/Login.vue?vue&type=style&index=0&lang=scss&");
+
+            
+
+var options = {};
+
+options.insert = "head";
+options.singleton = false;
+
+var update = _node_modules_style_loader_dist_runtime_injectStylesIntoStyleTag_js__WEBPACK_IMPORTED_MODULE_0___default()(_node_modules_css_loader_dist_cjs_js_clonedRuleSet_12_0_rules_0_use_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_dist_cjs_js_clonedRuleSet_12_0_rules_0_use_2_node_modules_sass_loader_dist_cjs_js_clonedRuleSet_12_0_rules_0_use_3_node_modules_vue_loader_lib_index_js_vue_loader_options_Login_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_1__["default"], options);
+
+
+
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (_node_modules_css_loader_dist_cjs_js_clonedRuleSet_12_0_rules_0_use_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_dist_cjs_js_clonedRuleSet_12_0_rules_0_use_2_node_modules_sass_loader_dist_cjs_js_clonedRuleSet_12_0_rules_0_use_3_node_modules_vue_loader_lib_index_js_vue_loader_options_Login_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_1__["default"].locals || {});
+
+/***/ }),
+
+/***/ "./node_modules/style-loader/dist/cjs.js!./node_modules/css-loader/dist/cjs.js??clonedRuleSet-12[0].rules[0].use[1]!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-12[0].rules[0].use[2]!./node_modules/sass-loader/dist/cjs.js??clonedRuleSet-12[0].rules[0].use[3]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/js/components/section/Auth/Register.vue?vue&type=style&index=0&lang=scss&":
+/*!***********************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/style-loader/dist/cjs.js!./node_modules/css-loader/dist/cjs.js??clonedRuleSet-12[0].rules[0].use[1]!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-12[0].rules[0].use[2]!./node_modules/sass-loader/dist/cjs.js??clonedRuleSet-12[0].rules[0].use[3]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/js/components/section/Auth/Register.vue?vue&type=style&index=0&lang=scss& ***!
+  \***********************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _node_modules_style_loader_dist_runtime_injectStylesIntoStyleTag_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! !../../../../../node_modules/style-loader/dist/runtime/injectStylesIntoStyleTag.js */ "./node_modules/style-loader/dist/runtime/injectStylesIntoStyleTag.js");
+/* harmony import */ var _node_modules_style_loader_dist_runtime_injectStylesIntoStyleTag_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_style_loader_dist_runtime_injectStylesIntoStyleTag_js__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _node_modules_css_loader_dist_cjs_js_clonedRuleSet_12_0_rules_0_use_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_dist_cjs_js_clonedRuleSet_12_0_rules_0_use_2_node_modules_sass_loader_dist_cjs_js_clonedRuleSet_12_0_rules_0_use_3_node_modules_vue_loader_lib_index_js_vue_loader_options_Register_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! !!../../../../../node_modules/css-loader/dist/cjs.js??clonedRuleSet-12[0].rules[0].use[1]!../../../../../node_modules/vue-loader/lib/loaders/stylePostLoader.js!../../../../../node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-12[0].rules[0].use[2]!../../../../../node_modules/sass-loader/dist/cjs.js??clonedRuleSet-12[0].rules[0].use[3]!../../../../../node_modules/vue-loader/lib/index.js??vue-loader-options!./Register.vue?vue&type=style&index=0&lang=scss& */ "./node_modules/css-loader/dist/cjs.js??clonedRuleSet-12[0].rules[0].use[1]!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-12[0].rules[0].use[2]!./node_modules/sass-loader/dist/cjs.js??clonedRuleSet-12[0].rules[0].use[3]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/js/components/section/Auth/Register.vue?vue&type=style&index=0&lang=scss&");
+
+            
+
+var options = {};
+
+options.insert = "head";
+options.singleton = false;
+
+var update = _node_modules_style_loader_dist_runtime_injectStylesIntoStyleTag_js__WEBPACK_IMPORTED_MODULE_0___default()(_node_modules_css_loader_dist_cjs_js_clonedRuleSet_12_0_rules_0_use_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_dist_cjs_js_clonedRuleSet_12_0_rules_0_use_2_node_modules_sass_loader_dist_cjs_js_clonedRuleSet_12_0_rules_0_use_3_node_modules_vue_loader_lib_index_js_vue_loader_options_Register_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_1__["default"], options);
+
+
+
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (_node_modules_css_loader_dist_cjs_js_clonedRuleSet_12_0_rules_0_use_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_dist_cjs_js_clonedRuleSet_12_0_rules_0_use_2_node_modules_sass_loader_dist_cjs_js_clonedRuleSet_12_0_rules_0_use_3_node_modules_vue_loader_lib_index_js_vue_loader_options_Register_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_1__["default"].locals || {});
 
 /***/ }),
 
@@ -58705,107 +67822,6 @@ component.options.__file = "resources/js/components/App.vue"
 
 /***/ }),
 
-/***/ "./resources/js/components/Hello.vue":
-/*!*******************************************!*\
-  !*** ./resources/js/components/Hello.vue ***!
-  \*******************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
-/* harmony export */ });
-/* harmony import */ var _Hello_vue_vue_type_template_id_19aad877___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./Hello.vue?vue&type=template&id=19aad877& */ "./resources/js/components/Hello.vue?vue&type=template&id=19aad877&");
-/* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! !../../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
-
-var script = {}
-
-
-/* normalize component */
-;
-var component = (0,_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_1__["default"])(
-  script,
-  _Hello_vue_vue_type_template_id_19aad877___WEBPACK_IMPORTED_MODULE_0__.render,
-  _Hello_vue_vue_type_template_id_19aad877___WEBPACK_IMPORTED_MODULE_0__.staticRenderFns,
-  false,
-  null,
-  null,
-  null
-  
-)
-
-/* hot reload */
-if (false) { var api; }
-component.options.__file = "resources/js/components/Hello.vue"
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (component.exports);
-
-/***/ }),
-
-/***/ "./resources/js/components/Home.vue":
-/*!******************************************!*\
-  !*** ./resources/js/components/Home.vue ***!
-  \******************************************/
-/***/ ((module, __webpack_exports__, __webpack_require__) => {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
-/* harmony export */ });
-/* harmony import */ var _Home_vue_vue_type_template_id_f2b6376c___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./Home.vue?vue&type=template&id=f2b6376c& */ "./resources/js/components/Home.vue?vue&type=template&id=f2b6376c&");
-/* harmony import */ var _Home_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./Home.vue?vue&type=script&lang=js& */ "./resources/js/components/Home.vue?vue&type=script&lang=js&");
-/* harmony import */ var _Home_vue_vue_type_style_index_0_lang_scss_module_true___WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./Home.vue?vue&type=style&index=0&lang=scss&module=true& */ "./resources/js/components/Home.vue?vue&type=style&index=0&lang=scss&module=true&");
-/* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! !../../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
-/* module decorator */ module = __webpack_require__.hmd(module);
-
-
-
-;
-
-var cssModules = {}
-var disposed = false
-
-function injectStyles (context) {
-  if (disposed) return
-  
-        cssModules["$style"] = (_Home_vue_vue_type_style_index_0_lang_scss_module_true___WEBPACK_IMPORTED_MODULE_2__["default"].locals || _Home_vue_vue_type_style_index_0_lang_scss_module_true___WEBPACK_IMPORTED_MODULE_2__["default"])
-        Object.defineProperty(this, "$style", {
-          configurable: true,
-          get: function () {
-            return cssModules["$style"]
-          }
-        })
-      
-}
-
-
-  module.hot && 0
-
-
-
-        module.hot && 0
-
-/* normalize component */
-;
-var component = (0,_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__["default"])(
-  _Home_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__["default"],
-  _Home_vue_vue_type_template_id_f2b6376c___WEBPACK_IMPORTED_MODULE_0__.render,
-  _Home_vue_vue_type_template_id_f2b6376c___WEBPACK_IMPORTED_MODULE_0__.staticRenderFns,
-  false,
-  injectStyles,
-  null,
-  null
-  
-)
-
-/* hot reload */
-if (false) { var api; }
-component.options.__file = "resources/js/components/Home.vue"
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (component.exports);
-
-/***/ }),
-
 /***/ "./resources/js/components/basic/add-task.vue":
 /*!****************************************************!*\
   !*** ./resources/js/components/basic/add-task.vue ***!
@@ -59011,6 +68027,88 @@ component.options.__file = "resources/js/components/common/tool-bar.vue"
 
 /***/ }),
 
+/***/ "./resources/js/components/section/Auth/Login.vue":
+/*!********************************************************!*\
+  !*** ./resources/js/components/section/Auth/Login.vue ***!
+  \********************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _Login_vue_vue_type_template_id_60ecad92___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./Login.vue?vue&type=template&id=60ecad92& */ "./resources/js/components/section/Auth/Login.vue?vue&type=template&id=60ecad92&");
+/* harmony import */ var _Login_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./Login.vue?vue&type=script&lang=js& */ "./resources/js/components/section/Auth/Login.vue?vue&type=script&lang=js&");
+/* harmony import */ var _Login_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./Login.vue?vue&type=style&index=0&lang=scss& */ "./resources/js/components/section/Auth/Login.vue?vue&type=style&index=0&lang=scss&");
+/* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! !../../../../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
+
+
+
+;
+
+
+/* normalize component */
+
+var component = (0,_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__["default"])(
+  _Login_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__["default"],
+  _Login_vue_vue_type_template_id_60ecad92___WEBPACK_IMPORTED_MODULE_0__.render,
+  _Login_vue_vue_type_template_id_60ecad92___WEBPACK_IMPORTED_MODULE_0__.staticRenderFns,
+  false,
+  null,
+  null,
+  null
+  
+)
+
+/* hot reload */
+if (false) { var api; }
+component.options.__file = "resources/js/components/section/Auth/Login.vue"
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (component.exports);
+
+/***/ }),
+
+/***/ "./resources/js/components/section/Auth/Register.vue":
+/*!***********************************************************!*\
+  !*** ./resources/js/components/section/Auth/Register.vue ***!
+  \***********************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _Register_vue_vue_type_template_id_2313d045___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./Register.vue?vue&type=template&id=2313d045& */ "./resources/js/components/section/Auth/Register.vue?vue&type=template&id=2313d045&");
+/* harmony import */ var _Register_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./Register.vue?vue&type=script&lang=js& */ "./resources/js/components/section/Auth/Register.vue?vue&type=script&lang=js&");
+/* harmony import */ var _Register_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./Register.vue?vue&type=style&index=0&lang=scss& */ "./resources/js/components/section/Auth/Register.vue?vue&type=style&index=0&lang=scss&");
+/* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! !../../../../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
+
+
+
+;
+
+
+/* normalize component */
+
+var component = (0,_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__["default"])(
+  _Register_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__["default"],
+  _Register_vue_vue_type_template_id_2313d045___WEBPACK_IMPORTED_MODULE_0__.render,
+  _Register_vue_vue_type_template_id_2313d045___WEBPACK_IMPORTED_MODULE_0__.staticRenderFns,
+  false,
+  null,
+  null,
+  null
+  
+)
+
+/* hot reload */
+if (false) { var api; }
+component.options.__file = "resources/js/components/section/Auth/Register.vue"
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (component.exports);
+
+/***/ }),
+
 /***/ "./resources/js/components/section/Body.vue":
 /*!**************************************************!*\
   !*** ./resources/js/components/section/Body.vue ***!
@@ -59132,22 +68230,6 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ }),
 
-/***/ "./resources/js/components/Home.vue?vue&type=script&lang=js&":
-/*!*******************************************************************!*\
-  !*** ./resources/js/components/Home.vue?vue&type=script&lang=js& ***!
-  \*******************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
-/* harmony export */ });
-/* harmony import */ var _node_modules_babel_loader_lib_index_js_clonedRuleSet_5_0_rules_0_use_0_node_modules_vue_loader_lib_index_js_vue_loader_options_Home_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../node_modules/babel-loader/lib/index.js??clonedRuleSet-5[0].rules[0].use[0]!../../../node_modules/vue-loader/lib/index.js??vue-loader-options!./Home.vue?vue&type=script&lang=js& */ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-5[0].rules[0].use[0]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/js/components/Home.vue?vue&type=script&lang=js&");
- /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (_node_modules_babel_loader_lib_index_js_clonedRuleSet_5_0_rules_0_use_0_node_modules_vue_loader_lib_index_js_vue_loader_options_Home_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__["default"]); 
-
-/***/ }),
-
 /***/ "./resources/js/components/basic/add-task.vue?vue&type=script&lang=js&":
 /*!*****************************************************************************!*\
   !*** ./resources/js/components/basic/add-task.vue?vue&type=script&lang=js& ***!
@@ -59228,6 +68310,38 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ }),
 
+/***/ "./resources/js/components/section/Auth/Login.vue?vue&type=script&lang=js&":
+/*!*********************************************************************************!*\
+  !*** ./resources/js/components/section/Auth/Login.vue?vue&type=script&lang=js& ***!
+  \*********************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _node_modules_babel_loader_lib_index_js_clonedRuleSet_5_0_rules_0_use_0_node_modules_vue_loader_lib_index_js_vue_loader_options_Login_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../../../node_modules/babel-loader/lib/index.js??clonedRuleSet-5[0].rules[0].use[0]!../../../../../node_modules/vue-loader/lib/index.js??vue-loader-options!./Login.vue?vue&type=script&lang=js& */ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-5[0].rules[0].use[0]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/js/components/section/Auth/Login.vue?vue&type=script&lang=js&");
+ /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (_node_modules_babel_loader_lib_index_js_clonedRuleSet_5_0_rules_0_use_0_node_modules_vue_loader_lib_index_js_vue_loader_options_Login_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__["default"]); 
+
+/***/ }),
+
+/***/ "./resources/js/components/section/Auth/Register.vue?vue&type=script&lang=js&":
+/*!************************************************************************************!*\
+  !*** ./resources/js/components/section/Auth/Register.vue?vue&type=script&lang=js& ***!
+  \************************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _node_modules_babel_loader_lib_index_js_clonedRuleSet_5_0_rules_0_use_0_node_modules_vue_loader_lib_index_js_vue_loader_options_Register_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../../../node_modules/babel-loader/lib/index.js??clonedRuleSet-5[0].rules[0].use[0]!../../../../../node_modules/vue-loader/lib/index.js??vue-loader-options!./Register.vue?vue&type=script&lang=js& */ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-5[0].rules[0].use[0]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/js/components/section/Auth/Register.vue?vue&type=script&lang=js&");
+ /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (_node_modules_babel_loader_lib_index_js_clonedRuleSet_5_0_rules_0_use_0_node_modules_vue_loader_lib_index_js_vue_loader_options_Register_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__["default"]); 
+
+/***/ }),
+
 /***/ "./resources/js/components/section/Body.vue?vue&type=script&lang=js&":
 /*!***************************************************************************!*\
   !*** ./resources/js/components/section/Body.vue?vue&type=script&lang=js& ***!
@@ -59272,22 +68386,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "default": () => (/* reexport safe */ _node_modules_style_loader_dist_cjs_js_node_modules_css_loader_dist_cjs_js_clonedRuleSet_11_0_rules_0_use_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_dist_cjs_js_clonedRuleSet_11_0_rules_0_use_2_node_modules_sass_loader_dist_cjs_js_clonedRuleSet_11_0_rules_0_use_3_node_modules_vue_loader_lib_index_js_vue_loader_options_App_vue_vue_type_style_index_0_lang_scss_module_true___WEBPACK_IMPORTED_MODULE_0__["default"])
 /* harmony export */ });
 /* harmony import */ var _node_modules_style_loader_dist_cjs_js_node_modules_css_loader_dist_cjs_js_clonedRuleSet_11_0_rules_0_use_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_dist_cjs_js_clonedRuleSet_11_0_rules_0_use_2_node_modules_sass_loader_dist_cjs_js_clonedRuleSet_11_0_rules_0_use_3_node_modules_vue_loader_lib_index_js_vue_loader_options_App_vue_vue_type_style_index_0_lang_scss_module_true___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../node_modules/style-loader/dist/cjs.js!../../../node_modules/css-loader/dist/cjs.js??clonedRuleSet-11[0].rules[0].use[1]!../../../node_modules/vue-loader/lib/loaders/stylePostLoader.js!../../../node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-11[0].rules[0].use[2]!../../../node_modules/sass-loader/dist/cjs.js??clonedRuleSet-11[0].rules[0].use[3]!../../../node_modules/vue-loader/lib/index.js??vue-loader-options!./App.vue?vue&type=style&index=0&lang=scss&module=true& */ "./node_modules/style-loader/dist/cjs.js!./node_modules/css-loader/dist/cjs.js??clonedRuleSet-11[0].rules[0].use[1]!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-11[0].rules[0].use[2]!./node_modules/sass-loader/dist/cjs.js??clonedRuleSet-11[0].rules[0].use[3]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/js/components/App.vue?vue&type=style&index=0&lang=scss&module=true&");
- 
-
-/***/ }),
-
-/***/ "./resources/js/components/Home.vue?vue&type=style&index=0&lang=scss&module=true&":
-/*!****************************************************************************************!*\
-  !*** ./resources/js/components/Home.vue?vue&type=style&index=0&lang=scss&module=true& ***!
-  \****************************************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "default": () => (/* reexport safe */ _node_modules_style_loader_dist_cjs_js_node_modules_css_loader_dist_cjs_js_clonedRuleSet_11_0_rules_0_use_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_dist_cjs_js_clonedRuleSet_11_0_rules_0_use_2_node_modules_sass_loader_dist_cjs_js_clonedRuleSet_11_0_rules_0_use_3_node_modules_vue_loader_lib_index_js_vue_loader_options_Home_vue_vue_type_style_index_0_lang_scss_module_true___WEBPACK_IMPORTED_MODULE_0__["default"])
-/* harmony export */ });
-/* harmony import */ var _node_modules_style_loader_dist_cjs_js_node_modules_css_loader_dist_cjs_js_clonedRuleSet_11_0_rules_0_use_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_dist_cjs_js_clonedRuleSet_11_0_rules_0_use_2_node_modules_sass_loader_dist_cjs_js_clonedRuleSet_11_0_rules_0_use_3_node_modules_vue_loader_lib_index_js_vue_loader_options_Home_vue_vue_type_style_index_0_lang_scss_module_true___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../node_modules/style-loader/dist/cjs.js!../../../node_modules/css-loader/dist/cjs.js??clonedRuleSet-11[0].rules[0].use[1]!../../../node_modules/vue-loader/lib/loaders/stylePostLoader.js!../../../node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-11[0].rules[0].use[2]!../../../node_modules/sass-loader/dist/cjs.js??clonedRuleSet-11[0].rules[0].use[3]!../../../node_modules/vue-loader/lib/index.js??vue-loader-options!./Home.vue?vue&type=style&index=0&lang=scss&module=true& */ "./node_modules/style-loader/dist/cjs.js!./node_modules/css-loader/dist/cjs.js??clonedRuleSet-11[0].rules[0].use[1]!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-11[0].rules[0].use[2]!./node_modules/sass-loader/dist/cjs.js??clonedRuleSet-11[0].rules[0].use[3]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/js/components/Home.vue?vue&type=style&index=0&lang=scss&module=true&");
  
 
 /***/ }),
@@ -59373,6 +68471,32 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ }),
 
+/***/ "./resources/js/components/section/Auth/Login.vue?vue&type=style&index=0&lang=scss&":
+/*!******************************************************************************************!*\
+  !*** ./resources/js/components/section/Auth/Login.vue?vue&type=style&index=0&lang=scss& ***!
+  \******************************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_style_loader_dist_cjs_js_node_modules_css_loader_dist_cjs_js_clonedRuleSet_12_0_rules_0_use_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_dist_cjs_js_clonedRuleSet_12_0_rules_0_use_2_node_modules_sass_loader_dist_cjs_js_clonedRuleSet_12_0_rules_0_use_3_node_modules_vue_loader_lib_index_js_vue_loader_options_Login_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../../../node_modules/style-loader/dist/cjs.js!../../../../../node_modules/css-loader/dist/cjs.js??clonedRuleSet-12[0].rules[0].use[1]!../../../../../node_modules/vue-loader/lib/loaders/stylePostLoader.js!../../../../../node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-12[0].rules[0].use[2]!../../../../../node_modules/sass-loader/dist/cjs.js??clonedRuleSet-12[0].rules[0].use[3]!../../../../../node_modules/vue-loader/lib/index.js??vue-loader-options!./Login.vue?vue&type=style&index=0&lang=scss& */ "./node_modules/style-loader/dist/cjs.js!./node_modules/css-loader/dist/cjs.js??clonedRuleSet-12[0].rules[0].use[1]!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-12[0].rules[0].use[2]!./node_modules/sass-loader/dist/cjs.js??clonedRuleSet-12[0].rules[0].use[3]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/js/components/section/Auth/Login.vue?vue&type=style&index=0&lang=scss&");
+
+
+/***/ }),
+
+/***/ "./resources/js/components/section/Auth/Register.vue?vue&type=style&index=0&lang=scss&":
+/*!*********************************************************************************************!*\
+  !*** ./resources/js/components/section/Auth/Register.vue?vue&type=style&index=0&lang=scss& ***!
+  \*********************************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_style_loader_dist_cjs_js_node_modules_css_loader_dist_cjs_js_clonedRuleSet_12_0_rules_0_use_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_dist_cjs_js_clonedRuleSet_12_0_rules_0_use_2_node_modules_sass_loader_dist_cjs_js_clonedRuleSet_12_0_rules_0_use_3_node_modules_vue_loader_lib_index_js_vue_loader_options_Register_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../../../node_modules/style-loader/dist/cjs.js!../../../../../node_modules/css-loader/dist/cjs.js??clonedRuleSet-12[0].rules[0].use[1]!../../../../../node_modules/vue-loader/lib/loaders/stylePostLoader.js!../../../../../node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-12[0].rules[0].use[2]!../../../../../node_modules/sass-loader/dist/cjs.js??clonedRuleSet-12[0].rules[0].use[3]!../../../../../node_modules/vue-loader/lib/index.js??vue-loader-options!./Register.vue?vue&type=style&index=0&lang=scss& */ "./node_modules/style-loader/dist/cjs.js!./node_modules/css-loader/dist/cjs.js??clonedRuleSet-12[0].rules[0].use[1]!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-12[0].rules[0].use[2]!./node_modules/sass-loader/dist/cjs.js??clonedRuleSet-12[0].rules[0].use[3]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/js/components/section/Auth/Register.vue?vue&type=style&index=0&lang=scss&");
+
+
+/***/ }),
+
 /***/ "./resources/js/components/section/Body.vue?vue&type=style&index=0&lang=scss&":
 /*!************************************************************************************!*\
   !*** ./resources/js/components/section/Body.vue?vue&type=style&index=0&lang=scss& ***!
@@ -59399,40 +68523,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "staticRenderFns": () => (/* reexport safe */ _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_App_vue_vue_type_template_id_332fccf4___WEBPACK_IMPORTED_MODULE_0__.staticRenderFns)
 /* harmony export */ });
 /* harmony import */ var _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_App_vue_vue_type_template_id_332fccf4___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!../../../node_modules/vue-loader/lib/index.js??vue-loader-options!./App.vue?vue&type=template&id=332fccf4& */ "./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/js/components/App.vue?vue&type=template&id=332fccf4&");
-
-
-/***/ }),
-
-/***/ "./resources/js/components/Hello.vue?vue&type=template&id=19aad877&":
-/*!**************************************************************************!*\
-  !*** ./resources/js/components/Hello.vue?vue&type=template&id=19aad877& ***!
-  \**************************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "render": () => (/* reexport safe */ _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_Hello_vue_vue_type_template_id_19aad877___WEBPACK_IMPORTED_MODULE_0__.render),
-/* harmony export */   "staticRenderFns": () => (/* reexport safe */ _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_Hello_vue_vue_type_template_id_19aad877___WEBPACK_IMPORTED_MODULE_0__.staticRenderFns)
-/* harmony export */ });
-/* harmony import */ var _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_Hello_vue_vue_type_template_id_19aad877___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!../../../node_modules/vue-loader/lib/index.js??vue-loader-options!./Hello.vue?vue&type=template&id=19aad877& */ "./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/js/components/Hello.vue?vue&type=template&id=19aad877&");
-
-
-/***/ }),
-
-/***/ "./resources/js/components/Home.vue?vue&type=template&id=f2b6376c&":
-/*!*************************************************************************!*\
-  !*** ./resources/js/components/Home.vue?vue&type=template&id=f2b6376c& ***!
-  \*************************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "render": () => (/* reexport safe */ _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_Home_vue_vue_type_template_id_f2b6376c___WEBPACK_IMPORTED_MODULE_0__.render),
-/* harmony export */   "staticRenderFns": () => (/* reexport safe */ _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_Home_vue_vue_type_template_id_f2b6376c___WEBPACK_IMPORTED_MODULE_0__.staticRenderFns)
-/* harmony export */ });
-/* harmony import */ var _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_Home_vue_vue_type_template_id_f2b6376c___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!../../../node_modules/vue-loader/lib/index.js??vue-loader-options!./Home.vue?vue&type=template&id=f2b6376c& */ "./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/js/components/Home.vue?vue&type=template&id=f2b6376c&");
 
 
 /***/ }),
@@ -59522,6 +68612,40 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ }),
 
+/***/ "./resources/js/components/section/Auth/Login.vue?vue&type=template&id=60ecad92&":
+/*!***************************************************************************************!*\
+  !*** ./resources/js/components/section/Auth/Login.vue?vue&type=template&id=60ecad92& ***!
+  \***************************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "render": () => (/* reexport safe */ _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_Login_vue_vue_type_template_id_60ecad92___WEBPACK_IMPORTED_MODULE_0__.render),
+/* harmony export */   "staticRenderFns": () => (/* reexport safe */ _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_Login_vue_vue_type_template_id_60ecad92___WEBPACK_IMPORTED_MODULE_0__.staticRenderFns)
+/* harmony export */ });
+/* harmony import */ var _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_Login_vue_vue_type_template_id_60ecad92___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../../../node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!../../../../../node_modules/vue-loader/lib/index.js??vue-loader-options!./Login.vue?vue&type=template&id=60ecad92& */ "./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/js/components/section/Auth/Login.vue?vue&type=template&id=60ecad92&");
+
+
+/***/ }),
+
+/***/ "./resources/js/components/section/Auth/Register.vue?vue&type=template&id=2313d045&":
+/*!******************************************************************************************!*\
+  !*** ./resources/js/components/section/Auth/Register.vue?vue&type=template&id=2313d045& ***!
+  \******************************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "render": () => (/* reexport safe */ _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_Register_vue_vue_type_template_id_2313d045___WEBPACK_IMPORTED_MODULE_0__.render),
+/* harmony export */   "staticRenderFns": () => (/* reexport safe */ _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_Register_vue_vue_type_template_id_2313d045___WEBPACK_IMPORTED_MODULE_0__.staticRenderFns)
+/* harmony export */ });
+/* harmony import */ var _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_Register_vue_vue_type_template_id_2313d045___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../../../node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!../../../../../node_modules/vue-loader/lib/index.js??vue-loader-options!./Register.vue?vue&type=template&id=2313d045& */ "./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/js/components/section/Auth/Register.vue?vue&type=template&id=2313d045&");
+
+
+/***/ }),
+
 /***/ "./resources/js/components/section/Body.vue?vue&type=template&id=21bf0077&":
 /*!*********************************************************************************!*\
   !*** ./resources/js/components/section/Body.vue?vue&type=template&id=21bf0077& ***!
@@ -59575,76 +68699,20 @@ var render = function() {
   return _c(
     "div",
     { class: _vm.$style.container },
-    [_c("Header"), _vm._v(" "), _c("Body")],
+    [
+      _c("Header"),
+      _vm._v(" "),
+      _c("Body", {
+        attrs: { username: _vm.username, email: _vm.email, items: _vm.items },
+        on: {
+          reloadlist: function($event) {
+            return _vm.getList()
+          }
+        }
+      })
+    ],
     1
   )
-}
-var staticRenderFns = []
-render._withStripped = true
-
-
-
-/***/ }),
-
-/***/ "./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/js/components/Hello.vue?vue&type=template&id=19aad877&":
-/*!*****************************************************************************************************************************************************************************************************************!*\
-  !*** ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/js/components/Hello.vue?vue&type=template&id=19aad877& ***!
-  \*****************************************************************************************************************************************************************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "render": () => (/* binding */ render),
-/* harmony export */   "staticRenderFns": () => (/* binding */ staticRenderFns)
-/* harmony export */ });
-var render = function() {
-  var _vm = this
-  var _h = _vm.$createElement
-  var _c = _vm._self._c || _h
-  return _c("p", [_vm._v("Hello World!")])
-}
-var staticRenderFns = []
-render._withStripped = true
-
-
-
-/***/ }),
-
-/***/ "./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/js/components/Home.vue?vue&type=template&id=f2b6376c&":
-/*!****************************************************************************************************************************************************************************************************************!*\
-  !*** ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/js/components/Home.vue?vue&type=template&id=f2b6376c& ***!
-  \****************************************************************************************************************************************************************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "render": () => (/* binding */ render),
-/* harmony export */   "staticRenderFns": () => (/* binding */ staticRenderFns)
-/* harmony export */ });
-var render = function() {
-  var _vm = this
-  var _h = _vm.$createElement
-  var _c = _vm._self._c || _h
-  return _c("div", { class: _vm.$style.container }, [
-    _c(
-      "div",
-      { class: _vm.$style.header },
-      [
-        _c("div", { class: _vm.$style.logo }, [_vm._v("ToDo")]),
-        _vm._v(" "),
-        _c("a-input-search", {
-          staticStyle: { width: "300px" },
-          attrs: { placeholder: "" },
-          on: { search: _vm.onSearch }
-        }),
-        _vm._v(" "),
-        _c("a-avatar", { attrs: { size: "large", icon: "user" } })
-      ],
-      1
-    )
-  ])
 }
 var staticRenderFns = []
 render._withStripped = true
@@ -59672,7 +68740,14 @@ var render = function() {
   return _c("div", { staticClass: "add-task" }, [
     _c(
       "button",
-      { staticClass: "icon-plus" },
+      {
+        staticClass: "icon-plus",
+        on: {
+          click: function($event) {
+            return _vm.addItem()
+          }
+        }
+      },
       [_c("a-icon", { attrs: { type: "plus" } })],
       1
     ),
@@ -59682,19 +68757,19 @@ var render = function() {
         {
           name: "model",
           rawName: "v-model",
-          value: _vm.text,
-          expression: "text"
+          value: _vm.item.text,
+          expression: "item.text"
         }
       ],
       staticClass: "input",
       attrs: { type: "text", placeholder: "Добавить задачу", tabindex: "-1" },
-      domProps: { value: _vm.text },
+      domProps: { value: _vm.item.text },
       on: {
         input: function($event) {
           if ($event.target.composing) {
             return
           }
-          _vm.text = $event.target.value
+          _vm.$set(_vm.item, "text", $event.target.value)
         }
       }
     })
@@ -59805,27 +68880,49 @@ var render = function() {
     "div",
     { staticClass: "task-item" },
     [
-      _c("a-icon", {
-        class: { "icon-check": _vm.value, "icon-check-active": !_vm.value },
-        attrs: { type: "check-circle" },
-        on: {
-          click: function($event) {
-            _vm.value = !_vm.value
-          }
-        }
-      }),
+      _c(
+        "a-popover",
+        { attrs: { placement: "topLeft" } },
+        [
+          _c("template", { slot: "content" }, [
+            _c("p", [_vm._v("Пометить как завершенное")])
+          ]),
+          _vm._v(" "),
+          _c("a-icon", {
+            staticClass: "icon-check",
+            class: {
+              active: _vm.item.completed,
+              "no-active": !_vm.item.completed
+            },
+            attrs: { type: "check-circle" },
+            on: {
+              click: function($event) {
+                return _vm.updateCheck()
+              }
+            },
+            model: {
+              value: _vm.item.completed,
+              callback: function($$v) {
+                _vm.$set(_vm.item, "completed", $$v)
+              },
+              expression: "item.completed"
+            }
+          })
+        ],
+        2
+      ),
       _vm._v(" "),
       _c("div", { staticClass: "task-item-wrapper" }, [
         _c("div", { staticClass: "task-item-name" }, [
-          _vm._v(_vm._s(_vm.model.fullName))
+          _vm._v(_vm._s(_vm.item.username))
         ]),
         _vm._v(" "),
         _c("div", { staticClass: "task-item-email" }, [
-          _vm._v(_vm._s(_vm.model.email))
+          _vm._v(_vm._s(_vm.item.email))
         ]),
         _vm._v(" "),
         _c("div", { staticClass: "task-item-text" }, [
-          _vm._v(_vm._s(_vm.model.text))
+          _vm._v(_vm._s(_vm.item.text))
         ])
       ])
     ],
@@ -59859,13 +68956,30 @@ var render = function() {
     "div",
     { staticClass: "main-background" },
     [
-      _c("AddTask"),
+      _c("add-task", {
+        attrs: { username: _vm.username, email: _vm.email },
+        on: {
+          reloadlist: function($event) {
+            return _vm.$emit("reloadlist")
+          }
+        }
+      }),
       _vm._v(" "),
-      _c("TaskItem"),
+      _vm._l(_vm.items, function(item, index) {
+        return _c("task-item", {
+          key: index,
+          attrs: { item: item },
+          on: {
+            itemchanged: function($event) {
+              return _vm.$emit("reloadlist")
+            }
+          }
+        })
+      }),
       _vm._v(" "),
       _c("div", { staticClass: "backgroundLines" })
     ],
-    1
+    2
   )
 }
 var staticRenderFns = []
@@ -59908,6 +69022,436 @@ render._withStripped = true
 
 /***/ }),
 
+/***/ "./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/js/components/section/Auth/Login.vue?vue&type=template&id=60ecad92&":
+/*!******************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/js/components/section/Auth/Login.vue?vue&type=template&id=60ecad92& ***!
+  \******************************************************************************************************************************************************************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "render": () => (/* binding */ render),
+/* harmony export */   "staticRenderFns": () => (/* binding */ staticRenderFns)
+/* harmony export */ });
+var render = function() {
+  var _vm = this
+  var _h = _vm.$createElement
+  var _c = _vm._self._c || _h
+  return _c("div", { staticClass: "form-body" }, [
+    _c("div", { staticClass: "form-wrapper" }, [
+      _c(
+        "div",
+        { staticClass: "form-content" },
+        [
+          _c(
+            "a-form",
+            {
+              attrs: { layout: "horizontal", form: _vm.form },
+              on: { submit: _vm.handleSubmit }
+            },
+            [
+              _c(
+                "a-form-item",
+                {
+                  attrs: {
+                    "validate-status": _vm.emailError() ? "error" : "",
+                    help: _vm.emailError() || ""
+                  }
+                },
+                [
+                  _c(
+                    "a-input",
+                    {
+                      directives: [
+                        {
+                          name: "decorator",
+                          rawName: "v-decorator",
+                          value: [
+                            "email",
+                            {
+                              rules: [
+                                {
+                                  required: true,
+                                  message: "Please input your email!"
+                                },
+                                { validator: _vm.validEmail }
+                              ]
+                            }
+                          ],
+                          expression:
+                            "[\n              'email',\n              {\n                rules: [\n                  { required: true, message: 'Please input your email!' },\n                  { validator: validEmail },\n                ],\n              },\n            ]"
+                        }
+                      ],
+                      attrs: { placeholder: "Email" }
+                    },
+                    [
+                      _c("a-icon", {
+                        staticStyle: { color: "rgba(0, 0, 0, 0.25)" },
+                        attrs: { slot: "prefix", type: "mail" },
+                        slot: "prefix"
+                      })
+                    ],
+                    1
+                  )
+                ],
+                1
+              ),
+              _vm._v(" "),
+              _c(
+                "a-form-item",
+                {
+                  attrs: {
+                    "validate-status": _vm.passwordError() ? "error" : "",
+                    help: _vm.passwordError() || ""
+                  }
+                },
+                [
+                  _c(
+                    "a-input",
+                    {
+                      directives: [
+                        {
+                          name: "decorator",
+                          rawName: "v-decorator",
+                          value: [
+                            "password",
+                            {
+                              rules: [
+                                {
+                                  required: true,
+                                  message: "Please input your Password!"
+                                }
+                              ]
+                            }
+                          ],
+                          expression:
+                            "[\n              'password',\n              {\n                rules: [\n                  { required: true, message: 'Please input your Password!' },\n                ],\n              },\n            ]"
+                        }
+                      ],
+                      attrs: { type: "password", placeholder: "Password" }
+                    },
+                    [
+                      _c("a-icon", {
+                        staticStyle: { color: "rgba(0, 0, 0, 0.25)" },
+                        attrs: { slot: "prefix", type: "lock" },
+                        slot: "prefix"
+                      })
+                    ],
+                    1
+                  )
+                ],
+                1
+              ),
+              _vm._v(" "),
+              _c(
+                "a-form-item",
+                [
+                  _c(
+                    "a-button",
+                    {
+                      staticClass: "form-button",
+                      attrs: {
+                        type: "primary",
+                        "html-type": "submit",
+                        disabled: _vm.hasErrors(_vm.form.getFieldsError())
+                      }
+                    },
+                    [_vm._v("\n            Registration\n          ")]
+                  )
+                ],
+                1
+              ),
+              _vm._v(" "),
+              _c(
+                "div",
+                { staticClass: "form-link" },
+                [
+                  _c("router-link", { attrs: { to: "/auth/register" } }, [
+                    _vm._v("Register now!")
+                  ])
+                ],
+                1
+              )
+            ],
+            1
+          )
+        ],
+        1
+      )
+    ])
+  ])
+}
+var staticRenderFns = []
+render._withStripped = true
+
+
+
+/***/ }),
+
+/***/ "./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/js/components/section/Auth/Register.vue?vue&type=template&id=2313d045&":
+/*!*********************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/js/components/section/Auth/Register.vue?vue&type=template&id=2313d045& ***!
+  \*********************************************************************************************************************************************************************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "render": () => (/* binding */ render),
+/* harmony export */   "staticRenderFns": () => (/* binding */ staticRenderFns)
+/* harmony export */ });
+var render = function() {
+  var _vm = this
+  var _h = _vm.$createElement
+  var _c = _vm._self._c || _h
+  return _c("div", { staticClass: "form-body" }, [
+    _c("div", { staticClass: "form-wrapper" }, [
+      _c(
+        "div",
+        { staticClass: "form-content" },
+        [
+          _c(
+            "a-form",
+            {
+              attrs: { layout: "horizontal", form: _vm.form },
+              on: { submit: _vm.handleSubmit }
+            },
+            [
+              _c(
+                "a-form-item",
+                {
+                  attrs: {
+                    "validate-status": _vm.userNameError() ? "error" : "",
+                    help: _vm.userNameError() || ""
+                  }
+                },
+                [
+                  _c(
+                    "a-input",
+                    {
+                      directives: [
+                        {
+                          name: "decorator",
+                          rawName: "v-decorator",
+                          value: [
+                            "userName",
+                            {
+                              rules: [
+                                {
+                                  required: true,
+                                  message: "Please input your username!"
+                                }
+                              ]
+                            }
+                          ],
+                          expression:
+                            "[\n              'userName',\n              {\n                rules: [\n                  { required: true, message: 'Please input your username!' },\n                ],\n              },\n            ]"
+                        }
+                      ],
+                      attrs: { placeholder: "Username" }
+                    },
+                    [
+                      _c("a-icon", {
+                        staticStyle: { color: "rgba(0, 0, 0, 0.25)" },
+                        attrs: { slot: "prefix", type: "user" },
+                        slot: "prefix"
+                      })
+                    ],
+                    1
+                  )
+                ],
+                1
+              ),
+              _vm._v(" "),
+              _c(
+                "a-form-item",
+                {
+                  attrs: {
+                    "validate-status": _vm.emailError() ? "error" : "",
+                    help: _vm.emailError() || ""
+                  }
+                },
+                [
+                  _c(
+                    "a-input",
+                    {
+                      directives: [
+                        {
+                          name: "decorator",
+                          rawName: "v-decorator",
+                          value: [
+                            "email",
+                            {
+                              rules: [
+                                {
+                                  required: true,
+                                  message: "Please input your email!"
+                                },
+                                { validator: _vm.validEmail }
+                              ]
+                            }
+                          ],
+                          expression:
+                            "[\n              'email',\n              {\n                rules: [\n                  { required: true, message: 'Please input your email!' },\n                  { validator: validEmail },\n                ],\n              },\n            ]"
+                        }
+                      ],
+                      attrs: { placeholder: "Email" }
+                    },
+                    [
+                      _c("a-icon", {
+                        staticStyle: { color: "rgba(0, 0, 0, 0.25)" },
+                        attrs: { slot: "prefix", type: "mail" },
+                        slot: "prefix"
+                      })
+                    ],
+                    1
+                  )
+                ],
+                1
+              ),
+              _vm._v(" "),
+              _c(
+                "a-form-item",
+                {
+                  attrs: {
+                    "validate-status": _vm.passwordError() ? "error" : "",
+                    help: _vm.passwordError() || ""
+                  }
+                },
+                [
+                  _c(
+                    "a-input",
+                    {
+                      directives: [
+                        {
+                          name: "decorator",
+                          rawName: "v-decorator",
+                          value: [
+                            "password",
+                            {
+                              rules: [
+                                {
+                                  required: true,
+                                  message: "Please input your Password!"
+                                },
+                                { validator: _vm.handlePass }
+                              ]
+                            }
+                          ],
+                          expression:
+                            "[\n              'password',\n              {\n                rules: [\n                  { required: true, message: 'Please input your Password!' },\n                  { validator: handlePass },\n                ],\n              },\n            ]"
+                        }
+                      ],
+                      attrs: { type: "password", placeholder: "Password" }
+                    },
+                    [
+                      _c("a-icon", {
+                        staticStyle: { color: "rgba(0, 0, 0, 0.25)" },
+                        attrs: { slot: "prefix", type: "lock" },
+                        slot: "prefix"
+                      })
+                    ],
+                    1
+                  )
+                ],
+                1
+              ),
+              _vm._v(" "),
+              _c(
+                "a-form-item",
+                {
+                  attrs: {
+                    "validate-status": _vm.passwordErrorConfirmed()
+                      ? "error"
+                      : "",
+                    help: _vm.passwordErrorConfirmed() || ""
+                  }
+                },
+                [
+                  _c(
+                    "a-input",
+                    {
+                      directives: [
+                        {
+                          name: "decorator",
+                          rawName: "v-decorator",
+                          value: [
+                            "password_confirmed",
+                            {
+                              rules: [
+                                {
+                                  required: true,
+                                  message: "Password not confirmed!"
+                                },
+                                { validator: _vm.handleConfirmedPass }
+                              ]
+                            }
+                          ],
+                          expression:
+                            "[\n              'password_confirmed',\n              {\n                rules: [\n                  { required: true, message: 'Password not confirmed!' },\n                  { validator: handleConfirmedPass },\n                ],\n              },\n            ]"
+                        }
+                      ],
+                      attrs: { type: "password", placeholder: "Password" }
+                    },
+                    [
+                      _c("a-icon", {
+                        staticStyle: { color: "rgba(0, 0, 0, 0.25)" },
+                        attrs: { slot: "prefix", type: "lock" },
+                        slot: "prefix"
+                      })
+                    ],
+                    1
+                  )
+                ],
+                1
+              ),
+              _vm._v(" "),
+              _c(
+                "a-form-item",
+                [
+                  _c(
+                    "a-button",
+                    {
+                      staticClass: "form-button",
+                      attrs: {
+                        type: "primary",
+                        "html-type": "submit",
+                        disabled: _vm.hasErrors(_vm.form.getFieldsError())
+                      }
+                    },
+                    [_vm._v("\n            Registration\n          ")]
+                  )
+                ],
+                1
+              ),
+              _vm._v(" "),
+              _c(
+                "div",
+                { staticClass: "form-link" },
+                [
+                  _c("router-link", { attrs: { to: "/login" } }, [
+                    _vm._v("I have an account!")
+                  ])
+                ],
+                1
+              )
+            ],
+            1
+          )
+        ],
+        1
+      )
+    ])
+  ])
+}
+var staticRenderFns = []
+render._withStripped = true
+
+
+
+/***/ }),
+
 /***/ "./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/js/components/section/Body.vue?vue&type=template&id=21bf0077&":
 /*!************************************************************************************************************************************************************************************************************************!*\
   !*** ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/js/components/section/Body.vue?vue&type=template&id=21bf0077& ***!
@@ -59927,7 +69471,18 @@ var render = function() {
   return _c(
     "div",
     { staticClass: "main" },
-    [_c("ToolBar"), _vm._v(" "), _c("MainBackground")],
+    [
+      _c("tool-bar"),
+      _vm._v(" "),
+      _c("main-background", {
+        attrs: { username: _vm.username, email: _vm.email, items: _vm.items },
+        on: {
+          reloadlist: function($event) {
+            return _vm.$emit("reloadlist")
+          }
+        }
+      })
+    ],
     1
   )
 }
@@ -59968,7 +69523,14 @@ var render = function() {
       _vm._v(" "),
       _c(
         "div",
-        { class: _vm.$style.avatar },
+        {
+          class: _vm.$style.avatar,
+          on: {
+            click: function($event) {
+              return _vm.Link()
+            }
+          }
+        },
         [_c("a-avatar", { attrs: { size: "large", icon: "user" } })],
         1
       )
@@ -75350,6 +84912,90 @@ Vue.compile = compileToFunctions;
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (Vue);
 
+
+/***/ }),
+
+/***/ "./node_modules/warning/warning.js":
+/*!*****************************************!*\
+  !*** ./node_modules/warning/warning.js ***!
+  \*****************************************/
+/***/ ((module) => {
+
+"use strict";
+/**
+ * Copyright (c) 2014-present, Facebook, Inc.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+
+
+/**
+ * Similar to invariant but only logs a warning if the condition is not met.
+ * This can be used to log issues in development environments in critical
+ * paths. Removing the logging code for production environments will keep the
+ * same logic and follow the same code paths.
+ */
+
+var __DEV__ = "development" !== 'production';
+
+var warning = function() {};
+
+if (__DEV__) {
+  var printWarning = function printWarning(format, args) {
+    var len = arguments.length;
+    args = new Array(len > 1 ? len - 1 : 0);
+    for (var key = 1; key < len; key++) {
+      args[key - 1] = arguments[key];
+    }
+    var argIndex = 0;
+    var message = 'Warning: ' +
+      format.replace(/%s/g, function() {
+        return args[argIndex++];
+      });
+    if (typeof console !== 'undefined') {
+      console.error(message);
+    }
+    try {
+      // --- Welcome to debugging React ---
+      // This error was thrown as a convenience so that you can use this stack
+      // to find the callsite that caused this warning to fire.
+      throw new Error(message);
+    } catch (x) {}
+  }
+
+  warning = function(condition, format, args) {
+    var len = arguments.length;
+    args = new Array(len > 2 ? len - 2 : 0);
+    for (var key = 2; key < len; key++) {
+      args[key - 2] = arguments[key];
+    }
+    if (format === undefined) {
+      throw new Error(
+          '`warning(condition, format, ...args)` requires a warning ' +
+          'message argument'
+      );
+    }
+    if (!condition) {
+      printWarning.apply(null, [format].concat(args));
+    }
+  };
+}
+
+module.exports = warning;
+
+
+/***/ }),
+
+/***/ "./node_modules/axios/package.json":
+/*!*****************************************!*\
+  !*** ./node_modules/axios/package.json ***!
+  \*****************************************/
+/***/ ((module) => {
+
+"use strict";
+module.exports = JSON.parse('{"_from":"axios@^0.21","_id":"axios@0.21.4","_inBundle":false,"_integrity":"sha512-ut5vewkiu8jjGBdqpM44XxjuCjq9LAKeHVmoVfHVzy8eHgxxq8SbAVQNovDA8mVi05kP0Ea/n/UzcSHcTJQfNg==","_location":"/axios","_phantomChildren":{},"_requested":{"type":"range","registry":true,"raw":"axios@^0.21","name":"axios","escapedName":"axios","rawSpec":"^0.21","saveSpec":null,"fetchSpec":"^0.21"},"_requiredBy":["#DEV:/"],"_resolved":"https://registry.npmjs.org/axios/-/axios-0.21.4.tgz","_shasum":"c67b90dc0568e5c1cf2b0b858c43ba28e2eda575","_spec":"axios@^0.21","_where":"C:\\\\Games\\\\Программирование\\\\Web\\\\laravel-app\\\\laravel-app","author":{"name":"Matt Zabriskie"},"browser":{"./lib/adapters/http.js":"./lib/adapters/xhr.js"},"bugs":{"url":"https://github.com/axios/axios/issues"},"bundleDependencies":false,"bundlesize":[{"path":"./dist/axios.min.js","threshold":"5kB"}],"dependencies":{"follow-redirects":"^1.14.0"},"deprecated":false,"description":"Promise based HTTP client for the browser and node.js","devDependencies":{"coveralls":"^3.0.0","es6-promise":"^4.2.4","grunt":"^1.3.0","grunt-banner":"^0.6.0","grunt-cli":"^1.2.0","grunt-contrib-clean":"^1.1.0","grunt-contrib-watch":"^1.0.0","grunt-eslint":"^23.0.0","grunt-karma":"^4.0.0","grunt-mocha-test":"^0.13.3","grunt-ts":"^6.0.0-beta.19","grunt-webpack":"^4.0.2","istanbul-instrumenter-loader":"^1.0.0","jasmine-core":"^2.4.1","karma":"^6.3.2","karma-chrome-launcher":"^3.1.0","karma-firefox-launcher":"^2.1.0","karma-jasmine":"^1.1.1","karma-jasmine-ajax":"^0.1.13","karma-safari-launcher":"^1.0.0","karma-sauce-launcher":"^4.3.6","karma-sinon":"^1.0.5","karma-sourcemap-loader":"^0.3.8","karma-webpack":"^4.0.2","load-grunt-tasks":"^3.5.2","minimist":"^1.2.0","mocha":"^8.2.1","sinon":"^4.5.0","terser-webpack-plugin":"^4.2.3","typescript":"^4.0.5","url-search-params":"^0.10.0","webpack":"^4.44.2","webpack-dev-server":"^3.11.0"},"homepage":"https://axios-http.com","jsdelivr":"dist/axios.min.js","keywords":["xhr","http","ajax","promise","node"],"license":"MIT","main":"index.js","name":"axios","repository":{"type":"git","url":"git+https://github.com/axios/axios.git"},"scripts":{"build":"NODE_ENV=production grunt build","coveralls":"cat coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js","examples":"node ./examples/server.js","fix":"eslint --fix lib/**/*.js","postversion":"git push && git push --tags","preversion":"npm test","start":"node ./sandbox/server.js","test":"grunt test","version":"npm run build && grunt version && git add -A dist && git add CHANGELOG.md bower.json package.json"},"typings":"./index.d.ts","unpkg":"dist/axios.min.js","version":"0.21.4"}');
 
 /***/ })
 

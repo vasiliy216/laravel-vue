@@ -1,37 +1,43 @@
 <template>
   <div class="task-item">
-    <a-icon
-      type="check-circle"
-      class="icon-check"
-      v-bind:class="{ 'active': item.completed, 'no-active': !item.completed }"
-      v-on:click="updateCheck()"
-      v-model="item.completed"
-    />
+    <a-popover placement="topLeft">
+      <template slot="content">
+        <p>Пометить как завершенное</p>
+      </template>
+      <a-icon
+        type="check-circle"
+        class="icon-check"
+        v-bind:class="{ active: item.completed, 'no-active': !item.completed }"
+        v-on:click="updateCheck()"
+        v-model="item.completed"
+      />
+    </a-popover>
     <div class="task-item-wrapper">
-      <div class="task-item-name">{{ item.name }}</div>
-      <div class="task-item-email"></div>
-      <div class="task-item-text"></div>
+      <div class="task-item-name">{{ item.username }}</div>
+      <div class="task-item-email">{{ item.email }}</div>
+      <div class="task-item-text">{{ item.text }}</div>
     </div>
   </div>
 </template>
 
 <script>
-import axios from 'axios'
+import axios from "axios";
 
 export default {
   props: ["item"],
   methods: {
     updateCheck() {
-      axios.put('api/item/' + this.item.id, {
-        item: this.item
-      })
-      .then(res => {
-        if (res.status == 200) this.$emit('itemchanged');
-      })
-      .catch(err => {
-        console.log(err);
-      })
-    }
+      axios
+        .put("api/item/" + this.item.id, {
+          item: this.item,
+        })
+        .then((res) => {
+          if (res.status == 200) this.$emit("itemchanged");
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    },
   },
   data: () => ({
     value: true,

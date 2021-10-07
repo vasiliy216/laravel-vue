@@ -2,7 +2,7 @@
   <div :class="$style.header">
     <div :class="$style.logo">ToDo</div>
     <a-input-search placeholder="#" style="width: 300px" @search="onSearch" />
-    <div :class="$style.avatar">
+    <div :class="$style.avatar" @click="Link()">
       <a-avatar size="large" icon="user" />
     </div>
   </div>
@@ -14,6 +14,9 @@ export default {
     onSearch(value) {
       console.log(value);
     },
+    Link() {
+      this.$router.push('/register');
+    }
   },
 };
 </script>
@@ -40,6 +43,7 @@ export default {
   .logo,
   .avatar {
     width: 10%;
+    cursor: pointer;
   }
 }
 </style>
