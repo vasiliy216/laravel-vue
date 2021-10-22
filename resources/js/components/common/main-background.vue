@@ -1,11 +1,11 @@
 <template>
   <div class="main-background">
-    <add-task :username="username" :email="email" v-on:reloadlist="$emit('reloadlist')"/>
+    <add-task :user="User" v-on:reloadlist="fetchItemsData()" />
     <task-item
-      v-for="(item, index) in items"
+      v-for="(item, index) in Items"
       :key="index"
       :item="item"
-      v-on:itemchanged="$emit('reloadlist')"
+      v-on:reloadlist="fetchItemsData()"
     />
     <div class="backgroundLines"></div>
   </div>
@@ -14,11 +14,23 @@
 <script>
 import AddTask from "../basic/add-task.vue";
 import TaskItem from "../basic/task-item.vue";
+
+import { mapGetters, mapActions } from "Vuex";
+
 export default {
-  props: ["items", "username", "email"],
   components: {
     AddTask,
     TaskItem,
+  },
+  computed: {
+    ...mapGetters(["User", "Items"]),
+  },
+  methods: {
+    ...mapActions(["fetchUserData", "fetchItemsData"]),
+  },
+  created() {
+    this.fetchUserData();
+    this.fetchItemsData();
   },
 };
 </script>

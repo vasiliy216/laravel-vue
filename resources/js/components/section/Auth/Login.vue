@@ -56,7 +56,7 @@
               class="form-button"
               :disabled="hasErrors(form.getFieldsError())"
             >
-              Registration
+              Login
             </a-button>
           </a-form-item>
           <div class="form-link">
@@ -69,7 +69,7 @@
 </template>
 
 <script>
-import axios from 'axios'
+import axios from "axios";
 function hasErrors(fieldsError) {
   return Object.keys(fieldsError).some((field) => fieldsError[field]);
 }
@@ -117,6 +117,10 @@ export default {
           axios
             .post("api/auth/login", data)
             .then((res) => {
+
+              window.localStorage["token"] = res.data.token;
+              // window.axios.defaults.headers.common["token"] = res.data.token;
+
               this.$router.push("/");
             })
             .catch((err) => console.log(err));

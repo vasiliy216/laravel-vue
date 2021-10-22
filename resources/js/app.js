@@ -16,6 +16,7 @@ Vue.use(Popover);
 
 Vue.use(VueRouter);
 
+import store from './store/store'
 
 import App from './components/App'
 import Register from './components/section/Auth/Register.vue'
@@ -41,8 +42,10 @@ const router = new VueRouter({
         }
     ],
 });
+
 const app = new Vue({
     el: '#app',
     components: { App },
     router,
+    store
 });

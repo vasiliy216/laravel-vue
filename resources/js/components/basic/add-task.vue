@@ -6,7 +6,7 @@
     <input
       class="input"
       type="text"
-      v-model="item.text"
+      v-model="text"
       placeholder="Добавить задачу"
       tabindex="-1"
     />
@@ -17,30 +17,30 @@
 import axios from "axios";
 
 export default {
-  props:['username', 'email'],
+  props:{
+    user: Object
+  },
   data: function () {
     return {
-      item: {
-        username: username,
-        email: email,
-        text: "",
-      },
+      text: ""
     };
   },
   methods: {
     addItem() {
-      if (this.item.text == "") return;
-
-      console.log(this.item);
+      if (this.text == "") return;
 
       axios
         .post("api/item/store", {
-          item: this.item,
+          item: {
+            username: this.user.username,
+            email: this.user.email,
+            text: this.text,
+          }
         })
         .then((res) => {
           if (res.status == 201) {
-            this.item.text = "";
-            this.$emit('reloadlist')
+            this.text = "";
+            this.$emit('reloadlist');
           }
         })
         .catch((err) => {

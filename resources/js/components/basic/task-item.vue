@@ -2,7 +2,8 @@
   <div class="task-item">
     <a-popover placement="topLeft">
       <template slot="content">
-        <p>Пометить как завершенное</p>
+        <p v-if="!item.completed">Пометить как завершенное</p>
+        <p v-else>Пометить как не завершенное</p>
       </template>
       <a-icon
         type="check-circle"
@@ -24,7 +25,9 @@
 import axios from "axios";
 
 export default {
-  props: ["item"],
+  props: {
+    item: Object
+  },
   methods: {
     updateCheck() {
       axios
@@ -32,7 +35,7 @@ export default {
           item: this.item,
         })
         .then((res) => {
-          if (res.status == 200) this.$emit("itemchanged");
+          if (res.status == 200) this.$emit("reloadlist");
         })
         .catch((err) => {
           console.log(err);

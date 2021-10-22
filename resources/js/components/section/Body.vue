@@ -1,7 +1,7 @@
 <template>
   <div class="main">
     <tool-bar />
-    <main-background :username="username" :email="email" :items="items" v-on:reloadlist="$emit('reloadlist')"/>
+    <main-background />
   </div>
 </template>
 
@@ -9,11 +9,10 @@
 import ToolBar from "../common/tool-bar.vue";
 import MainBackground from "../common/main-background.vue";
 export default {
-  props: ["items", "username", "email"],
   components: {
     ToolBar,
     MainBackground,
-  },
+  }
 };
 </script>
 

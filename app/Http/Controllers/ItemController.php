@@ -36,6 +36,8 @@ class ItemController extends Controller
      */
     public function store(Request $request)
     {
+
+        print_r($request->item);
         $newItem = new Item;
         $newItem->username = $request->item["username"];
         $newItem->email = $request->item["email"];

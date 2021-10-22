@@ -9,7 +9,7 @@
           >
             <a-input
               v-decorator="[
-                'userName',
+                'username',
                 {
                   rules: [
                     { required: true, message: 'Please input your username!' },
@@ -139,7 +139,7 @@ export default {
     // Only show error after a field is touched.
     userNameError() {
       const { getFieldError, isFieldTouched } = this.form;
-      return isFieldTouched("userName") && getFieldError("userName");
+      return isFieldTouched("username") && getFieldError("username");
     },
     emailError() {
       const { getFieldError, isFieldTouched } = this.form;

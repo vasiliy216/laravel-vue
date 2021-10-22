@@ -30826,6 +30826,7 @@ function hasErrors(fieldsError) {
             email: values.email,
             password: values.password
           };
+          console.log(data);
           axios__WEBPACK_IMPORTED_MODULE_0___default().post('api/auth/register', data).then(function (res) {
             _this2.$router.push('/login');
           })["catch"](function (err) {
@@ -69157,7 +69158,7 @@ var render = function() {
                         disabled: _vm.hasErrors(_vm.form.getFieldsError())
                       }
                     },
-                    [_vm._v("\n            Registration\n          ")]
+                    [_vm._v("\n            Login\n          ")]
                   )
                 ],
                 1
