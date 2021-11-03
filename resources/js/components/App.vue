@@ -1,5 +1,5 @@
 <template>
-  <div :class="$style.container">
+  <div class="container">
     <Header />
     <Body />
   </div>
@@ -12,10 +12,10 @@ export default {
   components: {
     Header,
     Body,
-  }
+  },
 };
 </script>
-<style lang="scss" module>
+<style lang="scss">
 // @import "ant-design-vue/lib/date-picker/style";
 
 .container {

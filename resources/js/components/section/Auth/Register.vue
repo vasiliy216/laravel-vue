@@ -116,7 +116,7 @@
 </template>
 
 <script>
-import axios from 'axios'
+import { mapActions } from "Vuex";
 
 function hasErrors(fieldsError) {
   return Object.keys(fieldsError).some((field) => fieldsError[field]);
@@ -136,6 +136,7 @@ export default {
     });
   },
   methods: {
+    ...mapActions(["fetchUserRegister"]),
     // Only show error after a field is touched.
     userNameError() {
       const { getFieldError, isFieldTouched } = this.form;
@@ -182,14 +183,15 @@ export default {
           const data = {
             username: values.username,
             email: values.email,
-            password: values.password
-          }
+            password: values.password,
+          };
 
-          axios.post('api/auth/register', data)
-          .then(res => {
-            this.$router.push('/login');
-          })
-          .catch(err => console.log(err))
+          this.fetchUserRegister(data)
+            .then((res) => {
+              // console.log(res);
+              this.$router.push('/login');
+            })
+            .catch((err) => {});
         }
       });
     },

@@ -17,10 +17,10 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::prefix('auth')->group(function () {
-    Route::get('init', [AppController::class, 'init']);
+Route::get('/login', function () {
+    return view('welcome');
+});
 
-    Route::post('register', [AppController::class, 'register']);
-    Route::post('login', [AppController::class, 'login']);
-    Route::post('logout', [AppController::class, 'logout']);
+Route::get('/register', function () {
+    return view('welcome');
 });

@@ -1,18 +1,35 @@
 <template>
   <div class="task-item">
-    <a-popover placement="topLeft">
+    <a-popover placement="topLeft" v-if="User.email === item.email || item.completed">
       <template slot="content">
-        <p v-if="!item.completed">Пометить как завершенное</p>
-        <p v-else>Пометить как не завершенное</p>
+        <span v-if="!item.completed">Пометить как завершенное</span>
+        <span v-else>Пометить как не завершенное</span>
       </template>
-      <a-icon
-        type="check-circle"
-        class="icon-check"
-        v-bind:class="{ active: item.completed, 'no-active': !item.completed }"
-        v-on:click="updateCheck()"
-        v-model="item.completed"
-      />
+      <div
+        class="icon-circle"
+        v-bind:class="{
+          active: item.completed,
+        }"
+      >
+        <a-icon
+          type="check"
+          class="icon-check"
+          v-bind:class="{
+            active: item.completed,
+            'no-active': !item.completed,
+          }"
+          v-on:click="updateCheck()"
+          v-model="item.completed"
+        />
+      </div>
     </a-popover>
+    <a-icon
+      type="delete"
+      class="icon-delete"
+      v-on:click="Delete()"
+      v-model="item.completed"
+      v-if="User.email === item.email"
+    />
     <div class="task-item-wrapper">
       <div class="task-item-name">{{ item.username }}</div>
       <div class="task-item-email">{{ item.email }}</div>
@@ -23,10 +40,17 @@
 
 <script>
 import axios from "axios";
+import { mapGetters, mapActions } from "Vuex";
 
 export default {
   props: {
-    item: Object
+    item: Object,
+  },
+  data: () => ({
+    value: true,
+  }),
+  computed: {
+    ...mapGetters(["User"]),
   },
   methods: {
     updateCheck() {
@@ -41,25 +65,70 @@ export default {
           console.log(err);
         });
     },
+    Delete() {
+      axios
+        .delete("api/item/" + this.item.id, {
+          item: this.item,
+        })
+        .then((res) => {
+          if (res.status == 200) this.$emit("reloadlist");
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    },
   },
-  data: () => ({
-    value: true,
-  }),
 };
 </script>
 
 <style lang="scss">
-.icon-check {
-  font-size: 20px;
-  opacity: 0;
+.icon-circle {
   top: 11px;
   left: 6px;
   position: absolute;
+
+  width: 20px;
+  height: 20px;
+
+  border-radius: 50px;
+  border: 1px solid #3e69e4;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  cursor: pointer;
+
+  &:hover {
+    .no-active {
+      opacity: 0.5;
+    }
+  }
+}
+.icon-delete {
+  font-size: 19px;
+  color: #db3a29;
+
+  opacity: 0.2;
+
+  top: 40px;
+  left: 6px;
+  position: absolute;
+
+  &:hover {
+    opacity: 0.6;
+  }
+}
+.icon-check {
+  font-size: 13px;
+  color: #3e69e4;
+  opacity: 0;
 }
 .task-item {
   display: flex;
   align-items: center;
   position: relative;
+  box-shadow: 0 1px 0 0px #e5e5e5;
 
   &-name {
     font-size: 18px;
@@ -77,9 +146,7 @@ export default {
   }
 
   &:hover {
-    .no-active {
-      opacity: 0.2;
-    }
+    background-color: #f5f5f5;
   }
 
   &-wrapper {
@@ -88,11 +155,9 @@ export default {
     cursor: pointer;
   }
 }
-.no-active {
-  opacity: 0;
-}
 .active {
   opacity: 1;
-  color: #3e69e4;
+  color: white;
+  background-color: #3e69e4;
 }
 </style>

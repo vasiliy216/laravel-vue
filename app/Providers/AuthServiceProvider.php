@@ -30,7 +30,7 @@ class AuthServiceProvider extends ServiceProvider
 
         // Sanctum::usePersonalAccessTokenModel(PersonalAccessToken::class);
 
-        Passport::routes();
+        // Passport::routes();
 
         // Passport::loadKeysFrom(__DIR__.'/../secrets/oauth');
 

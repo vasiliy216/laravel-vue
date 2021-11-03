@@ -20,20 +20,25 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::get('/items', [ItemController::class, 'index']);
+// Public routes
 Route::prefix('/item')->group(function() {
-    // Route::post('/store', [ItemController::class, 'store']);
+    Route::post('/store', [ItemController::class, 'store']);
     Route::put('/{id}', [ItemController::class, 'update']);
     Route::delete('/{id}', [ItemController::class, 'destroy']);
 });
 
-Route::group(['middleware' => ['auth:sanctum']], function () {
-    Route::post('/item/store', [ItemController::class, 'store']);
-});
-
 Route::prefix('/auth')->group(function () {
-    Route::get('/init', [AppController::class, 'init']);
     Route::post('/register', [AppController::class, 'register']);
     Route::post('/login', [AppController::class, 'login']);
-    Route::post('/logout', [AppController::class, 'logout']);
+});
+
+// Protected routes
+Route::group(['middleware' => ['auth:sanctum']], function () {
+    Route::get('/items', [ItemController::class, 'index']);
+    Route::get('/auth/init', [AppController::class, 'init']);
+    Route::get('/auth/logout', [AppController::class, 'logout']);
+});
+
+Route::group( [ 'middleware' => 'admin', 'prefix' => 'admin' ], function () {
+    // только для админа
 });

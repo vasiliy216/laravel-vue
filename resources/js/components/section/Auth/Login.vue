@@ -60,7 +60,7 @@
             </a-button>
           </a-form-item>
           <div class="form-link">
-            <router-link to="/auth/register">Register now!</router-link>
+            <router-link to="/register">Register now!</router-link>
           </div>
         </a-form>
       </div>
@@ -70,6 +70,8 @@
 
 <script>
 import axios from "axios";
+import { mapActions } from "Vuex";
+
 function hasErrors(fieldsError) {
   return Object.keys(fieldsError).some((field) => fieldsError[field]);
 }
@@ -88,6 +90,7 @@ export default {
     });
   },
   methods: {
+    ...mapActions(["fetchUserLogin"]),
     // Only show error after a field is touched.
     emailError() {
       const { getFieldError, isFieldTouched } = this.form;
@@ -114,16 +117,13 @@ export default {
             password: values.password,
           };
 
-          axios
-            .post("api/auth/login", data)
-            .then((res) => {
+          this.fetchUserLogin(data)
+          .then(res => {
+              this.$router.push('/');
+          })
+          .catch(err => {
 
-              window.localStorage["token"] = res.data.token;
-              // window.axios.defaults.headers.common["token"] = res.data.token;
-
-              this.$router.push("/");
-            })
-            .catch((err) => console.log(err));
+          })
         }
       });
     },

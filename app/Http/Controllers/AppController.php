@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use App\Models\User;
 use Carbon\Carbon;
 
@@ -11,14 +12,7 @@ class AppController extends Controller
 {
     public function init(Request $request)
     {
-        // $token = $request->user()->createToken($request->token_name);
         $user = Auth::user();
-
-        // $ttt = "79aaf39c6184643bfce86e14bcd820e1af0836cdc4b4d39e79bc92b2887ad214";
-    
-        // $user = User::find(1);
-
-        print_r($request->all());
 
         return response()->json(
             [
@@ -28,72 +22,69 @@ class AppController extends Controller
 
     public function register(Request $request)
     {
+
+        // $request->validate([
+        //     'username' => 'required|string',
+        //     'email' => 'required|string|unique:users,email',
+        //     'password' => 'required|string'
+        // ]);
+
         $user = User::where('email', $request->email)->first();
 
         if(isset($user->id)) {
-            return response()->json(['error' => 'Email is already exists.'], 401);
+            return response()->json(["error" => 'Email is already exists.'], 401);
         }
 
-        $user = new User();
+        $user = User::create([
+            'username' => $request->username,
+            'email' => $request->email,
+            'password' => bcrypt($request->password)
+        ]);
 
-        $user->username = $request->username;
-        $user->email = $request->email;
-        $user->password = bcrypt($request->password);
+        $token = $user->createToken('myapptoken')->plainTextToken;
 
         $user->save();
 
         Auth::login($user);
 
-        return response()->json($user, 200);
+        return response()->json([
+            'user' => $user,
+            'token' => $token
+        ], 200);
+
     }
 
     public function login(Request $request)
     {
         $request->validate([
-            'email' => 'required|string|email',
-            'password' => 'required|string',
-            // 'remember_me' => 'boolean'
+            'email' => 'required|string',
+            'password' => 'required|string'
         ]);
 
-        if(!Auth::attempt(['email' => $request->email, 'password' => $request->password])) {
-            return response()->json([
-                'message' => 'Unauthorized',
-                'status_code' => 401
+        // Check email
+        $user = User::where('email', $request->email)->first();
+
+        // Check password
+        if(!$user || !Hash::check($request->password, $user->password)) {
+            return response([
+                'message' => 'Bad creds'
             ], 401);
-        } 
-
-        $user = $request->user();
-
-        $tokenData = $user->createToken('MyApp');
-
-        // print_r($tokenData);
-
-        $token = $tokenData->accessToken->token;
-
-        // if($request->remember_me) {
-            $tokenData->expires_at = Carbon::now()->addWeeks(1);
-        // }
-
-        if($token && $user->save()) {
-            return response()->json([
-                'user' => $user,
-                'token' => $token,
-                'access_token' => $tokenData->accessToken,
-                'token_type' => 'Bearer',
-                'token_scope' => $tokenData->plainTextToken[0],
-                'expires_at' => Carbon::parse($tokenData->expires_at)->toDateTimeString(),
-                'status_code' => 200
-            ], 200);
-        } else {
-            return responce()->json([
-                'message' => 'Some error occurred, please try again!',
-                'status_code' => 500
-            ], 500);
         }
+
+        $token = $user->createToken('myapptoken')->plainTextToken;
+
+        return response()->json([
+            'user' => $user,
+            'token' => $token
+        ], 200);
     }
 
     public function logout()
     {
-        Auth::logout();
+        auth()->user()->tokens()->delete();
+
+        return [
+            'message' => 'Logged out'
+        ];
     }
 }

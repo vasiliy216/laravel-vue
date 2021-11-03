@@ -1,7 +1,7 @@
 <template>
   <div class="add-task">
     <button class="icon-plus" @click="addItem()">
-      <a-icon type="plus" />
+      <a-icon type="plus"/>
     </button>
     <input
       class="input"
@@ -9,6 +9,7 @@
       v-model="text"
       placeholder="Добавить задачу"
       tabindex="-1"
+      v-on:keyup.13="addItem()"
     />
   </div>
 </template>
